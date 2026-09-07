@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f6f4">
+    <title>Weekly shop | Gather</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to shopping list</a>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="App navigation">
+        <a class="brand" href="#" aria-label="Gather home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M7 13.5h18l-2 13H9l-2-13Z"/><path d="M11 15V9a5 5 0 0 1 10 0v6"/></svg>
+          </span>
+          <span>Gather</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="all-lists.html">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            All lists
+          </a>
+          <a href="#">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.09A1.7 1.7 0 0 0 8.95 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.58 15 1.7 1.7 0 0 0 3 14H3v-4h.09A1.7 1.7 0 0 0 4.6 8.95a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.58 1.7 1.7 0 0 0 10 3h4v.09A1.7 1.7 0 0 0 15.05 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.42 9 1.7 1.7 0 0 0 21 10v4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+            Settings
+          </a>
+        </nav>
+
+        <div class="household">
+          <div class="avatar-stack">
+            <span class="avatar avatar-one" aria-hidden="true">M</span>
+            <span class="avatar avatar-two" aria-hidden="true">J</span>
+          </div>
+          <div>
+            <strong>Our household</strong>
+            <span>2 people</span>
+          </div>
+        </div>
+      </aside>
+
+      <main id="main-content" class="main-content" tabindex="-1">
+        <header class="page-header">
+          <a class="back-link" href="all-lists.html">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+            All lists
+          </a>
+
+          <div class="title-row">
+            <div>
+              <h1>Weekly shop</h1>
+              <p class="list-meta">Updated just now</p>
+            </div>
+            <button class="icon-button" type="button" aria-label="More options">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <section class="list-card" aria-labelledby="list-title">
+          <h2 id="list-title" class="visually-hidden">Items to buy</h2>
+
+          <form class="add-item-form" id="add-item-form" action="#" method="post">
+            <label class="visually-hidden" for="new-item">Add an item</label>
+            <input id="new-item" name="item" type="text" placeholder="Add an item…" autocomplete="off" required>
+            <button type="submit">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Add
+            </button>
+          </form>
+
+          <div class="quick-add" role="group" aria-label="Quick add suggestions">
+            <span>Often bought</span>
+            <button type="button" data-quick-add="Bananas">+ Bananas</button>
+            <button type="button" data-quick-add="Oat milk">+ Oat milk</button>
+            <button type="button" data-quick-add="Coffee">+ Coffee</button>
+          </div>
+
+          <ul class="items active-items">
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">2 packs of cherry tomatoes</span><span class="item-note">The sweet mini ones, not plum tomatoes</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark cherry tomatoes done</span><input id="item-tomatoes" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">3 avocados</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark avocados done</span><input id="item-avocados" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">2 lemons</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark lemons done</span><input id="item-lemons" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">2 cartons of oat milk</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark oat milk done</span><input id="item-milk" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">Halloumi</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark halloumi done</span><input id="item-halloumi" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">500 g Greek yoghurt</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark Greek yoghurt done</span><input id="item-yoghurt" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">1 pack of rigatoni</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark rigatoni done</span><input id="item-pasta" type="checkbox"></label>
+            </li>
+            <li class="item-row">
+              <button class="item-details" type="button"><span class="item-copy"><span class="item-name">1 bottle of olive oil</span></span></button>
+              <label class="checkbox-label"><span class="visually-hidden">Mark olive oil done</span><input id="item-olive-oil" type="checkbox"></label>
+            </li>
+          </ul>
+
+          <details class="completed-items">
+            <summary><span>Done</span><span id="completed-count">2 items</span></summary>
+            <ul class="items">
+              <li class="item-row is-complete">
+                <button class="item-details" type="button"><span class="item-copy"><span class="item-name">1 loaf of sourdough bread</span></span></button>
+                <label class="checkbox-label"><span class="visually-hidden">Mark sourdough bread not done</span><input id="item-bread" type="checkbox" checked></label>
+              </li>
+              <li class="item-row is-complete">
+                <button class="item-details" type="button"><span class="item-copy"><span class="item-name">12 eggs</span></span></button>
+                <label class="checkbox-label"><span class="visually-hidden">Mark eggs not done</span><input id="item-eggs" type="checkbox" checked></label>
+              </li>
+            </ul>
+          </details>
+        </section>
+
+        <p class="sync-note"><span aria-hidden="true">✓</span> Changes are shared with your household</p>
+        <div class="announcer visually-hidden" aria-live="polite" aria-atomic="true"></div>
+      </main>
+    </div>
+
+    <dialog class="item-dialog" id="item-dialog" aria-labelledby="dialog-title">
+      <form id="edit-item-form" method="dialog">
+        <div class="dialog-heading">
+          <div><p>Edit item</p><h2 id="dialog-title">Cherry tomatoes</h2></div>
+          <button class="dialog-close" type="button" aria-label="Close item details">×</button>
+        </div>
+        <div class="form-field">
+          <label for="edit-name">Item</label>
+          <input id="edit-name" name="name" type="text" required>
+        </div>
+        <div class="form-field">
+          <label for="edit-note">Note</label>
+          <textarea id="edit-note" name="note" rows="3" placeholder="Add a useful detail…"></textarea>
+        </div>
+        <div class="dialog-actions">
+          <button class="remove-item" type="button">Remove item</button>
+          <button class="save-item" type="submit">Save changes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="all-lists.html"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Lists</span></a>
+      <a href="#"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>Settings</span></a>
+    </nav>
+  </body>
+</html>

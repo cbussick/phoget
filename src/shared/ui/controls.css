@@ -1,0 +1,157 @@
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  width: var(--border-width) !important;
+  height: var(--border-width) !important;
+  margin: var(--hidden-offset) !important;
+  padding: var(--space-none) !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.icon-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  width: var(--space-12);
+  height: var(--space-12);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-options);
+}
+
+.icon-button:hover {
+  color: var(--color-ink);
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-raised);
+}
+
+.icon-button svg {
+  width: var(--space-5);
+}
+
+.item-dialog {
+  width: min(100% - var(--space-6), var(--dialog-width));
+  padding: var(--space-none);
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.item-dialog::backdrop {
+  background: var(--color-backdrop);
+  backdrop-filter: blur(var(--line-thick));
+}
+
+.item-dialog form {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dialog-heading p {
+  margin: var(--space-none) 0 var(--space-1);
+  color: var(--color-ink-soft);
+  font-size: var(--font-caption);
+  font-weight: var(--font-weight-700);
+}
+
+.dialog-heading h2 {
+  margin: var(--space-none);
+  font-size: var(--font-dialog-title);
+  line-height: var(--line-height-1-2);
+}
+
+.dialog-close {
+  display: grid;
+  width: var(--control-height);
+  height: var(--control-height);
+  place-items: center;
+  border: var(--border-width) solid var(--color-line);
+  border-radius: 50%;
+  color: var(--color-ink-soft);
+  background: transparent;
+  font-size: var(--font-dialog-title);
+  cursor: pointer;
+}
+
+.form-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.form-field label {
+  font-size: var(--font-label);
+  font-weight: var(--font-weight-700);
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  min-height: var(--space-12);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  background: var(--color-white);
+  font-size: var(--font-base);
+}
+
+.form-field textarea {
+  min-height: var(--space-24);
+  resize: vertical;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block-start: var(--space-2);
+}
+
+.dialog-actions button {
+  min-height: var(--control-height);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-700);
+  cursor: pointer;
+}
+
+.remove-item {
+  border: var(--border-width) solid var(--color-line-strong);
+  color: var(--color-ink-soft);
+  background: transparent;
+}
+
+.save-item {
+  border: 0;
+  color: var(--color-ink);
+  background: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .item-row,
+  .item-details,
+  .list-overview a,
+  .quick-add button,
+  .icon-button,
+  .dialog-close {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      opacity 150ms ease;
+  }
+}

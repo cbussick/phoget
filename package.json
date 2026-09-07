@@ -1,0 +1,58 @@
+{
+  "name": "gather",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k 'npm:dev:server' 'npm:dev:client'",
+    "dev:server": "tsx watch --env-file=.env server/index.ts",
+    "dev:client": "vite --host 127.0.0.1",
+    "build": "NODE_ENV=production vite build && tsc -p tsconfig.server.json",
+    "start": "node --env-file=.env dist/server/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --env-file=.env server/db/migrate.ts",
+    "db:seed": "tsx --env-file=.env server/db/seed.ts",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "lint": "oxlint src server shared tests *.ts && stylelint 'src/**/*.css'",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "tsx --env-file=.env.test --test tests/api.test.ts",
+    "test:e2e": "npm run build && playwright test",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run test:e2e",
+    "db:migrate:production": "node --env-file=.env dist/server/db/migrate.js"
+  },
+  "dependencies": {
+    "@fontsource-variable/nunito": "5.3.0",
+    "@tanstack/react-query": "5.102.8",
+    "drizzle-orm": "0.45.2",
+    "express": "5.2.1",
+    "helmet": "8.3.0",
+    "pg": "8.23.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@types/express": "5.0.6",
+    "@types/node": "26.5.0",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "concurrently": "10.0.5",
+    "drizzle-kit": "0.31.10",
+    "oxfmt": "0.67.0",
+    "oxlint": "1.82.0",
+    "stylelint": "17.15.0",
+    "stylelint-config-standard": "40.0.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "npm@11.16.0"
+}

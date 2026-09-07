@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: gather
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gather_local}
+      POSTGRES_DB: gather
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - gather-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gather"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+volumes:
+  gather-data:
