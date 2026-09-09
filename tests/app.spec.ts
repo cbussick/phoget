@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { listSchema, stateSchema } from "../shared/contracts";
 
@@ -37,7 +38,7 @@ async function createList(page: Page, name: string) {
   await page.getByLabel("Beschreibung", { exact: true }).fill("A shared test list");
   await page.getByRole("button", { name: "Liste erstellen", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
-  await page.getByRole("link", { name: name + " A shared test list" }).click();
+  await page.getByRole("link", { name, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
   const id = page.url().split("/").pop()!;
   createdListIds.push(id);
@@ -47,7 +48,9 @@ test("complete household workflow persists through reload and a second browser",
   page,
   browser,
   request,
+  browserName,
 }) => {
+  test.slow(browserName === "webkit", "Long multi-step workflow is slower in WebKit.");
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const name = "Weekend " + crypto.randomUUID();
@@ -141,8 +144,8 @@ test("complete household workflow persists through reload and a second browser",
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
     const more = page.getByRole("button", { name: "Weitere Optionen", exact: true });
-    await expect(more.locator("circle").first()).toHaveAttribute("stroke", "none");
-    await expect(more.locator("circle").first()).toHaveAttribute("fill", "currentColor");
+    await expect(more.locator("svg")).toBeVisible();
+    await expect(more.locator("svg")).toHaveAttribute("aria-hidden", "true");
     await more.click();
     await page.getByLabel("Listenname", { exact: true }).fill("Coast trip");
     await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();

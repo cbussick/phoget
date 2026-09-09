@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { listSchema, stateSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
@@ -7,7 +8,9 @@ test("adding preserves input focus only for Enter in the combobox; new icons per
   page,
   request,
   context,
+  browserName,
 }) => {
+  test.slow(browserName === "webkit", "Long multi-step workflow is slower in WebKit.");
   expect((await request.post("/api/session", { data: testCredentials })).status()).toBe(200);
   await context.addCookies((await request.storageState()).cookies);
   const list = listSchema.parse(

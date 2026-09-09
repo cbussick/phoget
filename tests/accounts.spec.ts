@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { testCredentials } from "./testCredentials";
 import { userSchema } from "../shared/accounts";
