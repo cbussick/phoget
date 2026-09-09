@@ -1,0 +1,152 @@
+.gather-button {
+  --button-hover-fill: var(--color-fill-hover);
+  --button-pressed-fill: var(--color-fill-pressed);
+  --button-focus-color: var(--color-control-pressed);
+  --button-state-text: var(--color-ink);
+  --button-hover-text: var(--button-state-text);
+  --button-pressed-text: var(--button-state-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-none) var(--space-4);
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-soft);
+  background: transparent;
+  font: inherit;
+  font-weight: var(--font-weight-700);
+  cursor: pointer;
+}
+
+.gather-button svg {
+  width: var(--icon-small);
+}
+
+.gather-button[data-size="content"] {
+  min-height: auto;
+  font-weight: inherit;
+}
+
+.gather-button[data-size="icon"] {
+  width: var(--space-12);
+  height: var(--space-12);
+  padding: var(--space-none);
+  border-radius: var(--radius-pill);
+  background: var(--color-options);
+  border-color: var(--color-line);
+  flex: 0 0 auto;
+}
+
+.gather-button[data-size="add"] {
+  gap: var(--space-1);
+  min-width: var(--add-button-width);
+  padding-inline: var(--space-2);
+  min-height: var(--space-10);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-small);
+}
+
+.gather-button[data-size="add"] svg {
+  width: var(--space-4);
+  stroke-width: 2.25;
+}
+
+.gather-button[data-size="compact"] {
+  min-height: var(--space-8);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  background: transparent;
+  font-size: var(--font-caption);
+  font-weight: var(--font-weight-600);
+}
+
+.gather-button[data-size="large"] {
+  flex: 0 0 auto;
+  min-height: var(--space-12);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.gather-button[data-size="large"] svg {
+  width: var(--icon-small);
+  stroke-width: 2.25;
+}
+
+.gather-button[data-variant="primary"] {
+  --button-hover-fill: var(--accent-hover, var(--color-accent-hover));
+  --button-pressed-fill: var(--accent-pressed, var(--color-accent-pressed));
+  --button-hover-text: var(--accent-hover-text, var(--color-ink));
+  --button-pressed-text: var(--accent-pressed-text, var(--color-ink));
+  --button-focus-color: var(--accent-foreground, var(--color-control-pressed));
+  border: 0;
+  color: var(--accent-foreground, var(--color-ink));
+  background: var(--accent-background, var(--color-accent));
+}
+
+.gather-button[data-variant="ghost"] {
+  border-color: transparent;
+}
+
+.gather-button[data-variant="danger"] {
+  --button-hover-fill: var(--color-danger-hover);
+  --button-pressed-fill: var(--color-danger-pressed);
+  --button-focus-color: var(--color-white);
+  --button-state-text: var(--color-white);
+  border-color: transparent;
+  color: var(--color-white);
+  background: var(--color-error);
+}
+
+@media (hover: hover) {
+  .gather-button[data-variant="secondary"]:not(.field-control):enabled:hover {
+    border-color: var(--button-state-text);
+  }
+
+  .gather-button:not(.field-control):enabled:hover {
+    background: var(--button-hover-fill);
+    color: var(--button-hover-text);
+  }
+}
+
+.gather-button:not(.field-control):enabled:focus-visible {
+  outline: var(--control-emphasis-width) solid var(--button-focus-color);
+  outline-offset: calc(-1 * var(--control-emphasis-width));
+}
+
+.gather-button:not(.field-control):enabled:active {
+  background: var(--button-pressed-fill);
+  color: var(--button-pressed-text);
+}
+
+.gather-button[data-variant="secondary"]:not(.field-control):enabled:active {
+  border-color: var(--button-state-text);
+}
+
+.gather-button:disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gather-button {
+    transition:
+      background-color var(--duration-control) ease,
+      border-color var(--duration-control) ease,
+      color var(--duration-control) ease;
+  }
+}
+
+.gather-button[data-size="icon"] svg {
+  width: var(--space-5);
+}
+
+@media (forced-colors: active) {
+  .gather-button:not(.field-control):enabled:focus-visible {
+    outline: var(--focus-width) solid Highlight;
+    outline-offset: calc(-1 * var(--focus-width));
+  }
+}

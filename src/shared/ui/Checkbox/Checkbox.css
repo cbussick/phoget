@@ -1,0 +1,20 @@
+.checkbox-label {
+  display: grid;
+  place-self: center;
+  place-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label .choice-control {
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+}
+
+.checkbox-label .choice-control::before {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.checkbox-label:has(:disabled) {
+  cursor: not-allowed;
+}

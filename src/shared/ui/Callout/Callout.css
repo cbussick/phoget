@@ -1,0 +1,24 @@
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-error);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-surface);
+  color: var(--color-error);
+  font-size: var(--font-small);
+  line-height: var(--line-height-1-5);
+}
+
+.callout > svg {
+  flex: 0 0 var(--space-5);
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.callout-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-ink);
+}

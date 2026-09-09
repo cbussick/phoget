@@ -1,33 +1,27 @@
+import { Callout } from "../../shared/ui/Callout/Callout";
 import { useState } from "react";
 import type { Item, List } from "../../../shared/contracts";
 import { Link } from "../../app/navigation";
-import { Button } from "../../shared/ui/Button";
-import { Icon } from "../../shared/ui/Icon";
+import { Button } from "../../shared/ui/Button/Button";
+import { EmptyState } from "../../shared/ui/EmptyState/EmptyState";
+import { Icon } from "../../shared/ui/Icon/Icon";
+import { ListIcon } from "../../shared/ui/ListIcon/ListIcon";
 import { ItemRow } from "./ItemRow";
 import { ItemDialog } from "./ItemDialog";
 import { ListDialog } from "./ListDialog";
 import { AddItemForm } from "./AddItemForm";
 
-function updatedLabel(value: string) {
-  const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000));
-  if (minutes < 1) return "Updated just now";
-  if (minutes < 60)
-    return "Updated " + minutes + " " + (minutes === 1 ? "minute" : "minutes") + " ago";
-  return (
-    "Updated " + new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-  );
-}
+import { listActivityLabel, useActivityClock } from "../../shared/ui/listActivity";
 export function ListPage({
   list,
   items,
-  suggestions,
   syncError,
 }: {
   list: List;
   items: Item[];
-  suggestions: string[];
   syncError: boolean;
 }) {
+  const now = useActivityClock();
   const [selected, setSelected] = useState<Item | null>(null);
   const [options, setOptions] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -41,16 +35,26 @@ export function ListPage({
       <header className="page-header">
         <Link className="back-link" href="/">
           <Icon name="back" />
-          All lists
+          Alle Listen
         </Link>
+        <ListIcon name={list.icon} color={list.color} />
         <div className="title-row">
           <div>
             <h1>{list.name}</h1>
-            <p className="list-meta">{updatedLabel(list.updatedAt)}</p>
+            <p className="list-meta">
+              <time
+                dateTime={list.updatedAt}
+                title={new Date(list.updatedAt).toLocaleString("de-DE")}
+              >
+                {listActivityLabel(list.updatedAt, list.updatedBy, now)}
+              </time>
+            </p>
           </div>
           <Button
+            variant="secondary"
+            size="icon"
             className="icon-button"
-            aria-label="More options"
+            aria-label="Weitere Optionen"
             onClick={() => setOptions(true)}
           >
             <Icon name="more" />
@@ -59,33 +63,39 @@ export function ListPage({
       </header>
       <section className="list-card" aria-labelledby="list-title">
         <h2 id="list-title" className="visually-hidden">
-          Items to do
+          Offene Einträge
         </h2>
-        <AddItemForm listId={list.id} suggestions={suggestions} onAnnounce={setAnnouncement} />
+        <AddItemForm listId={list.id} color={list.color} onAnnounce={setAnnouncement} />
         <ul className="items active-items">{active.map(renderItem)}</ul>
         {!active.length ? (
-          <p className="empty-state">
-            {completed.length
-              ? "All done! Add anything else you need above."
-              : "Nothing here yet. Add your first item above."}
-          </p>
+          <EmptyState
+            title={completed.length ? "Alles erledigt!" : "Hier ist noch nichts"}
+            description={
+              completed.length
+                ? "Alles auf dieser Liste ist erledigt. Genieße die kleine Pause."
+                : "Füge oben deinen ersten Eintrag hinzu. Gemeinsam behalten wir den Überblick."
+            }
+            icon={completed.length ? "complete" : "emptyList"}
+          />
         ) : null}
-        <details className="completed-items">
-          <summary>
-            <span>Done</span>
-            <span>
-              {completed.length} {completed.length === 1 ? "item" : "items"}
-            </span>
-          </summary>
-          <ul className="items">{completed.map(renderItem)}</ul>
-        </details>
+        {completed.length > 0 ? (
+          <details className="completed-items">
+            <summary>
+              <span className="completed-heading">
+                <Icon name="chevronDown" />
+                Erledigt
+              </span>
+              <span className="completed-count">
+                {completed.length} {completed.length === 1 ? "Eintrag" : "Einträge"}
+              </span>
+            </summary>
+            <ul className="items">{completed.map(renderItem)}</ul>
+          </details>
+        ) : null}
       </section>
-      <p className="sync-note" role="status">
-        <span aria-hidden="true">{syncError ? "!" : "✓"}</span>
-        {syncError
-          ? "Connection lost. Showing the last saved version."
-          : "Changes are shared with your household"}
-      </p>
+      {syncError ? (
+        <Callout>Verbindung unterbrochen. Die zuletzt gespeicherte Version wird angezeigt.</Callout>
+      ) : null}
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>

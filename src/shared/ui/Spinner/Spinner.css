@@ -1,0 +1,20 @@
+.spinner {
+  flex: 0 0 auto;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border: var(--line-thick) solid var(--spinner-track);
+  border-block-start-color: currentcolor;
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: spinner-turn var(--duration-spinner) linear infinite;
+  }
+}
+
+@keyframes spinner-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}

@@ -1,0 +1,68 @@
+@import url("./controlStates.css");
+
+.choice-control {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+  margin: var(--space-none);
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--space-1);
+  color: var(--color-white);
+  background: var(--color-white);
+  cursor: pointer;
+}
+
+.choice-control::before {
+  content: "";
+  width: var(--space-3);
+  height: var(--space-3);
+  background: currentcolor;
+  clip-path: polygon(14% 44%, 0 59%, 40% 100%, 100% 18%, 83% 5%, 37% 70%);
+  visibility: hidden;
+}
+
+.choice-control:checked {
+  border-color: var(--color-accent-control);
+  background: var(--color-accent-control);
+}
+
+.choice-control:checked::before {
+  visibility: visible;
+}
+
+.choice-control[type="radio"] {
+  border-radius: var(--radius-pill);
+}
+
+.choice-control[type="radio"]::before {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  clip-path: none;
+}
+
+.choice-control:enabled:active {
+  background: var(--color-fill-pressed);
+}
+
+.choice-control:enabled:checked:active {
+  background: var(--color-choice-pressed);
+}
+
+.choice-control:enabled:focus-visible {
+  outline: var(--control-emphasis-width) solid var(--color-control-pressed);
+  outline-offset: var(--border-width);
+}
+
+@media (forced-colors: active) {
+  .choice-control {
+    appearance: auto;
+  }
+
+  .choice-control::before {
+    display: none;
+  }
+}

@@ -1,0 +1,72 @@
+.auth-page {
+  width: min(100% - var(--space-8), var(--auth-width));
+  margin-inline: auto;
+  padding-block: var(--space-12);
+  display: grid;
+  gap: var(--space-8);
+}
+
+.login-page {
+  min-block-size: 100svh;
+  align-content: center;
+}
+
+.login-page > .brand {
+  margin-inline: var(--space-none);
+}
+
+.auth-page header p {
+  color: var(--color-ink-soft);
+  margin-block-end: var(--space-none);
+}
+
+.account-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+}
+
+.account-card h2 {
+  margin: var(--space-none);
+  font-size: var(--font-dialog-title);
+  line-height: var(--line-height-1-2);
+}
+
+.settings-stack {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: var(--user-actions-width);
+}
+@media (width <= 30rem) {
+  .account-card {
+    padding: var(--space-4);
+  }
+}
+
+.login-feedback {
+  block-size: var(--login-feedback-height);
+  overflow: auto;
+}
+
+.login-feedback .error-message {
+  margin: var(--space-none);
+}

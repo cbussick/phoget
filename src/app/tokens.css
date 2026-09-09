@@ -48,6 +48,7 @@
   --content-min: 20rem;
   --glow-start: 12rem;
   --glow-end: 24rem;
+  --line-height-1: 1;
   --line-height-1-5: 1.5;
   --border-width: 1px;
   --hidden-offset: -1px;
@@ -90,8 +91,40 @@
   --mobile-content-width: 42rem;
   --mobile-bottom-space: 7rem;
   --mobile-nav-height: 4.5rem;
+  --empty-mark-size: 5rem;
+  --empty-icon-size: 3rem;
+  --opacity-disabled: 0.6;
+  --duration-control: 150ms;
+  --duration-spinner: 800ms;
+  --control-emphasis-width: 2px;
+  --color-control-pressed: var(--color-ink);
+  --color-fill-hover: var(--color-row-hover);
+  --color-fill-pressed: color-mix(in srgb, var(--color-ink) 12%, var(--color-surface));
+  --color-accent-hover: color-mix(in srgb, var(--color-ink) 6%, var(--color-accent));
+  --color-accent-pressed: color-mix(in srgb, var(--color-ink) 14%, var(--color-accent));
+  --color-danger-hover: color-mix(in srgb, var(--color-ink) 12%, var(--color-error));
+  --color-danger-pressed: color-mix(in srgb, var(--color-ink) 24%, var(--color-error));
+  --spinner-size: 1em;
+  --spinner-track: color-mix(in srgb, currentcolor 25%, transparent);
+  --avatar-optical-offset: 0.03em;
+  --select-max-height: 16rem;
+  --shadow-popover: 0 0.5rem 1.5rem rgb(24 48 43 / 16%);
+  --color-danger-surface: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
   --color-error: #a32929;
+  --color-success: #276749;
+  --color-success-surface: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
   --space-none: 0;
+  --color-choice-pressed: color-mix(in srgb, var(--color-ink) 18%, var(--color-accent-control));
+  --login-feedback-height: 6rem;
+  --list-icon-radius: 38% 50% 42% 48%;
+  --list-icon-rotation: -2deg;
+  --field-error-height: calc(var(--font-small) * var(--line-height-1-5));
+  --row-padding: var(--space-4);
+  --checkbox-size: var(--space-8);
+  --auth-width: 28rem;
+  --swatch-width: 10rem;
+  --user-actions-width: 10rem;
+  --table-min-width: 34rem;
 }
 
 @media (prefers-contrast: more) {

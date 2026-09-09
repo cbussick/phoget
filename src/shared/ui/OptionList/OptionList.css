@@ -1,0 +1,44 @@
+.option-popup {
+  position: fixed;
+  inset: auto;
+  margin: var(--space-none);
+  padding: var(--space-1);
+  max-height: var(--select-max-height);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-popover);
+  font: inherit;
+}
+
+.listbox-option.gather-button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-inline: var(--space-3);
+  gap: var(--space-3);
+  color: var(--color-ink);
+  font-weight: inherit;
+  text-align: start;
+}
+
+.listbox-option[data-highlighted="true"] {
+  background: var(--color-fill-hover);
+}
+
+.listbox-option[aria-selected="true"] {
+  font-weight: var(--font-weight-700);
+}
+
+.listbox-option > svg {
+  flex-shrink: 0;
+}
+
+.listbox-option > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

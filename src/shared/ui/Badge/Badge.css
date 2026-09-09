@@ -1,0 +1,14 @@
+.gather-badge {
+  display: inline-flex;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-row-hover);
+  color: var(--color-ink);
+  font-size: var(--font-caption);
+  font-weight: var(--font-weight-700);
+  white-space: nowrap;
+}
+
+.gather-badge[data-tone="accent"] {
+  background: var(--color-accent);
+}

@@ -1,0 +1,42 @@
+.story-stack {
+  display: grid;
+  gap: var(--space-5);
+  width: min(var(--dialog-width), 100%);
+}
+
+.story-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.story-swatch {
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.story-foundations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--swatch-width), 1fr));
+  gap: var(--space-4);
+  width: min(var(--overview-width), 100%);
+}
+
+.story-icon {
+  width: var(--empty-icon-size);
+  color: var(--color-ink);
+}
+
+.story-stack h2 {
+  font-size: var(--font-dialog-title);
+}
+
+.story-stack small {
+  font-size: var(--font-small);
+}
+
+.story-control {
+  width: min(var(--auth-width), calc(100vw - var(--space-8)));
+}

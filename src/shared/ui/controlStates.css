@@ -1,0 +1,37 @@
+/* Controls share hover colors and disabled states. Fields emphasize focus inward;
+   choices keep a fixed border for pointer interaction. */
+:is(.field-control, .choice-control) {
+  --control-state-color: var(--color-control-pressed);
+}
+
+@media (hover: hover) {
+  :is(.field-control, .choice-control):not(:disabled, :has(:disabled)):hover {
+    border-color: var(--control-state-color);
+  }
+}
+
+.field-control:not(:disabled, :has(:disabled)):is(:focus-within, :active, :has(:active)) {
+  border-color: var(--control-state-color);
+  outline: var(--control-emphasis-width) solid var(--control-state-color);
+  outline-offset: calc(-1 * var(--control-emphasis-width));
+}
+
+:is(.field-control, .choice-control):is(:disabled, :has(:disabled)) {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(.field-control, .choice-control) {
+    transition:
+      background-color var(--duration-control) ease,
+      border-color var(--duration-control) ease,
+      outline-color var(--duration-control) ease;
+  }
+}
+
+@media (forced-colors: active) {
+  :is(.field-control, .choice-control):not(:disabled, :has(:disabled)):focus-within {
+    outline-color: Highlight;
+  }
+}

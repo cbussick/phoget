@@ -1,0 +1,14 @@
+.error-page {
+  display: grid;
+  min-block-size: 100svh;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-5);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.error-page > * {
+  max-inline-size: var(--content-width);
+  margin: var(--space-none);
+}

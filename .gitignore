@@ -1,4 +1,5 @@
 node_modules/
+.cache/
 dist/
 .env
 .env.*
@@ -6,3 +7,6 @@ dist/
 !.env.test.example
 test-results/
 playwright-report/
+storybook-static/
+.local-credentials
+storybook-test-results/

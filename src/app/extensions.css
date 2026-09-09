@@ -1,19 +1,3 @@
-:where(textarea, select):focus-visible {
-  outline: var(--focus-width) solid var(--color-focus);
-  outline-offset: var(--space-1);
-}
-
-button:disabled,
-input:disabled {
-  cursor: wait;
-  opacity: 0.6;
-}
-
-.empty-state {
-  padding-block: var(--space-6);
-  color: var(--color-ink-soft);
-}
-
 .error-message {
   color: var(--color-error);
   overflow-wrap: anywhere;
@@ -25,34 +9,12 @@ input:disabled {
 
 .dialog-heading h2,
 .title-row h1,
-.list-copy,
 .household strong {
   overflow-wrap: anywhere;
 }
 
 .title-row > div {
   min-width: 0;
-}
-
-.icon-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  padding: var(--space-3);
-  border: var(--border-width) solid var(--color-line);
-  border-radius: var(--radius-sm);
-}
-
-.icon-picker label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: var(--space-10);
-  cursor: pointer;
-}
-
-.icon-picker svg {
-  width: var(--space-6);
 }
 
 .danger {

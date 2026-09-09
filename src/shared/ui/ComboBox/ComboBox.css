@@ -1,0 +1,21 @@
+.combo-box {
+  min-width: 0;
+}
+
+.combo-toggle.gather-button {
+  align-self: stretch;
+  height: auto;
+  min-height: auto;
+  border-radius: var(--radius-sm);
+  border-color: transparent;
+  background: transparent;
+}
+
+.combo-chevron.expanded {
+  rotate: 180deg;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .combo-chevron {
+    transition: rotate var(--duration-control) ease;
+  }
+}

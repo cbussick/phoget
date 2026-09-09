@@ -2,6 +2,7 @@ import { z } from "zod";
 import { request } from "../../shared/api/request";
 import {
   listInputSchema,
+  listUpdateSchema,
   listSchema,
   itemInputSchema,
   itemPatchSchema,
@@ -14,10 +15,10 @@ export const listApi = {
       method: "POST",
       body: JSON.stringify(listInputSchema.parse(input)),
     }),
-  update: (id: string, input: z.input<typeof listInputSchema>) =>
+  update: (id: string, input: z.input<typeof listUpdateSchema>) =>
     request("/lists/" + id, listSchema, {
       method: "PUT",
-      body: JSON.stringify(listInputSchema.parse(input)),
+      body: JSON.stringify(listUpdateSchema.parse(input)),
     }),
   remove: (id: string) => request("/lists/" + id, z.undefined(), { method: "DELETE" }),
   addItem: (id: string, input: z.input<typeof itemInputSchema>) =>

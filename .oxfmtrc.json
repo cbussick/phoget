@@ -1,1 +1,3 @@
-{ "ignorePatterns": ["prototype/**", "drizzle/**", "package-lock.json"] }
+{
+  "ignorePatterns": ["prototype/**", "package-lock.json"]
+}

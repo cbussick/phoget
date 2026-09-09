@@ -1,0 +1,22 @@
+.list-icon {
+  display: grid;
+  width: var(--row-height);
+  height: var(--row-height);
+  place-items: center;
+  border-radius: var(--list-icon-radius);
+  color: var(--accent-foreground, var(--color-accent-control));
+  background: var(--accent-background, var(--color-accent));
+  transform: rotate(var(--list-icon-rotation));
+}
+
+.list-icon svg {
+  width: var(--icon-large);
+  transform: rotate(calc(-1 * var(--list-icon-rotation)));
+}
+
+@container (max-width: 28rem) {
+  .list-icon {
+    width: var(--space-12);
+    height: var(--space-12);
+  }
+}

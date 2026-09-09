@@ -1,0 +1,32 @@
+.text-field-control {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.text-field-control > input,
+.text-field-control > textarea {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: inherit;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.text-field-control > textarea {
+  min-height: var(--space-24);
+  resize: none;
+}
+
+.text-field-control > :disabled {
+  cursor: not-allowed;
+}
+
+.text-field-control > ::placeholder {
+  color: var(--color-placeholder);
+}

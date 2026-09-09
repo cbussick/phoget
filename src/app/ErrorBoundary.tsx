@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
-import { Button } from "../shared/ui/Button";
+import { Button } from "../shared/ui/Button/Button";
+import "./errorPage.css";
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -8,11 +9,13 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
   render() {
     if (this.state.failed)
       return (
-        <main className="main-content">
-          <h1>Something went wrong</h1>
-          <p>Your saved lists are safe. Reload to try again.</p>
-          <Button className="new-list-button" onClick={() => location.reload()}>
-            Reload Gather
+        <main className="error-page">
+          <h1>Etwas ist schiefgelaufen</h1>
+          <p>
+            Deine gespeicherten Listen sind sicher. Lade die Seite neu, um es erneut zu versuchen.
+          </p>
+          <Button variant="primary" size="large" onClick={() => location.reload()}>
+            Gather neu laden
           </Button>
         </main>
       );

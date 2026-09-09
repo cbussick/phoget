@@ -1,0 +1,27 @@
+.select-trigger.gather-button {
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  font-weight: inherit;
+  text-align: start;
+}
+
+.select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-chevron {
+  flex-shrink: 0;
+}
+
+.select-trigger[aria-expanded="true"] .select-chevron {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .select-chevron {
+    transition: rotate var(--duration-control) ease;
+  }
+}

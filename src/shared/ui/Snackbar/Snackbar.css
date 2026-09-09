@@ -1,0 +1,60 @@
+.snackbar {
+  position: fixed;
+  inset: auto var(--space-4) var(--space-5);
+  margin-inline: auto;
+  width: fit-content;
+  max-width: calc(100% - var(--space-8));
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--snackbar-color);
+  border-radius: var(--radius-md);
+  background: var(--snackbar-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-popover);
+  font: inherit;
+}
+
+.snackbar[data-variant="success"] {
+  --snackbar-color: var(--color-success);
+  --snackbar-surface: var(--color-success-surface);
+}
+
+.snackbar[data-variant="error"] {
+  --snackbar-color: var(--color-error);
+  --snackbar-surface: var(--color-danger-surface);
+}
+
+.snackbar[data-variant="info"] {
+  --snackbar-color: var(--color-accent-control);
+  --snackbar-surface: var(--color-accent);
+}
+
+.snackbar:popover-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.snackbar > svg {
+  width: var(--space-5);
+  flex-shrink: 0;
+  color: var(--snackbar-color);
+}
+
+.snackbar > span {
+  overflow-wrap: anywhere;
+}
+
+@supports not selector(:popover-open) {
+  .snackbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    z-index: 20;
+  }
+}
+
+@media (width <= 47.99rem) {
+  .snackbar {
+    inset-block-end: calc(var(--space-5) + var(--mobile-nav-height) + env(safe-area-inset-bottom));
+  }
+}

@@ -1,6 +1,7 @@
+import { Checkbox } from "../../shared/ui/Checkbox/Checkbox";
 import type { Item } from "../../../shared/contracts";
-import { Button } from "../../shared/ui/Button";
-import { Feedback } from "../../shared/ui/Feedback";
+import { Button } from "../../shared/ui/Button/Button";
+import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
@@ -15,30 +16,28 @@ export function ItemRow({
 }) {
   const toggle = useAction(async (completed: boolean) => {
     await listApi.editItem(item.id, { completed });
-    onAnnounce(item.name + (completed ? " marked done" : " moved back to the list"));
+    onAnnounce(
+      item.name + (completed ? " als erledigt markiert" : " zurück auf die Liste verschoben"),
+    );
   });
   return (
     <li className={"item-row" + (item.completed ? " is-complete" : "")}>
-      <Button className="item-details" onClick={() => onEdit(item)}>
+      <hr className="item-divider" aria-hidden="true" />
+      <Button variant="ghost" size="content" className="item-details" onClick={() => onEdit(item)}>
         <span className="item-copy">
           <span className="item-name">{item.name}</span>
           {item.note ? <span className="item-note">{item.note}</span> : null}
         </span>
       </Button>
-      <label className="checkbox-label">
-        <span className="visually-hidden">
-          Mark {item.name} {item.completed ? "not done" : "done"}
-        </span>
-        <input
-          type="checkbox"
-          checked={toggle.isPending ? toggle.variables : item.completed}
-          disabled={toggle.isPending}
-          onChange={(event) => {
-            const completed = event.target.checked;
-            toggle.mutate(completed);
-          }}
-        />
-      </label>
+      <Checkbox
+        label={item.name + (item.completed ? " als offen markieren" : " als erledigt markieren")}
+        checked={toggle.isPending ? toggle.variables : item.completed}
+        disabled={toggle.isPending}
+        onChange={(event) => {
+          const completed = event.target.checked;
+          toggle.mutate(completed);
+        }}
+      />
       <Feedback error={toggle.error} />
     </li>
   );

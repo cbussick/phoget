@@ -1,9 +1,9 @@
-import { useState } from "react";
-import type { Item } from "../../../shared/contracts";
-import { Dialog } from "../../shared/ui/Dialog";
-import { Field } from "../../shared/ui/Field";
-import { Button } from "../../shared/ui/Button";
-import { Feedback } from "../../shared/ui/Feedback";
+import { itemInputSchema, type Item } from "../../../shared/contracts";
+import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
+import { Dialog } from "../../shared/ui/Dialog/Dialog";
+import { TextField } from "../../shared/ui/TextField/TextField";
+import { Button } from "../../shared/ui/Button/Button";
+import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
@@ -16,63 +16,72 @@ export function ItemDialog({
   onClose: () => void;
   onAnnounce: (message: string) => void;
 }) {
-  const [name, setName] = useState(item.name);
-  const [note, setNote] = useState(item.note);
-  const save = useAction(() => listApi.editItem(item.id, { name, note }));
+  const save = useAction((value: { name: string; note: string }) =>
+    listApi.editItem(item.id, value),
+  );
   const remove = useAction(() => listApi.removeItem(item.id));
-  const busy = save.isPending || remove.isPending;
+  const {
+    form,
+    busy: saving,
+    error,
+    submit,
+  } = useValidatedForm(
+    { name: item.name, note: item.note },
+    itemInputSchema.required(),
+    async (value) => {
+      await save.mutateAsync(value);
+      onAnnounce(value.name + " aktualisiert");
+      onClose();
+    },
+  );
+  const busy = saving || remove.isPending;
   return (
     <Dialog
       title={item.name}
-      eyebrow="Edit item"
+      eyebrow="Eintrag bearbeiten"
       onClose={onClose}
       busy={busy}
       onSubmit={(event) => {
-        event.preventDefault();
-        if (busy) return;
-        save.mutate(undefined, {
-          onSuccess: () => {
-            onAnnounce(name + " updated");
-            onClose();
-          },
-        });
+        if (remove.isPending) event.preventDefault();
+        else submit(event);
       }}
     >
-      <Field
-        label="Item"
-        name="name"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        required
-        maxLength={200}
-      />
-      <Field
-        label="Note"
-        name="note"
-        multiline
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
-        maxLength={2000}
-        placeholder="Add a useful detail…"
-      />
-      <Feedback error={save.error ?? remove.error} />
+      <form.Field name="name">
+        {(field) => (
+          <TextField {...textFieldProps(field)} label="Eintrag" required disabled={busy} />
+        )}
+      </form.Field>
+      <form.Field name="note">
+        {(field) => (
+          <TextField
+            {...textFieldProps(field)}
+            label="Notiz"
+            multiline
+            placeholder="Ein hilfreiches Detail hinzufügen…"
+            disabled={busy}
+          />
+        )}
+      </form.Field>
+      <Feedback error={error ?? remove.error} />
       <div className="dialog-actions">
         <Button
-          className="remove-item"
+          variant="danger"
+          loading={remove.isPending}
+          loadingLabel="Wird entfernt…"
           disabled={busy}
           onClick={() =>
             remove.mutate(undefined, {
               onSuccess: () => {
-                onAnnounce(item.name + " removed");
+                onAnnounce(item.name + " entfernt");
                 onClose();
               },
             })
           }
         >
-          Remove item
+          Eintrag entfernen
         </Button>
-        <Button className="save-item" type="submit" disabled={busy}>
-          {save.isPending ? "Saving…" : "Save changes"}
+        <Button type="submit" loading={saving} disabled={busy}>
+          Änderungen speichern
         </Button>
       </div>
     </Dialog>

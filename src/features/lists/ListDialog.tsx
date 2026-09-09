@@ -1,102 +1,145 @@
 import { useState } from "react";
-import { iconSchema, type List } from "../../../shared/contracts";
+import type { z } from "zod";
+import { DEFAULT_LIST_COLOR } from "../../../shared/colors";
+import { ColorPicker } from "../../shared/ui/ColorPicker/ColorPicker";
+import { iconSchema, listInputSchema, type List } from "../../../shared/contracts";
+import { useValidatedForm, textFieldProps, fieldError } from "../../shared/forms/useValidatedForm";
 import { navigate } from "../../app/navigation";
-import { Dialog } from "../../shared/ui/Dialog";
-import { Field } from "../../shared/ui/Field";
-import { Feedback } from "../../shared/ui/Feedback";
-import { Button } from "../../shared/ui/Button";
-import { Icon } from "../../shared/ui/Icon";
+import { Dialog } from "../../shared/ui/Dialog/Dialog";
+import { TextField } from "../../shared/ui/TextField/TextField";
+import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { Button } from "../../shared/ui/Button/Button";
+import { ToggleButtonGroup } from "../../shared/ui/ToggleButtonGroup/ToggleButtonGroup";
+import { Icon } from "../../shared/ui/Icon/Icon";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
+
 export function ListDialog({ list, onClose }: { list?: List; onClose: () => void }) {
-  const [name, setName] = useState(list?.name ?? "");
-  const [description, setDescription] = useState(list?.description ?? "");
-  const [icon, setIcon] = useState(list?.icon ?? "shop");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const save = useAction(async () =>
-    list
-      ? listApi.update(list.id, { name, description, icon })
-      : listApi.create({ name, description, icon }),
+  const save = useAction((value: z.input<typeof listInputSchema>) =>
+    list ? listApi.update(list.id, value) : listApi.create(value),
   );
   const remove = useAction(async () => {
     if (list) await listApi.remove(list.id);
+    onClose();
+    navigate("/");
   });
-  const busy = save.isPending || remove.isPending;
+  const {
+    form,
+    busy: saving,
+    error,
+    submit,
+  } = useValidatedForm(
+    {
+      name: list?.name ?? "",
+      description: list?.description ?? "",
+      icon: list?.icon ?? "shop",
+      color: list?.color ?? DEFAULT_LIST_COLOR,
+    },
+    listInputSchema.required(),
+    async (value) => {
+      await save.mutateAsync(value);
+      onClose();
+    },
+  );
+  const busy = saving || remove.isPending;
   return (
     <Dialog
-      title={confirmDelete ? "Delete this list?" : list ? "List details" : "New list"}
+      title={confirmDelete ? "Diese Liste löschen?" : list ? "Listendetails" : "Neue Liste"}
       eyebrow={list?.name}
       busy={busy}
       onClose={onClose}
       onSubmit={(event) => {
-        event.preventDefault();
+        if (busy || confirmDelete) event.preventDefault();
         if (busy) return;
-        if (confirmDelete)
-          remove.mutate(undefined, {
-            onSuccess: () => {
-              onClose();
-              navigate("/");
-            },
-          });
-        else save.mutate(undefined, { onSuccess: onClose });
+        if (confirmDelete) remove.mutate(undefined);
+        else submit(event);
       }}
     >
       {confirmDelete ? (
-        <p>This will permanently remove “{list?.name}” and all its items.</p>
+        <p>„{list?.name}“ und alle Einträge werden endgültig gelöscht.</p>
       ) : (
         <>
-          <Field
-            label="List name"
-            name="name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-            maxLength={200}
-          />
-          <Field
-            label="Description"
-            name="description"
-            multiline
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            maxLength={1000}
-            placeholder="What is this list for?"
-          />
-          <fieldset className="icon-picker">
-            <legend>Icon</legend>
-            {iconSchema.options.map((value) => (
-              <label key={value}>
-                <input
-                  type="radio"
-                  name="icon"
-                  value={value}
-                  checked={icon === value}
-                  onChange={() => setIcon(value)}
-                />
-                <Icon name={value} />
-                <span className="visually-hidden">{value}</span>
-              </label>
-            ))}
-          </fieldset>
+          <form.Field name="name">
+            {(field) => (
+              <TextField {...textFieldProps(field)} label="Listenname" required disabled={busy} />
+            )}
+          </form.Field>
+          <form.Field name="description">
+            {(field) => (
+              <TextField
+                {...textFieldProps(field)}
+                label="Beschreibung"
+                multiline
+                placeholder="Wofür ist diese Liste?"
+                disabled={busy}
+              />
+            )}
+          </form.Field>
+          <form.Field name="icon">
+            {(field) => (
+              <ToggleButtonGroup
+                label="Symbol"
+                value={field.state.value}
+                error={fieldError(field)}
+                onBlur={field.handleBlur}
+                onValueChange={(value) => field.handleChange(iconSchema.parse(value))}
+                disabled={busy}
+                options={iconSchema.options.map((value) => ({
+                  value,
+                  label: {
+                    shop: "Einkauf",
+                    home: "Zuhause",
+                    travel: "Reise",
+                    tools: "Werkzeug",
+                    heart: "Herz",
+                    cart: "Einkaufswagen",
+                    bubbles: "Seifenblasen",
+                    cleaning: "Putzen",
+                    city: "Innenstadt",
+                    rice: "Asia-Supermarkt",
+                    sewing: "Nähen",
+                  }[value],
+                  icon: <Icon name={value} className="list-symbol-choice" />,
+                }))}
+              />
+            )}
+          </form.Field>
+          <form.Field name="color">
+            {(field) => (
+              <ColorPicker
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                onBlur={field.handleBlur}
+                error={fieldError(field)}
+                disabled={busy}
+              />
+            )}
+          </form.Field>
         </>
       )}
-      <Feedback error={save.error ?? remove.error} />
+      {list && !confirmDelete ? (
+        <section className="list-delete-section" aria-label="Liste löschen">
+          <h3>Liste löschen</h3>
+          <p>Die Liste und alle Einträge werden unwiderruflich entfernt.</p>
+          <Button variant="danger" disabled={busy} onClick={() => setConfirmDelete(true)}>
+            <Icon name="trash" />
+            Liste löschen
+          </Button>
+        </section>
+      ) : null}
+      <Feedback error={error ?? remove.error} />
       <div className="dialog-actions">
         <Button
-          className="remove-item"
+          variant="secondary"
           disabled={busy}
-          onClick={() =>
-            confirmDelete ? setConfirmDelete(false) : list ? setConfirmDelete(true) : onClose()
-          }
+          onClick={() => (confirmDelete ? setConfirmDelete(false) : onClose())}
         >
-          {confirmDelete || !list ? "Cancel" : "Delete list"}
+          Abbrechen
         </Button>
-        <Button
-          className={confirmDelete ? "remove-item danger" : "save-item"}
-          type="submit"
-          disabled={busy}
-        >
-          {busy ? "Saving…" : confirmDelete ? "Delete list" : list ? "Save changes" : "Create list"}
+        <Button variant={confirmDelete ? "danger" : "primary"} type="submit" loading={busy}>
+          {confirmDelete ? <Icon name="trash" /> : null}
+          {confirmDelete ? "Liste löschen" : list ? "Änderungen speichern" : "Liste erstellen"}
         </Button>
       </div>
     </Dialog>

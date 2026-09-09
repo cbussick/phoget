@@ -1,0 +1,57 @@
+@import url("../controlStates.css");
+
+.form-field {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  width: 100%;
+  container-type: inline-size;
+}
+
+.form-field > label {
+  justify-self: start;
+  font-size: var(--font-label);
+  font-weight: var(--font-weight-700);
+}
+
+.field-hint {
+  margin: var(--space-none);
+  font-size: var(--font-small);
+  line-height: var(--line-height-1-5);
+  color: var(--color-ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.field-error {
+  color: var(--color-error);
+}
+
+.field-control {
+  --control-state-color: var(--color-control-pressed);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--space-12);
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  background: var(--color-white);
+  font: inherit;
+}
+
+.field-control:where([aria-invalid="true"], :has([aria-invalid="true"])) {
+  --control-state-color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.field-error-space {
+  display: grid;
+  min-block-size: var(--field-error-height);
+}
+
+.field-error-space > .field-hint {
+  grid-area: 1 / 1;
+}
+
+.field-error-space[data-error="true"] > .field-hint:not(.field-error) {
+  visibility: hidden;
+}
