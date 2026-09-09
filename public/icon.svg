@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <title>Phoget — a bowl of things to get done</title>
-  <rect width="512" height="512" rx="112" fill="#176f9f"/>
-  <g transform="translate(48 48) scale(13)" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M5 17h22c-1 6-5 10-11 10S6 23 5 17Z" fill="#fff3d6"/>
-    <path d="M12 10l4 4L25 5" fill="none" stroke="#8bcdf1" stroke-width="2.8"/>
-    <path d="M9 6c-3 3 2 4 0 7" fill="none" stroke="#fff3d6" stroke-width="1.8"/>
-    <path d="M11 21c1 2 3 3 5 3" fill="none" stroke="#176f9f" stroke-width="1.5"/>
+  <!-- Matches the list icons' 38% 50% 42% 48% corners and -2 degree rotation. -->
+  <path d="M198.4 16H256A240 240 0 0 1 496 256V294.4A201.6 201.6 0 0 1 294.4 496H246.4A230.4 230.4 0 0 1 16 265.6V198.4A182.4 182.4 0 0 1 198.4 16Z" transform="rotate(-2 256 256)" fill="#8bcdf1"/>
+  <g transform="translate(96 96) scale(10)" fill="none" stroke="#176f9f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 17h22c-1 6-5 10-11 10S6 23 5 17Z"/>
+    <path d="M12 10l4 4L25 5"/>
+    <path d="M9 6c-3 3 2 4 0 7"/>
+    <path d="M11 21c1 2 3 3 5 3"/>
   </g>
 </svg>
