@@ -1,7 +1,11 @@
-# Gather
+# Phoget
 
 A shared household list app with German UI, user accounts, customizable lists, and synced updates.
 Built with React, TypeScript, Express, and PostgreSQL.
+
+The Phoget logo lives in `public/icon.svg` and is shared by navigation and login. Its bowl and checkmark use the same blue palette and irregular oval as the list icons. PNG exports and `public/site.webmanifest` provide browser and home-screen branding.
+
+Existing `gather` database, volume, session, and internal protocol identifiers are retained for compatibility; renaming the app does not require a data migration.
 
 ## Run locally
 

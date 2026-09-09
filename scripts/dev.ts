@@ -44,7 +44,7 @@ try {
   });
   api.once("error", () => void stop(1));
   api.once("exit", (code) => void stop(code ?? 1));
-  console.log(`Gather dev origin: ${origin}`);
+  console.log(`Phoget dev origin: ${origin}`);
   vite.printUrls();
 } catch (error) {
   await stop(1);

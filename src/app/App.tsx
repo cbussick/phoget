@@ -25,7 +25,7 @@ export function App() {
   if (session.isPending)
     return (
       <main className="error-page">
-        <h1>Gather</h1>
+        <h1>Phoget</h1>
         <p role="status">Wird geladen…</p>
       </main>
     );
@@ -66,7 +66,7 @@ function HouseholdApp({ user }: { user: User }) {
   const list = state.data?.lists.find((value) => value.id === listId);
   const title = path === "/settings" ? "Einstellungen" : (list?.name ?? "Alle Listen");
   useEffect(() => {
-    document.title = title + " | Gather";
+    document.title = title + " | Phoget";
   }, [title]);
   useEffect(() => {
     document.getElementById("main-content")?.focus();
@@ -76,7 +76,7 @@ function HouseholdApp({ user }: { user: User }) {
       {!state.data ? (
         state.isPending ? (
           <div role="status" aria-busy="true">
-            <h1>Gather</h1>
+            <h1>Phoget</h1>
             <p>Deine Listen werden geladen…</p>
           </div>
         ) : (

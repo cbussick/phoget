@@ -1,5 +1,5 @@
 {
-  "name": "gather",
+  "name": "phoget",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,8 @@
     "lint": "oxlint src server shared scripts tests .storybook *.ts && stylelint \"src/**/*.css\" \".storybook/*.css\"",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "test": "tsx --env-file=.env.test --test tests/api.test.ts tests/colors.test.ts tests/activity.test.ts tests/icons.test.ts tests/dev.test.ts",
+    "test": "tsx --env-file=.env.test --test tests/api.test.ts tests/colors.test.ts tests/activity.test.ts tests/icons.test.ts tests/dev.test.ts tests/branding.test.ts",
+    "test:branding": "tsx --test tests/branding.test.ts",
     "test:e2e": "npm run build && tsx --env-file=.env.test tests/prepareAccounts.ts && playwright test",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run test:e2e && npm run test:storybook",
     "db:setup": "node --env-file=.env node_modules/drizzle-kit/bin.cjs push && tsx --env-file=.env server/db/setup.ts",

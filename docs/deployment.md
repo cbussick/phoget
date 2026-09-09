@@ -1,6 +1,6 @@
 # Deployment
 
-Gather runs as one Node process serving both the built frontend and API, backed by PostgreSQL.
+Phoget runs as one Node process serving both the built frontend and API, backed by PostgreSQL.
 
 ## Configure and build
 
@@ -11,7 +11,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://USER:PASSWORD@DATABASE_HOST:5432/DATABASE_NAME
 HOST=127.0.0.1
 PORT=3001
-APP_ORIGIN=https://your-gather-domain.example
+APP_ORIGIN=https://your-phoget-domain.example
 ```
 
 Use real database credentials, not the local example defaults.

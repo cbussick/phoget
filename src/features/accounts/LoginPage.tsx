@@ -5,7 +5,6 @@ import { TextField } from "../../shared/ui/TextField/TextField";
 import { PasswordField } from "../../shared/ui/PasswordField/PasswordField";
 import { Button } from "../../shared/ui/Button/Button";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
-import { Icon } from "../../shared/ui/Icon/Icon";
 import { accountApi } from "./accountApi";
 import { replaceSession } from "./replaceSession";
 import "./accounts.css";
@@ -24,9 +23,9 @@ export function LoginPage() {
     <main className="auth-page login-page">
       <div className="brand">
         <span className="brand-mark" aria-hidden="true">
-          <Icon name="brand" />
+          <img src="/icon.svg" alt="" width="32" height="32" />
         </span>
-        Gather
+        Phoget
       </div>
       <header>
         <h1>Willkommen zu Hause</h1>

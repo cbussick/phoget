@@ -27,7 +27,7 @@ export const Colors: StoryObj = {
 export const Typography: StoryObj = {
   render: () => (
     <div className="story-stack">
-      <h1>Gather together</h1>
+      <h1>Phoget together</h1>
       <h2>Our shared household</h2>
       <p>A little space for the things we need to remember.</p>
       <small>Nunito, self-hosted. All type and spacing comes from tokens.</small>

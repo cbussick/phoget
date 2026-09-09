@@ -5,7 +5,7 @@ import { readState } from "./db/repository.js";
 
 await readState();
 const server = app.listen(config.PORT, config.HOST, () =>
-  console.log(`Gather listening on http://${config.HOST}:${config.PORT}`),
+  console.log(`Phoget listening on http://${config.HOST}:${config.PORT}`),
 );
 function shutdown() {
   server.close(() => {

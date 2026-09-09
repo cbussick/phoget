@@ -58,7 +58,7 @@ test(
       let origin: string | undefined;
       const deadline = Date.now() + 40_000;
       while (Date.now() < deadline) {
-        origin = output.match(/Gather dev origin: (http:\/\/127\.0\.0\.1:\d+)/)?.[1];
+        origin = output.match(/Phoget dev origin: (http:\/\/127\.0\.0\.1:\d+)/)?.[1];
         if (origin) {
           try {
             if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok)

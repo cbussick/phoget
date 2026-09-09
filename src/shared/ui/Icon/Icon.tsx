@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 // Vendored SVG artwork: Lucide 1.43.0, Lucide Lab 0.2.0 (rice),
-// and Tabler Needle Thread (sewing, supplied by the user). Brand is Gather's own.
+// and Tabler Needle Thread (sewing, supplied by the user). Brand is Phoget's own.
 // Required copyright/license notices: public/third-party-icons.txt.
 // Stable names preserve existing saved list selections; no icon packages are needed.
 const icons = {
@@ -270,12 +270,7 @@ const icons = {
       <path d="M19.5 9.5l1.5 1.5" />
     </>
   ),
-  brand: (
-    <>
-      <path d="M7 13.5h18l-2 13H9l-2-13Z" />
-      <path d="M11 15V9a5 5 0 0 1 10 0v6" />
-    </>
-  ),
+  brand: <image href="/icon.svg" width="32" height="32" />,
 };
 
 export function Icon({ name, ...props }: SVGProps<SVGSVGElement> & { name: keyof typeof icons }) {
