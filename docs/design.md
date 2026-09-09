@@ -1,16 +1,13 @@
-# Prototype fidelity
+# Design notes
 
-The source of truth is the original `prototype/index.html`, `prototype/all-lists.html`, and `prototype/styles.css`. The original files are preserved byte-for-byte.
+Design tokens live in `src/app/tokens.css`: palette, Nunito typography, spacing, radii, shadows, and layout dimensions. Feature styles reference these tokens. Literal breakpoints remain in media/container queries because CSS custom properties cannot be used there.
 
-The palette, Nunito type, spacing scale, radii, shadows, sidebar width, content widths, control sizes, title scaling, and mobile navigation dimensions were extracted before implementing the React components. They live in `src/app/tokens.css`. Feature styles reference those tokens. Literal breakpoints remain in media/container queries because CSS custom properties cannot be used there.
+All pages compose shared dialogs, form fields, buttons, and feedback rather than maintaining alternate versions of the same controls.
 
-The two prototype screens retain their structure, copy, icons, colors, and layout. New list, list details, deletion confirmation, and settings reuse the existing visual language. Shared native dialogs, form fields, buttons, and feedback prevent alternate versions of the same controls.
-
-Intentional behavior changes:
+Interaction requirements:
 
 - Completing an item moves it into Done, and restoring it moves it back.
 - Timestamps reflect saved data.
-- Placeholder navigation and buttons now work.
 - Failed writes leave the form open with its input.
 - Long titles wrap instead of forcing horizontal scrolling.
 - Dialogs focus the first input, trap focus natively, and restore focus on close.
@@ -18,13 +15,13 @@ Intentional behavior changes:
 - The font is self-hosted instead of fetched from Google.
 - Loading, empty, not-found, and connection-error states are explicit.
 
-The browser tests compare the original and implemented screen geometry and computed typography/colors at 390px and 1440px in each engine. Both sides receive the same licensed Nunito font during comparison. Screenshots supplement these checks.
+Browser tests cover application behavior, responsive layouts, and accessibility. Storybook provides component-level interaction and visual checks.
 
 Implementation references: [native dialogs and focus](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog), [TanStack polling](https://tanstack.com/query/latest/docs/framework/react/guides/polling), [Express async errors](https://expressjs.com/en/5x/guide/error-handling/), and [Drizzle transactions](https://orm.drizzle.team/docs/transactions).
 
 The shared UI now lives in component folders with colocated stories. Button owns variant and interaction styling; layout-specific placement stays in features. PasswordField composes TextField and Button, and account tables compose Table, Badge, and Button. Storybook and the app import the same baseline, self-hosted font, and tokens.
 
-The empty-list state is centered with a large icon. Done appears only when there are completed items. Household avatars use real accounts. Account settings and administrator management extend the prototype's existing visual language.
+The empty-list state is centered with a large icon. Done appears only when there are completed items. Household avatars use real accounts. Account settings and administrator management use the same shared components.
 
 Authentication implementation references: [Node scrypt](https://nodejs.org/api/crypto.html#cryptoscryptpassword-salt-keylen-options-callback), [OWASP password storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), and [session management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html).
 
@@ -32,7 +29,7 @@ Text fields and selects share hover border colors and a 2px inward focus/pressed
 
 TextField, PasswordField, and Select share FieldLayout for labels, hint/error typography, spacing, and accessible descriptions. Password visibility is an action inside TextField's border. Select uses a top-layer listbox, a rotating chevron, and keyboard behavior based on the [WAI-ARIA select-only combobox pattern](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/). It is implemented locally without importing the reference design system. Stories focus on component variants and meaningful states; product-specific button labels use the controls instead of separate stories.
 
-ListIcon owns the prototype’s blue icon background; ListRow composes it with the label, description and chevron. Its hover surface has balanced internal padding on both sides. The row darkens on press, and sidebar hover transitions respect reduced motion. Both components have focused Storybook stories.
+ListIcon owns the list's colored icon background; ListRow composes it with the label, description and chevron. Its hover surface has balanced internal padding on both sides. The row darkens on press, and sidebar hover transitions respect reduced motion. Both components have focused Storybook stories.
 
 Feedback composes Callout for accessible, tinted error messages. Login reserves a scrollable feedback area below account help, avoiding layout shift even for a longer server message. The routine shared-changes note was removed; connection failures remain visible.
 
@@ -40,7 +37,7 @@ All application forms use TanStack Form with the shared Zod input schemas. Nativ
 
 The add-item control is a ComboBox that permits new text and searches per-list name history. Select and ComboBox share OptionList and anchored popup positioning. Renamed and removed items remain in that history; deleting a list removes its history. Existing item names are also included. The reference ComboBox informed the editable input, integrated trigger, popup, and keyboard behavior without importing its components.
 
-The overview and item rows use the row-padding token. Item hover covers the full row, while completion stays on the checkbox. Done has a stronger label, a chevron and a dashed separator; open items have no trailing divider. Icon choice uses a separate ToggleButtonGroup with one selection and roving keyboard focus, following the [MUI toggle group pattern](https://mui.com/material-ui/react-toggle-button/). Form validation follows the [TanStack Form guide](https://tanstack.com/form/latest/docs/framework/react/guides/validation). The prototype comparisons retain frame geometry and typography/color checks while allowing these explicitly requested content-layout changes.
+The overview and item rows use the row-padding token. Item hover covers the full row, while completion stays on the checkbox. Done has a stronger label, a chevron and a dashed separator; open items have no trailing divider. Icon choice uses a separate ToggleButtonGroup with one selection and roving keyboard focus, following the [MUI toggle group pattern](https://mui.com/material-ui/react-toggle-button/). Form validation follows the [TanStack Form guide](https://tanstack.com/form/latest/docs/framework/react/guides/validation).
 
 Forms validate only on submit, never on blur or while typing. Checkbox visuals and hit areas are both 32px, with no clickable padding. The list options icon uses filled SVG dots. Error-boundary and connection-error pages center their content horizontally and vertically.
 

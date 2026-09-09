@@ -118,7 +118,7 @@ try {
         .values({ ...item, createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString() })
         .onConflictDoNothing();
   });
-  console.log("Prototype sample data added.");
+  console.log("Demo sample data added.");
 } finally {
   await pool.end();
 }
