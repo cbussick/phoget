@@ -2,7 +2,7 @@ import type { SVGProps } from "react";
 
 const paths = {
   shop: ["M7 13h18l-2 13H9L7 13Z", "M11 14V9a5 5 0 0 1 10 0v5", "M12 19h8M12 22h5"],
-  brand: ["M7 13.5h18l-2 13H9l-2-13Z", "M11 15V9a5 5 0 0 1 10 0v6"],
+  brand: ["M5 17h22c-1 6-5 10-11 10S6 23 5 17Z", "M12 10l4 4L25 5", "M9 6c-3 3 2 4 0 7"],
   home: ["m6 15 10-9 10 9v11H6V15Z", "M12 26v-8h8v8", "M22 9V6h3v6"],
   travel: ["M8 11h16v15H8V11Z", "M12 11V8h8v3M8 17h16", "M14 21h4"],
   tools: ["M8 24 22 10l3 3-14 14H8v-3Z", "m19 13 3 3M7 7l6 6", "M8 12 5 9l4-4 3 3"],

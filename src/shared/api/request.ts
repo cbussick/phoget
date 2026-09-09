@@ -13,7 +13,7 @@ export async function request<T>(
   });
   if (!response.ok) {
     const parsed = errorSchema.safeParse(await response.json().catch(() => null));
-    throw new Error(parsed.success ? parsed.data.error : "Cannot reach Gather. Please try again.");
+    throw new Error(parsed.success ? parsed.data.error : "Cannot reach Phoget. Please try again.");
   }
   if (response.status === 204) return schema.parse(undefined);
   return schema.parse(await response.json());

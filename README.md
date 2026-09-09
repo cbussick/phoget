@@ -1,6 +1,12 @@
-# Gather
+# Phoget
 
 A shared list app for two people. React and TypeScript, a plain Node/Express server, and Postgres through Drizzle ORM.
+
+## Branding
+
+Phoget pairs a pho bowl with a rising checkmark: a reminder for groceries, chores, and everything else. The editable app icon is `public/icon.svg`, with PNG exports for home-screen icons and `public/site.webmanifest` for app metadata. The navigation uses a matching outline mark.
+
+Existing `gather` database names, credentials, and Docker volume identifiers are intentionally retained for compatibility with self-hosted installations. Renaming the app does not require a database migration.
 
 The original HTML/CSS/JS designs are preserved in `prototype/`. Both original screens are implemented, including their responsive layouts and self-hosted Nunito font.
 
@@ -53,7 +59,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://USER:PASSWORD@DATABASE_HOST:5432/DATABASE_NAME
 HOST=127.0.0.1
 PORT=3001
-APP_ORIGIN=https://your-gather-domain.example
+APP_ORIGIN=https://your-phoget-domain.example
 ```
 
 Then run:

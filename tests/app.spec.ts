@@ -207,7 +207,7 @@ test("prototype geometry, type and colors match on desktop and mobile", async ({
   await prototype.route("https://fonts.googleapis.com/**", (route) =>
     route.fulfill({
       contentType: "text/css",
-      body: "@font-face {font-family:Nunito;font-style:normal;font-weight:200 1000;src:url(https://fonts.gstatic.com/gather.woff2) format('woff2')}",
+      body: "@font-face {font-family:Nunito;font-style:normal;font-weight:200 1000;src:url(https://fonts.gstatic.com/phoget.woff2) format('woff2')}",
     }),
   );
   await prototype.route("https://fonts.gstatic.com/**", (route) =>

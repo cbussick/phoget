@@ -1,5 +1,5 @@
 {
-  "name": "gather",
+  "name": "phoget",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,8 @@
     "lint": "oxlint src server shared tests *.ts && stylelint 'src/**/*.css'",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "test": "tsx --env-file=.env.test --test tests/api.test.ts",
+    "test": "tsx --env-file=.env.test --test tests/api.test.ts tests/branding.test.ts",
+    "test:branding": "tsx --test tests/branding.test.ts",
     "test:e2e": "npm run build && playwright test",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run test:e2e",
     "db:migrate:production": "node --env-file=.env dist/server/db/migrate.js"

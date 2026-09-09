@@ -19,7 +19,7 @@ export function App() {
   const list = state.data?.lists.find((value) => value.id === listId);
   const title = path === "/settings" ? "Settings" : (list?.name ?? "All lists");
   useEffect(() => {
-    document.title = title + " | Gather";
+    document.title = title + " | Phoget";
   }, [title]);
   useEffect(() => {
     document.getElementById("main-content")?.focus();
@@ -29,7 +29,7 @@ export function App() {
       {!state.data ? (
         state.isPending ? (
           <div role="status" aria-busy="true">
-            <h1>Gather</h1>
+            <h1>Phoget</h1>
             <p>Loading your lists…</p>
           </div>
         ) : (

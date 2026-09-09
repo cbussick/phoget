@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
           <h1>Something went wrong</h1>
           <p>Your saved lists are safe. Reload to try again.</p>
           <Button className="new-list-button" onClick={() => location.reload()}>
-            Reload Gather
+            Reload Phoget
           </Button>
         </main>
       );

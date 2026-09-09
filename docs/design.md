@@ -1,6 +1,6 @@
 # Prototype fidelity
 
-The source of truth is the original `prototype/index.html`, `prototype/all-lists.html`, and `prototype/styles.css`. The original files are preserved byte-for-byte.
+The source of truth is the original `prototype/index.html`, `prototype/all-lists.html`, and `prototype/styles.css`. The prototype files retain their original layout; their app name and brand mark were updated to Phoget alongside the implementation.
 
 The palette, Nunito type, spacing scale, radii, shadows, sidebar width, content widths, control sizes, title scaling, and mobile navigation dimensions were extracted before implementing the React components. They live in `src/app/tokens.css`. Feature styles reference those tokens. Literal breakpoints remain in media/container queries because CSS custom properties cannot be used there.
 

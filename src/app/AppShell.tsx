@@ -41,11 +41,11 @@ export function AppShell({
       </a>
       <div className="app-shell">
         <aside className="sidebar" aria-label="App navigation">
-          <Link className="brand" href="/" aria-label="Gather home">
+          <Link className="brand" href="/" aria-label="Phoget home">
             <span className="brand-mark" aria-hidden="true">
               <Icon name="brand" />
             </span>
-            <span>Gather</span>
+            <span>Phoget</span>
           </Link>
           <nav className="nav-links" aria-label="Main navigation">
             {links(false)}
