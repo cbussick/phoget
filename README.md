@@ -4,7 +4,7 @@ A shared list app for two people. React and TypeScript, a plain Node/Express ser
 
 ## Branding
 
-Phoget pairs a pho bowl with a rising checkmark: a reminder for groceries, chores, and everything else. The editable app icon is `public/icon.svg`, with PNG exports for home-screen icons and `public/site.webmanifest` for app metadata. The navigation uses a matching outline mark.
+Phoget pairs a pho bowl with a rising checkmark: a reminder for groceries, chores, and everything else. The editable app icon is `public/icon.svg`, with PNG exports for home-screen icons and `public/site.webmanifest` for app metadata. The navigation uses the same SVG, including the bowl stripe. The icon uses the app's primary blue (`#176f9f`) and light-blue accent (`#8bcdf1`).
 
 Existing `gather` database names, credentials, and Docker volume identifiers are intentionally retained for compatibility with self-hosted installations. Renaming the app does not require a database migration.
 

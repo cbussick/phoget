@@ -43,7 +43,7 @@ export function AppShell({
         <aside className="sidebar" aria-label="App navigation">
           <Link className="brand" href="/" aria-label="Phoget home">
             <span className="brand-mark" aria-hidden="true">
-              <Icon name="brand" />
+              <img src="/icon.svg" alt="" width="32" height="32" />
             </span>
             <span>Phoget</span>
           </Link>

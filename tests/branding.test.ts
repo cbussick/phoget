@@ -18,6 +18,17 @@ test("Phoget has consistent document and home-screen branding", async () => {
   }
 });
 
+test("navigation uses the canonical icon and the app's blue palette", async () => {
+  const shell = await read("src/app/AppShell.tsx");
+  const svg = await read("public/icon.svg");
+  const tokens = await read("src/app/tokens.css");
+  assert.match(shell, /<img src="\/icon.svg" alt=""/);
+  for (const color of ["#176f9f", "#8bcdf1"]) {
+    assert.ok(svg.includes(color));
+    assert.ok(tokens.includes(color));
+  }
+});
+
 test("home-screen PNG exports have the expected dimensions", async () => {
   for (const [name, size] of [
     ["apple-touch-icon", 180],
