@@ -82,7 +82,7 @@
   --button-hover-text: var(--accent-hover-text, var(--color-ink));
   --button-pressed-text: var(--accent-pressed-text, var(--color-ink));
   --button-focus-color: var(--accent-foreground, var(--color-control-pressed));
-  border: 0;
+  border-color: transparent;
   color: var(--accent-foreground, var(--color-ink));
   background: var(--accent-background, var(--color-accent));
 }
