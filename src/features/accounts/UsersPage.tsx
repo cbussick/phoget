@@ -6,6 +6,7 @@ import { Button } from "../../shared/ui/Button/Button";
 import { Badge } from "../../shared/ui/Badge/Badge";
 import { Table } from "../../shared/ui/Table/Table";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { Icon } from "../../shared/ui/Icon/Icon";
 import { UserDialog, type UserAction } from "./UserDialog";
 export function UsersPage({ currentUser }: { currentUser: User }) {
   const [action, setAction] = useState<UserAction | null>(null);
@@ -23,6 +24,7 @@ export function UsersPage({ currentUser }: { currentUser: User }) {
           <p className="field-hint">Alle hier teilen dieselben Listen.</p>
         </div>
         <Button variant="primary" onClick={() => setAction({ kind: "create" })}>
+          <Icon name="plus" />
           Benutzer anlegen
         </Button>
       </div>

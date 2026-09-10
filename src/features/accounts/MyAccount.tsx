@@ -8,6 +8,7 @@ import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { accountApi } from "./accountApi";
 import { sessionKey } from "./useSession";
 import { PasswordForm } from "./PasswordForm";
+import { SignOutButton } from "./SignOutButton";
 export function MyAccount({ user }: { user: User }) {
   const notify = useSnackbar();
   const client = useQueryClient();
@@ -52,6 +53,15 @@ export function MyAccount({ user }: { user: User }) {
         </div>
       </form>
       <PasswordForm />
+      <section className="account-card">
+        <header className="section-heading">
+          <div>
+            <h2>Sitzung</h2>
+            <p className="field-hint">Melde dich auf diesem Gerät von Don't Phoget ab.</p>
+          </div>
+          <SignOutButton />
+        </header>
+      </section>
     </div>
   );
 }

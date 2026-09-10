@@ -4,7 +4,6 @@ import type { User } from "../../shared/accounts";
 import { HouseholdSettings } from "../features/settings/HouseholdSettings";
 import { MyAccount } from "../features/accounts/MyAccount";
 import { UsersPage } from "../features/accounts/UsersPage";
-import { SignOutButton } from "../features/accounts/SignOutButton";
 import { Icon } from "../shared/ui/Icon/Icon";
 import { Button } from "../shared/ui/Button/Button";
 import "./settingsRoute.css";
@@ -18,7 +17,6 @@ export function SettingsRoute({ user, settings }: { user: User; settings: Settin
           <h1>Einstellungen</h1>
           <p>Ein kleiner Bereich für dich und deinen Haushalt.</p>
         </div>
-        <SignOutButton />
       </header>
       <nav className="settings-nav" aria-label="Einstellungsbereiche">
         <Button
