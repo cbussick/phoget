@@ -121,7 +121,9 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
         : route.continue(),
     );
     await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();
-    await expect(page.getByRole("alert")).toHaveText("Speichern fehlgeschlagen.");
+    await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
+      "Speichern fehlgeschlagen.",
+    );
     await expect(hex).toHaveValue("#ABCDEF");
     await expect(icon).toHaveCSS("background-color", "rgb(36, 53, 102)");
     await page.unroute("**/api/lists/*");

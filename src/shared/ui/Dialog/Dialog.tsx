@@ -8,6 +8,7 @@ export function Dialog({
   onSubmit,
   children,
   busy = false,
+  spacious = false,
 }: {
   title: string;
   eyebrow?: string;
@@ -15,6 +16,7 @@ export function Dialog({
   onSubmit: FormEventHandler<HTMLFormElement>;
   children: ReactNode;
   busy?: boolean;
+  spacious?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -31,7 +33,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className="item-dialog"
+      className={"item-dialog" + (spacious ? " item-dialog-spacious" : "")}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();

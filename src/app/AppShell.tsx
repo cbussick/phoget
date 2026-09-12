@@ -45,11 +45,11 @@ export function AppShell({
       </a>
       <div className="app-shell">
         <aside className="sidebar" aria-label="App-Navigation">
-          <Link className="brand" href="/" aria-label="Phoget-Startseite">
+          <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
             <span className="brand-mark" aria-hidden="true">
               <img src="/icon.svg" alt="" width="32" height="32" />
             </span>
-            <span>Phoget</span>
+            <span>Don't Phoget</span>
           </Link>
           <nav className="nav-links" aria-label="Hauptnavigation">
             {links(false)}

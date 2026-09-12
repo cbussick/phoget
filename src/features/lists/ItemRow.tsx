@@ -1,7 +1,7 @@
 import { Checkbox } from "../../shared/ui/Checkbox/Checkbox";
 import type { Item } from "../../../shared/contracts";
 import { Button } from "../../shared/ui/Button/Button";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
@@ -20,6 +20,7 @@ export function ItemRow({
       item.name + (completed ? " als erledigt markiert" : " zurück auf die Liste verschoben"),
     );
   });
+  useErrorSnackbar(toggle.error);
   return (
     <li className={"item-row" + (item.completed ? " is-complete" : "")}>
       <hr className="item-divider" aria-hidden="true" />
@@ -38,7 +39,6 @@ export function ItemRow({
           toggle.mutate(completed);
         }}
       />
-      <Feedback error={toggle.error} />
     </li>
   );
 }

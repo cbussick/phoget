@@ -19,6 +19,10 @@
   padding: var(--space-6);
 }
 
+.item-dialog-spacious form {
+  gap: var(--space-5);
+}
+
 .dialog-heading {
   display: flex;
   align-items: flex-start;
@@ -58,4 +62,8 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding-block-start: var(--space-2);
+}
+
+.item-dialog-spacious .dialog-actions {
+  padding-block-start: var(--space-3);
 }

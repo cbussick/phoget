@@ -24,7 +24,9 @@
     "account:setup:production": "node --env-file=.env dist/server/auth/setupAdmin.js",
     "storybook": "storybook dev -p 6006 --host 127.0.0.1 --no-open --disable-telemetry",
     "build:storybook": "storybook build --disable-telemetry",
-    "test:storybook": "npm run build:storybook && playwright test --config playwright.storybook.config.ts"
+    "test:storybook": "npm run build:storybook && playwright test --config playwright.storybook.config.ts",
+    "gallery:errors": "npm run build && tsx --env-file=.env.test tests/prepareAccounts.ts && playwright test --config playwright.error-gallery.config.ts",
+    "gallery:errors:serve": "vite error-gallery --host 127.0.0.1 --port 4173"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "5.3.0",
@@ -37,6 +39,7 @@
     "react": "19.2.8",
     "react-aria-components": "1.21.1",
     "react-dom": "19.2.8",
+    "sonner": "2.0.8",
     "zod": "4.5.4"
   },
   "devDependencies": {

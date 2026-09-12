@@ -13,7 +13,8 @@ import { request } from "../shared/api/request";
 import { Feedback } from "../shared/ui/Feedback/Feedback";
 import { Button } from "../shared/ui/Button/Button";
 import { AppShell } from "./AppShell";
-import { Link, usePath } from "./navigation";
+import { navigate, usePath } from "./navigation";
+import { Icon } from "../shared/ui/Icon/Icon";
 
 export function App() {
   const session = useSession();
@@ -25,7 +26,7 @@ export function App() {
   if (session.isPending)
     return (
       <main className="error-page">
-        <h1>Phoget</h1>
+        <h1>Don't Phoget</h1>
         <p role="status">Wird geladen…</p>
       </main>
     );
@@ -66,7 +67,7 @@ function HouseholdApp({ user }: { user: User }) {
   const list = state.data?.lists.find((value) => value.id === listId);
   const title = path === "/settings" ? "Einstellungen" : (list?.name ?? "Alle Listen");
   useEffect(() => {
-    document.title = title + " | Phoget";
+    document.title = title + " | Don't Phoget";
   }, [title]);
   useEffect(() => {
     document.getElementById("main-content")?.focus();
@@ -76,22 +77,17 @@ function HouseholdApp({ user }: { user: User }) {
       {!state.data ? (
         state.isPending ? (
           <div role="status" aria-busy="true">
-            <h1>Phoget</h1>
+            <h1>Don't Phoget</h1>
             <p>Deine Listen werden geladen…</p>
           </div>
         ) : (
-          <>
-            <h1>Deine Listen konnten nicht geladen werden</h1>
-            <Feedback error={state.error} />
-            <Button
-              variant="primary"
-              size="large"
-              className="new-list-button"
-              onClick={() => void state.refetch()}
-            >
-              Erneut versuchen
-            </Button>
-          </>
+          <PageMessage
+            icon="error"
+            title="Deine Listen konnten nicht geladen werden"
+            description="Wir konnten gerade keine Verbindung herstellen. Deine Listen sind weiterhin sicher."
+            action="Erneut versuchen"
+            onAction={() => void state.refetch()}
+          />
         )
       ) : path === "/" || path === "/all-lists.html" ? (
         <>
@@ -116,12 +112,41 @@ function HouseholdApp({ user }: { user: User }) {
           syncError={state.isError}
         />
       ) : (
-        <>
-          <h1>Liste nicht gefunden</h1>
-          <p>Diese Liste wurde möglicherweise gelöscht.</p>
-          <Link href="/">Zurück zu allen Listen</Link>
-        </>
+        <PageMessage
+          icon="emptyList"
+          title="Liste nicht gefunden"
+          description="Diese Liste wurde möglicherweise gelöscht."
+          action="Zurück zu allen Listen"
+          onAction={() => navigate("/")}
+        />
       )}
     </AppShell>
+  );
+}
+
+function PageMessage({
+  icon,
+  title,
+  description,
+  action,
+  onAction,
+}: {
+  icon: "error" | "emptyList";
+  title: string;
+  description: string;
+  action: string;
+  onAction: () => void;
+}) {
+  return (
+    <section className="page-message" aria-labelledby="page-message-title">
+      <span className="page-message-mark" data-icon={icon} aria-hidden="true">
+        <Icon name={icon} />
+      </span>
+      <h1 id="page-message-title">{title}</h1>
+      <p>{description}</p>
+      <Button variant="primary" size="large" onClick={onAction}>
+        {action}
+      </Button>
+    </section>
   );
 }

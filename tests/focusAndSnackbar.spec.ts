@@ -87,11 +87,14 @@ test("settings success uses a dismissible snackbar without shifting the form", a
   await save.click();
   const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
   await expect(snackbar).toBeVisible();
-  await expect(page.getByRole("status")).toHaveText("Einstellungen gespeichert.");
+  await expect(snackbar).toContainText("Einstellungen gespeichert.");
   expect(await page.locator(".settings-form").boundingBox()).toEqual(before);
-  await expect(snackbar).toHaveCSS("position", "fixed");
+  await expect(page.locator("[data-sonner-toaster]")).toHaveCSS("position", "fixed");
   await expect(snackbar).toHaveAttribute("data-variant", "success");
-  await expect(snackbar).toHaveCSS("border-color", "rgb(39, 103, 73)");
+  await expect(snackbar.locator(".snackbar-message")).toHaveCSS(
+    "border-left-color",
+    "rgb(39, 103, 73)",
+  );
   await expect(page.locator(".settings-form")).toHaveCSS("row-gap", "12px");
   await expect(page.locator(".settings-form .form-field")).toHaveCSS("row-gap", "4px");
   await expect(snackbar.getByRole("button")).not.toBeFocused();

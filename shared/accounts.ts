@@ -13,7 +13,7 @@ export const usernameSchema = z
     /^[a-z0-9._-]+$/,
     "Verwende Buchstaben (a–z), Zahlen, Punkte, Unterstriche oder Bindestriche.",
   );
-export const passwordSchema = z.string().min(15, "Verwende mindestens 15 Zeichen.").max(128);
+export const passwordSchema = z.string().min(5, "Verwende mindestens 5 Zeichen.").max(128);
 export const loginSchema = z
   .object({
     username: usernameSchema,

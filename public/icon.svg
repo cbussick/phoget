@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <title>Phoget — a bowl of things to get done</title>
+  <title>Don't Phoget — a bowl of things to get done</title>
   <!-- Matches the list icons' 38% 50% 42% 48% corners and -2 degree rotation. -->
   <path d="M198.4 16H256A240 240 0 0 1 496 256V294.4A201.6 201.6 0 0 1 294.4 496H246.4A230.4 230.4 0 0 1 16 265.6V198.4A182.4 182.4 0 0 1 198.4 16Z" transform="rotate(-2 256 256)" fill="#8bcdf1"/>
   <g transform="translate(96 96) scale(10)" fill="none" stroke="#176f9f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

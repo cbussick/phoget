@@ -50,7 +50,7 @@ export function PasswordForm({ required = false }: { required?: boolean }) {
             {...textFieldProps(field)}
             label="Neues Passwort"
             autoComplete="new-password"
-            hint="Verwende mindestens 15 Zeichen. Mehrere Wörter eignen sich gut."
+            hint="Verwende mindestens 5 Zeichen. Mehrere Wörter eignen sich gut."
             required
             disabled={busy}
           />

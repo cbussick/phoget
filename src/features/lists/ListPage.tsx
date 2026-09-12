@@ -1,4 +1,3 @@
-import { Callout } from "../../shared/ui/Callout/Callout";
 import { useState } from "react";
 import type { Item, List } from "../../../shared/contracts";
 import { Link } from "../../app/navigation";
@@ -10,6 +9,7 @@ import { ItemRow } from "./ItemRow";
 import { ItemDialog } from "./ItemDialog";
 import { ListDialog } from "./ListDialog";
 import { AddItemForm } from "./AddItemForm";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 
 import { listActivityLabel, useActivityClock } from "../../shared/ui/listActivity";
 export function ListPage({
@@ -27,6 +27,9 @@ export function ListPage({
   const [announcement, setAnnouncement] = useState("");
   const active = items.filter((item) => !item.completed);
   const completed = items.filter((item) => item.completed);
+  useErrorSnackbar(
+    syncError ? "Verbindung unterbrochen. Die zuletzt gespeicherte Version wird angezeigt." : null,
+  );
   const renderItem = (item: Item) => (
     <ItemRow key={item.id} item={item} onEdit={setSelected} onAnnounce={setAnnouncement} />
   );
@@ -93,9 +96,6 @@ export function ListPage({
           </details>
         ) : null}
       </section>
-      {syncError ? (
-        <Callout>Verbindung unterbrochen. Die zuletzt gespeicherte Version wird angezeigt.</Callout>
-      ) : null}
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>

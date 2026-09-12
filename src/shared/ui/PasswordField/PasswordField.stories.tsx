@@ -18,7 +18,7 @@ export const NewPassword: Story = {
   args: {
     autoComplete: "new-password",
     label: "New password",
-    hint: "Use at least 15 characters.",
+    hint: "Use at least 5 characters.",
   },
 };
 export const Invalid: Story = { args: { error: "The current password is incorrect." } };

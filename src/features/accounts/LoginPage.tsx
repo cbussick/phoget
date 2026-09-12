@@ -25,7 +25,7 @@ export function LoginPage() {
         <span className="brand-mark" aria-hidden="true">
           <img src="/icon.svg" alt="" width="32" height="32" />
         </span>
-        Phoget
+        Don't Phoget
       </div>
       <header>
         <h1>Willkommen zu Hause</h1>

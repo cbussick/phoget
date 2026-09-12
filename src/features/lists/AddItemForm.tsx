@@ -5,7 +5,7 @@ import { useValidatedForm, fieldError } from "../../shared/forms/useValidatedFor
 import { Button } from "../../shared/ui/Button/Button";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ComboBox } from "../../shared/ui/ComboBox/ComboBox";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { request } from "../../shared/api/request";
 import { householdKey } from "../../shared/api/queryKeys";
 import { listApi } from "./listApi";
@@ -51,6 +51,7 @@ export function AddItemForm({
       });
     }
   });
+  useErrorSnackbar(error ?? add.error);
   const busy = formBusy || add.isPending;
   return (
     <>
@@ -99,7 +100,6 @@ export function AddItemForm({
           Hinzufügen
         </Button>
       </form>
-      <Feedback error={error ?? add.error} />
       {history.isError ? (
         <p className="field-hint">
           Vorschläge sind nicht verfügbar. Du kannst trotzdem einen neuen Eintrag hinzufügen.

@@ -101,6 +101,7 @@ export function UserDialog({
       title={title}
       eyebrow={user?.name}
       busy={busy}
+      spacious
       onClose={onClose}
       onSubmit={(event) => {
         if (blocked) event.preventDefault();

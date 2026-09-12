@@ -15,7 +15,7 @@ async function readPassword() {
     }
     return value.replace(/\r?\n$/, "");
   }
-  process.stdout.write("Password (at least 15 characters): ");
+  process.stdout.write("Password (at least 5 characters): ");
   process.stdin.setRawMode(true);
   process.stdin.resume();
   try {

@@ -109,6 +109,56 @@
   display: none;
 }
 
+.page-message {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  min-block-size: calc(
+    100svh - clamp(var(--space-10), var(--page-padding-fluid), var(--page-padding-max)) -
+      var(--space-24)
+  );
+  align-content: center;
+  text-align: center;
+}
+
+.page-message-mark {
+  display: grid;
+  width: var(--empty-mark-size);
+  height: var(--empty-mark-size);
+  margin-block-end: var(--space-2);
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-canvas);
+  color: var(--color-accent-control);
+}
+
+.page-message-mark[data-icon="error"] {
+  background: var(--color-danger-surface);
+  color: var(--color-error);
+}
+
+.page-message-mark svg {
+  width: var(--empty-icon-size);
+  height: var(--empty-icon-size);
+}
+
+.page-message h1,
+.page-message p {
+  width: min(100%, var(--content-min));
+  margin: 0;
+}
+
+.page-message h1 {
+  font-size: var(--font-dialog-title);
+  line-height: var(--line-height-1-2);
+  letter-spacing: -0.02em;
+}
+
+.page-message p {
+  margin-block-end: var(--space-3);
+  color: var(--color-ink-soft);
+}
+
 @media (width <= 47.99rem) {
   .app-shell {
     display: block;
@@ -121,6 +171,10 @@
   .main-content {
     width: min(100% - var(--space-6), var(--mobile-content-width));
     padding-block: var(--space-6) var(--mobile-bottom-space);
+  }
+
+  .page-message {
+    min-block-size: calc(100svh - var(--space-6) - var(--mobile-bottom-space));
   }
 
   .mobile-nav {

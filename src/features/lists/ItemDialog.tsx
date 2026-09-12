@@ -3,7 +3,7 @@ import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidate
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
@@ -34,6 +34,7 @@ export function ItemDialog({
       onClose();
     },
   );
+  useErrorSnackbar(error ?? remove.error);
   const busy = saving || remove.isPending;
   return (
     <Dialog
@@ -62,7 +63,6 @@ export function ItemDialog({
           />
         )}
       </form.Field>
-      <Feedback error={error ?? remove.error} />
       <div className="dialog-actions">
         <Button
           variant="danger"

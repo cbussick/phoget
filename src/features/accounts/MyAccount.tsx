@@ -4,7 +4,7 @@ import { profileSchema, type User } from "../../../shared/accounts";
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { accountApi } from "./accountApi";
 import { sessionKey } from "./useSession";
 import { PasswordForm } from "./PasswordForm";
@@ -23,6 +23,7 @@ export function MyAccount({ user }: { user: User }) {
       notify("Name gespeichert.");
     },
   );
+  useErrorSnackbar(error);
   return (
     <div className="settings-stack">
       <form noValidate className="account-card" onSubmit={submit}>
@@ -45,7 +46,6 @@ export function MyAccount({ user }: { user: User }) {
             />
           )}
         </form.Field>
-        <Feedback error={error} />
         <div className="dialog-actions">
           <Button type="submit" loading={busy}>
             Namen speichern

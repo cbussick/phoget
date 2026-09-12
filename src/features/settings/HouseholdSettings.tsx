@@ -3,7 +3,7 @@ import { settingsInputSchema, type Settings } from "../../../shared/contracts";
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { saveSettings } from "./settingsApi";
 import { useAction } from "../../shared/api/useAction";
 import "./settings.css";
@@ -18,6 +18,7 @@ export function HouseholdSettings({ settings }: { settings: Settings }) {
       notify("Einstellungen gespeichert.");
     },
   );
+  useErrorSnackbar(error);
   return (
     <form noValidate className="account-card settings-form" onSubmit={submit}>
       <h2>Haushalt</h2>
@@ -31,7 +32,6 @@ export function HouseholdSettings({ settings }: { settings: Settings }) {
           />
         )}
       </form.Field>
-      <Feedback error={error} />
       <div className="dialog-actions">
         <Button type="submit" loading={busy}>
           Änderungen speichern

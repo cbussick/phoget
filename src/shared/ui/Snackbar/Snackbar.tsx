@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, type ReactNode } from "react";
+import { Toaster, toast } from "sonner";
+import "sonner/dist/styles.css";
 import { Button } from "../Button/Button";
-import { Icon } from "../Icon/Icon";
+import { Callout } from "../Callout/Callout";
 import "./Snackbar.css";
 
 export type SnackbarVariant = "success" | "error" | "info";
@@ -14,74 +16,76 @@ export function useSnackbar() {
   return notify;
 }
 
+const desktopOffset = {
+  bottom: "calc(var(--space-5) + env(safe-area-inset-bottom, 0px))",
+  left: "var(--space-4)",
+  right: "var(--space-4)",
+};
+const mobileOffset = {
+  bottom: "calc(var(--mobile-nav-height) + var(--space-5) + env(safe-area-inset-bottom, 0px))",
+  left: "var(--space-4)",
+  right: "var(--space-4)",
+};
+
+function promoteToaster() {
+  requestAnimationFrame(() => {
+    const toaster = document.querySelector<HTMLElement>(".snackbar-toaster");
+    if (!toaster?.showPopover) return;
+    toaster.setAttribute("popover", "manual");
+    if (toaster.matches(":popover-open")) toaster.hidePopover();
+    toaster.showPopover();
+  });
+}
+
 export function SnackbarProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState<{
-    text: string;
-    id: number;
-    variant: SnackbarVariant;
-  } | null>(null);
-  const sequence = useRef(0);
-  const popup = useRef<HTMLDivElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (!message) return;
-    const element = popup.current;
-    previousFocus.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    // Fixed positioning remains a fallback in browsers without native popovers.
-    element?.showPopover?.();
-    return () => {
-      if (element?.hidePopover && element.matches(":popover-open")) element.hidePopover();
-    };
-  }, [message]);
-  const dismiss = () => {
-    if (popup.current?.contains(document.activeElement) && previousFocus.current?.isConnected) {
-      previousFocus.current.focus();
-    }
-    setMessage(null);
-  };
-  return (
-    <SnackbarContext.Provider
-      value={(text, variant = "success") => setMessage({ text, variant, id: ++sequence.current })}
-    >
-      {children}
-      <div role="status" aria-atomic="true" className="visually-hidden">
-        {message && message.variant !== "error" ? (
-          <span key={message.id}>{message.text}</span>
-        ) : null}
-      </div>
-      <div
-        role={message?.variant === "error" ? "alert" : undefined}
-        aria-live="assertive"
-        aria-atomic="true"
-        className="visually-hidden"
-      >
-        {message?.variant === "error" ? <span key={message.id}>{message.text}</span> : null}
-      </div>
-      {message ? (
+  useEffect(() => promoteToaster(), []);
+  const notify = useCallback((text: string, variant: SnackbarVariant = "success") => {
+    toast.custom(
+      (id) => (
         <div
-          ref={popup}
-          popover="manual"
           className="snackbar"
-          data-variant={message.variant}
+          data-variant={variant}
           role="region"
           aria-label="Benachrichtigung"
         >
-          <Icon
-            name={
-              message.variant === "success"
-                ? "check"
-                : message.variant === "error"
-                  ? "error"
-                  : "info"
-            }
-          />
-          <span>{message.text}</span>
-          <Button variant="ghost" size="icon" aria-label="Meldung schließen" onClick={dismiss}>
+          {variant === "error" ? (
+            <Callout className="snackbar-callout" announce={false}>
+              {text}
+            </Callout>
+          ) : (
+            <div className="snackbar-message">{text}</div>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="snackbar-dismiss"
+            aria-label="Meldung schließen"
+            onClick={() => toast.dismiss(id)}
+          >
             ×
           </Button>
         </div>
-      ) : null}
+      ),
+      { duration: Infinity, className: "snackbar-item" },
+    );
+    promoteToaster();
+  }, []);
+
+  return (
+    <SnackbarContext.Provider value={notify}>
+      {children}
+      <Toaster
+        className="snackbar-toaster"
+        position="bottom-center"
+        visibleToasts={3}
+        gap={10}
+        offset={desktopOffset}
+        mobileOffset={mobileOffset}
+        duration={Infinity}
+        expand
+        richColors={false}
+        closeButton={false}
+      />
     </SnackbarContext.Provider>
   );
 }

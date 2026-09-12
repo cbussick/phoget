@@ -7,7 +7,7 @@ import { useValidatedForm, textFieldProps, fieldError } from "../../shared/forms
 import { navigate } from "../../app/navigation";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
 import { TextField } from "../../shared/ui/TextField/TextField";
-import { Feedback } from "../../shared/ui/Feedback/Feedback";
+import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { Button } from "../../shared/ui/Button/Button";
 import { ToggleButtonGroup } from "../../shared/ui/ToggleButtonGroup/ToggleButtonGroup";
 import { Icon } from "../../shared/ui/Icon/Icon";
@@ -42,6 +42,7 @@ export function ListDialog({ list, onClose }: { list?: List; onClose: () => void
       onClose();
     },
   );
+  useErrorSnackbar(error ?? remove.error);
   const busy = saving || remove.isPending;
   return (
     <Dialog
@@ -128,7 +129,6 @@ export function ListDialog({ list, onClose }: { list?: List; onClose: () => void
           </Button>
         </section>
       ) : null}
-      <Feedback error={error ?? remove.error} />
       <div className="dialog-actions">
         <Button
           variant="secondary"

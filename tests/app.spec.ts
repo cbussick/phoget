@@ -27,7 +27,7 @@ async function createList(page: Page, name: string) {
   await page.goto("/", { waitUntil: "commit" });
   await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
-  await expect(page).toHaveTitle("Alle Listen | Phoget");
+  await expect(page).toHaveTitle("Alle Listen | Don't Phoget");
   await page.getByRole("button", { name: "Neue Liste", exact: true }).click();
   await page.getByLabel("Listenname", { exact: true }).fill(" ");
   await page.getByLabel("Beschreibung", { exact: true }).focus();
@@ -186,7 +186,9 @@ test("failed saves retain input, whitespace is rejected, and keyboard dialog foc
     );
     await input.fill("Keep this draft");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("Test connection failure");
+    await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
+      "Test connection failure",
+    );
     await expect(input).toHaveValue("Keep this draft");
     await page.unroute("**/api/lists/*/items");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
@@ -263,7 +265,9 @@ test("household settings persist and update the sidebar", async ({ page, request
       .fill("Our little home");
     await expect(page.getByRole("textbox", { name: /Häufig gekauft/ })).toHaveCount(0);
     await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();
-    await expect(page.getByRole("status")).toHaveText("Einstellungen gespeichert.");
+    await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
+      "Einstellungen gespeichert.",
+    );
     await page.reload();
     await expect(page.locator(".household strong")).toHaveText("Our little home");
   } finally {

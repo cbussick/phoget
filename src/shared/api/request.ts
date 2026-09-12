@@ -25,7 +25,9 @@ export async function request<T>(
     const parsed = errorSchema.safeParse(await response.json().catch(() => null));
     throw new ApiError(
       response.status,
-      parsed.success ? parsed.data.error : "Phoget ist nicht erreichbar. Bitte versuche es erneut.",
+      parsed.success
+        ? parsed.data.error
+        : "Don't Phoget ist nicht erreichbar. Bitte versuche es erneut.",
       parsed.success ? parsed.data.field : undefined,
     );
   }

@@ -83,7 +83,9 @@ test("administrator creates a user; user changes password and sees only personal
     await expect(userPage.getByRole("button", { name: "Haushalt", exact: true })).toHaveCount(0);
     await userPage.getByLabel("Dein Name").fill("Jamie Updated");
     await userPage.getByRole("button", { name: "Namen speichern" }).click();
-    await expect(userPage.getByRole("status")).toHaveText("Name gespeichert.");
+    await expect(userPage.getByRole("region", { name: "Benachrichtigung" })).toContainText(
+      "Name gespeichert.",
+    );
     await userPage.reload({ waitUntil: "commit" });
     await expect(userPage.getByLabel("Dein Name")).toHaveValue("Jamie Updated");
     await userPage.setViewportSize({ width: 390, height: 844 });
