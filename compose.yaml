@@ -1,3 +1,5 @@
+name: phoget
+
 services:
   app:
     build: .
@@ -23,11 +25,11 @@ services:
     ports:
       - "127.0.0.1:55432:5432"
     volumes:
-      - phoget-data:/var/lib/postgresql/data
+      - data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U phoget"]
       interval: 2s
       timeout: 3s
       retries: 20
 volumes:
-  phoget-data:
+  data:
