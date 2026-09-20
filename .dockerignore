@@ -1,0 +1,11 @@
+.git
+node_modules
+.cache
+dist
+.env
+.env.*
+test-results
+playwright-report
+storybook-static
+storybook-test-results
+.local-credentials

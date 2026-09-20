@@ -25,6 +25,34 @@ npm start
 
 Run commands from the repository root. Skip account setup on existing installations. Keep development dependencies until build and database setup finish.
 
+## Docker Compose on a VPS
+
+Use this option to run both PostgreSQL and the app as containers. Keep Cloudflare Tunnel pointed at `http://127.0.0.1:3001`; Docker binds that port only to the VPS loopback interface.
+
+In `.env`, set a strong `POSTGRES_PASSWORD`, keep `DATABASE_URL` pointed at the host-bound database port for setup commands, and set the public origin:
+
+```dotenv
+NODE_ENV=production
+HOST=127.0.0.1
+PORT=3001
+APP_ORIGIN=https://your-phoget-domain.example
+POSTGRES_PASSWORD=GENERATE_A_LONG_RANDOM_HEX_VALUE
+DATABASE_URL=postgresql://phoget:GENERATE_A_LONG_RANDOM_HEX_VALUE@127.0.0.1:55432/phoget
+```
+
+On a new installation:
+
+```sh
+npm ci
+docker compose up -d db
+npm run db:setup
+npm run build
+npm run account:setup:production
+docker compose up -d --build app
+```
+
+The `app` container connects to PostgreSQL over Docker's private network and restarts automatically. Check it locally with `curl http://127.0.0.1:3001/api/health`; use `docker compose logs -f app` to follow application logs.
+
 ## Operations
 
 - Serve over HTTPS and keep the app's listening port private.
