@@ -28,7 +28,7 @@ import {
 } from "./accounts.js";
 
 const secure = new URL(config.APP_ORIGIN).protocol === "https:";
-const cookieName = secure ? "__Host-gather-session" : "gather-session";
+const cookieName = secure ? "__Host-phoget-session" : "phoget-session";
 const cookieOptions = { httpOnly: true, secure, sameSite: "strict" as const, path: "/" };
 function token(request: Request) {
   return request.headers.cookie

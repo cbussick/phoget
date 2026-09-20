@@ -8,7 +8,7 @@ export default defineConfig({
   timeout: 60000,
   expect: { timeout: 8000 },
   use: {
-    extraHTTPHeaders: { "X-Gather-Request": "1" },
+    extraHTTPHeaders: { "X-Phoget-Request": "1" },
     baseURL: "http://127.0.0.1:3002",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",

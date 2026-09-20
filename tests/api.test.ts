@@ -23,8 +23,8 @@ const created: string[] = [];
 before(async () => {
   assert.match(
     process.env.DATABASE_URL ?? "",
-    /gather_test(?:\?|$)/,
-    "Use the isolated gather_test database.",
+    /phoget_test(?:\?|$)/,
+    "Use the isolated phoget_test database.",
   );
   await prepareAccounts();
   server = app.listen(0, "127.0.0.1");
@@ -47,7 +47,7 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
     method,
     headers: {
       "Content-Type": "application/json",
-      "X-Gather-Request": "1",
+      "X-Phoget-Request": "1",
       Cookie: path === "/session" && method === "POST" ? "" : cookie,
       ...headers,
     },
@@ -203,7 +203,7 @@ test("rejects malformed, unknown, oversized and hostile input without leaking de
     (
       await fetch(base + "/api/lists", {
         method: "POST",
-        headers: { "Content-Type": "text/plain", "X-Gather-Request": "1", Cookie: cookie },
+        headers: { "Content-Type": "text/plain", "X-Phoget-Request": "1", Cookie: cookie },
         body: "x",
       })
     ).status,
@@ -211,7 +211,7 @@ test("rejects malformed, unknown, oversized and hostile input without leaking de
   );
   const malformed = await fetch(base + "/api/lists", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Gather-Request": "1", Cookie: cookie },
+    headers: { "Content-Type": "application/json", "X-Phoget-Request": "1", Cookie: cookie },
     body: "{bad",
   });
   assert.equal(malformed.status, 400);
@@ -266,7 +266,7 @@ test("authentication protects data and mutations require the same-origin header"
     401,
   );
   assert.equal(
-    (await send("/lists", "POST", { name: "Blocked" }, { "X-Gather-Request": "" })).status,
+    (await send("/lists", "POST", { name: "Blocked" }, { "X-Phoget-Request": "" })).status,
     403,
   );
   const login = await send("/session", "POST", testCredentials, { Cookie: "" });

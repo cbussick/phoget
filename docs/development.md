@@ -6,11 +6,11 @@ To choose a starting port, use `npm run dev -- --port 5180`. The API port (`PORT
 
 ## Test setup
 
-Tests need PostgreSQL, Python 3, and Playwright browsers. Use only the isolated `gather_test` database: test setup resets accounts and list data.
+Tests need PostgreSQL, Python 3, and Playwright browsers. Use only the isolated `phoget_test` database: test setup resets accounts and list data.
 
 ```sh
 cp .env.test.example .env.test
-docker compose exec -T db createdb -U gather gather_test
+docker compose exec -T db createdb -U phoget phoget_test
 npm run db:setup:test
 node --env-file=.env.test --import tsx server/db/seed.ts
 npx playwright install --with-deps chromium firefox webkit

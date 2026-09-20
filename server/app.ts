@@ -51,7 +51,7 @@ app.use("/api", (_request, response, next) => {
 });
 app.use("/api", (request, response, next) => {
   if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
-    if (request.get("X-Gather-Request") !== "1") {
+    if (request.get("X-Phoget-Request") !== "1") {
       response.status(403).json({ error: "Der Sicherheitsheader der Anfrage fehlt." });
       return;
     }

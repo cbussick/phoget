@@ -31,7 +31,7 @@ test(
     const occupied = await reservePort();
     const backend = await reservePort();
     await new Promise<void>((resolve) => backend.server.close(() => resolve()));
-    const cacheDir = await mkdtemp(resolve(tmpdir(), "gather-vite-test-"));
+    const cacheDir = await mkdtemp(resolve(tmpdir(), "phoget-vite-test-"));
     const child = spawn(
       process.execPath,
       [
@@ -42,7 +42,7 @@ test(
         String(occupied.port),
       ],
       {
-        env: { ...process.env, PORT: String(backend.port), GATHER_VITE_CACHE_DIR: cacheDir },
+        env: { ...process.env, PORT: String(backend.port), PHOGET_VITE_CACHE_DIR: cacheDir },
         stdio: ["ignore", "pipe", "pipe"],
       },
     );
@@ -78,7 +78,7 @@ test(
           headers: {
             Origin: requestOrigin,
             "Content-Type": "application/json",
-            "X-Gather-Request": "1",
+            "X-Phoget-Request": "1",
           },
           body: JSON.stringify({ name: "Port test" }),
           signal: AbortSignal.timeout(5000),

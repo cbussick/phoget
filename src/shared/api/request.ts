@@ -18,7 +18,7 @@ export async function request<T>(
 ): Promise<T> {
   const response = await fetch("/api" + path, {
     ...options,
-    headers: { "Content-Type": "application/json", "X-Gather-Request": "1", ...options.headers },
+    headers: { "Content-Type": "application/json", "X-Phoget-Request": "1", ...options.headers },
     signal: options.signal ?? AbortSignal.timeout(15000),
   });
   if (!response.ok) {

@@ -7,8 +7,8 @@ import { testCredentials } from "./testCredentials.js";
 export async function prepareAccounts() {
   assert.match(
     process.env.DATABASE_URL ?? "",
-    /gather_test(?:\?|$)/,
-    "Only prepare accounts in gather_test.",
+    /phoget_test(?:\?|$)/,
+    "Only prepare accounts in phoget_test.",
   );
   const values = {
     name: "Test Admin",

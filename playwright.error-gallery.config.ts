@@ -8,7 +8,7 @@ export default defineConfig({
   use: {
     ...devices["Desktop Chrome"],
     baseURL: "http://127.0.0.1:3002",
-    extraHTTPHeaders: { "X-Gather-Request": "1" },
+    extraHTTPHeaders: { "X-Phoget-Request": "1" },
   },
   webServer: {
     command: "node --env-file=.env.test dist/server/index.js",

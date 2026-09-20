@@ -13,7 +13,7 @@ test.beforeEach(async ({ request, context }) => {
 test.afterEach(async ({ playwright, request }) => {
   const cleanup = await playwright.request.newContext({
     baseURL: "http://127.0.0.1:3002",
-    extraHTTPHeaders: { "X-Gather-Request": "1" },
+    extraHTTPHeaders: { "X-Phoget-Request": "1" },
     storageState: await request.storageState(),
   });
   try {
