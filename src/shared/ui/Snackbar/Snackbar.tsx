@@ -66,7 +66,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
           </Button>
         </div>
       ),
-      { duration: Infinity, className: "snackbar-item" },
+      { duration: 5000, className: "snackbar-item" },
     );
     promoteToaster();
   }, []);
@@ -81,7 +81,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         gap={10}
         offset={desktopOffset}
         mobileOffset={mobileOffset}
-        duration={Infinity}
+        duration={5000}
         expand
         richColors={false}
         closeButton={false}
