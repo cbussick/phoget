@@ -52,13 +52,18 @@ app.use("/api", (request, response, next) => {
   response.setHeader("X-Request-Id", requestId);
   response.once("finish", () => {
     // Use Express route templates, never raw URLs (which may contain IDs or query strings).
+    const route = request.route?.path;
     console.info(
       JSON.stringify({
         event: "api_request",
         requestId,
         method: request.method,
         route:
-          typeof request.route?.path === "string" ? `/api${request.route.path}` : "/api/unmatched",
+          typeof route === "string"
+            ? route.startsWith("/api/")
+              ? route
+              : `/api${route}`
+            : "/api/unmatched",
         status: response.statusCode,
         durationMs: Math.round(performance.now() - started),
       }),

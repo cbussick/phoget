@@ -104,6 +104,7 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
     await expect(other.locator(".page-header > .list-icon")).toHaveCSS(
       "background-color",
       "rgb(36, 53, 102)",
+      { timeout: 15_000 }, // Household state now refreshes every 10 seconds.
     );
     await page.reload();
     await expect(icon).toHaveCSS("background-color", "rgb(36, 53, 102)");

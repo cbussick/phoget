@@ -54,6 +54,28 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 }
+test("request logs use route templates without exposing query strings or list IDs", async () => {
+  const messages: string[] = [];
+  const original = console.info;
+  console.info = (message: string) => {
+    messages.push(message);
+  };
+  try {
+    const response = await send("/state?private=do-not-log");
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("x-request-id") ?? "", /^[0-9a-f-]{36}$/);
+    const entry = messages
+      .map((message) => JSON.parse(message))
+      .find((log) => log.requestId === response.headers.get("x-request-id"));
+    assert.equal(entry?.route, "/api/state");
+    assert.equal(entry?.status, 200);
+    assert.equal(entry?.method, "GET");
+    assert.equal(typeof entry?.durationMs, "number");
+    assert.ok(!messages.join(" ").includes("do-not-log"));
+  } finally {
+    console.info = original;
+  }
+});
 async function create(name = "API test") {
   const response = await send("/lists", "POST", { name });
   assert.equal(response.status, 201);
