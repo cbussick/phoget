@@ -44,6 +44,22 @@ async function createList(page: Page, name: string) {
   createdListIds.push(id);
   return id;
 }
+test("overview hides update activity while list detail retains it", async ({ page, request }) => {
+  const response = await request.post("/api/lists", {
+    data: { name: "Activity visibility " + crypto.randomUUID(), description: "Shared list" },
+  });
+  expect(response.status()).toBe(201);
+  const list = listSchema.parse(await response.json());
+  createdListIds.push(list.id);
+  await page.goto("/index.html");
+  await page.getByRole("link", { name: "Alle Listen" }).last().click();
+  const row = page.locator(".list-row").filter({ hasText: list.name });
+  await expect(row).toBeVisible();
+  await expect(row.locator(".list-activity")).toHaveCount(0);
+  await row.click();
+  await expect(page.locator(".list-meta time")).toContainText("aktualisiert");
+});
+
 test("complete household workflow persists through reload and a second browser", async ({
   page,
   browser,

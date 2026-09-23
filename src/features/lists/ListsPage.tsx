@@ -5,10 +5,8 @@ import { Button } from "../../shared/ui/Button/Button";
 import { EmptyState } from "../../shared/ui/EmptyState/EmptyState";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ListRow } from "../../shared/ui/ListRow/ListRow";
-import { listActivityLabel, useActivityClock } from "../../shared/ui/listActivity";
 import { ListDialog } from "./ListDialog";
 export function ListsPage({ lists }: { lists: List[] }) {
-  const now = useActivityClock();
   const [creating, setCreating] = useState(false);
   return (
     <>
@@ -42,7 +40,6 @@ export function ListsPage({ lists }: { lists: List[] }) {
                   color={list.color}
                   name={list.name}
                   description={list.description}
-                  activity={listActivityLabel(list.updatedAt, list.updatedBy, now)}
                 />
               </li>
             ))}

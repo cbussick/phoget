@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PHO-11 · Before and after</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #f1f1ee;
+        color: #222;
+        font:
+          16px system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1400px;
+        margin: auto;
+      }
+      h1 {
+        margin-bottom: 0.3rem;
+      }
+      p {
+        color: #555;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 580px), 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      figure {
+        margin: 0;
+        padding: 1rem;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 2px 14px #0001;
+      }
+      figcaption {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PHO-11 · All lists overview</h1>
+      <p>
+        Playwright captures of the same local test account and lists, before and after removing the
+        update activity from overview rows. The detail page keeps its activity label.
+      </p>
+      <div class="gallery">
+        <figure>
+          <figcaption>Before</figcaption>
+          <a href="before.png"
+            ><img
+              src="before.png"
+              alt="All lists overview with update activity under each list name"
+          /></a>
+        </figure>
+        <figure>
+          <figcaption>After</figcaption>
+          <a href="after.png"
+            ><img src="after.png" alt="All lists overview without update activity under list names"
+          /></a>
+        </figure>
+      </div>
+    </main>
+  </body>
+</html>
