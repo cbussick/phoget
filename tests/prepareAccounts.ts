@@ -9,7 +9,10 @@ export async function prepareAccounts() {
     new URL(process.env.DATABASE_URL ?? "").pathname.slice(1),
     process.env.PHOGET_TEST_DATABASE,
   );
-  assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
+  assert.match(
+    process.env.PHOGET_TEST_DATABASE ?? "",
+    /^phoget_test_[a-f0-9]{12}(?:_(?:chromium|firefox|webkit))?$/,
+  );
   const values = {
     name: "Test Admin",
     ...testCredentials,

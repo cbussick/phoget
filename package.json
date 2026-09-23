@@ -17,7 +17,7 @@
     "format:check": "oxfmt --check .",
     "test": "tsx --env-file=.env.test --test tests/api.test.ts tests/colors.test.ts tests/activity.test.ts tests/icons.test.ts tests/dev.test.ts tests/branding.test.ts",
     "test:branding": "tsx --test tests/branding.test.ts",
-    "test:e2e": "npm run build && tsx --env-file=.env.test tests/prepareAccounts.ts && playwright test",
+    "test:e2e": "VITE_E2E_FAST_POLL=1 npm run build && node scripts/prepareBrowserDatabases.mjs && node scripts/runBrowserProjects.mjs",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run test:e2e && npm run test:storybook",
     "db:setup": "node --env-file=.env node_modules/drizzle-kit/bin.cjs push && tsx --env-file=.env server/db/setup.ts",
     "db:setup:test": "node --env-file=.env.test node_modules/drizzle-kit/bin.cjs push && tsx --env-file=.env.test server/db/setup.ts",
