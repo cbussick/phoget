@@ -1,3 +1,4 @@
+import { sessionPollMs } from "../../app/pollingIntervals";
 import { useQuery } from "@tanstack/react-query";
 import { sessionSchema } from "../../../shared/accounts";
 import { request } from "../../shared/api/request";
@@ -7,6 +8,6 @@ export function useSession() {
     queryKey: sessionKey,
     queryFn: ({ signal }) => request("/session", sessionSchema, { signal }),
     retry: false,
-    refetchInterval: 30_000,
+    refetchInterval: sessionPollMs,
   });
 }

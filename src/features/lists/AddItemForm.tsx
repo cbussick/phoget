@@ -1,3 +1,4 @@
+import { sessionPollMs } from "../../app/pollingIntervals";
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { itemInputSchema, itemHistorySchema } from "../../../shared/contracts";
@@ -26,7 +27,7 @@ export function AddItemForm({
     queryKey: [...householdKey, "history", listId],
     queryFn: ({ signal }) =>
       request("/lists/" + listId + "/history", itemHistorySchema, { signal }),
-    refetchInterval: 30_000,
+    refetchInterval: sessionPollMs,
     retry: false,
   });
   const add = useAction(async (name: string) => {

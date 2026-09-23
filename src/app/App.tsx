@@ -1,3 +1,4 @@
+import { sessionPollMs } from "./pollingIntervals";
 import { useEffect } from "react";
 import { useHousehold } from "./useHousehold";
 import { ListsPage } from "../features/lists/ListsPage";
@@ -57,7 +58,7 @@ function HouseholdApp({ user }: { user: User }) {
   const members = useQuery({
     queryKey: ["members"],
     queryFn: ({ signal }) => request("/members", membersSchema, { signal }),
-    refetchInterval: 30_000,
+    refetchInterval: sessionPollMs,
   });
   const listId = path.startsWith("/lists/")
     ? path.slice("/lists/".length)

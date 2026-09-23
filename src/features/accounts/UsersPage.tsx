@@ -1,3 +1,4 @@
+import { sessionPollMs } from "../../app/pollingIntervals";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usersSchema, type User } from "../../../shared/accounts";
@@ -13,7 +14,7 @@ export function UsersPage({ currentUser }: { currentUser: User }) {
   const users = useQuery({
     queryKey: ["users"],
     queryFn: ({ signal }) => request("/users", usersSchema, { signal }),
-    refetchInterval: 30_000,
+    refetchInterval: sessionPollMs,
     retry: false,
   });
   return (

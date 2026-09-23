@@ -1,3 +1,4 @@
+import { householdPollMs } from "./pollingIntervals";
 import { useQuery } from "@tanstack/react-query";
 import { request } from "../shared/api/request";
 import { stateSchema } from "../../shared/contracts";
@@ -6,7 +7,7 @@ export function useHousehold() {
   return useQuery({
     queryKey: householdKey,
     queryFn: ({ signal }) => request("/state", stateSchema, { signal }),
-    refetchInterval: 10_000,
+    refetchInterval: householdPollMs,
     retry: 1,
   });
 }
