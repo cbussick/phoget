@@ -60,7 +60,8 @@ export function LoginPage() {
           Anmelden
         </Button>
         <p className="field-hint">
-          Need an account or forgot your password? Ask a household administrator.
+          Du brauchst ein Konto oder hast dein Passwort vergessen? Wende dich an einen Administrator
+          deines Haushalts.
         </p>
         <div className="login-feedback">
           <Feedback error={error} />
