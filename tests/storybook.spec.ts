@@ -84,6 +84,14 @@ test("snackbar variants are semantic, accessible and dismissible", async ({ page
   }
 });
 
+test("snackbar disappears automatically after five seconds", async ({ page }) => {
+  await page.goto("/iframe.html?id=components-snackbar--default&viewMode=story");
+  await page.getByRole("button", { name: "Meldung anzeigen" }).click();
+  const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
+  await expect(snackbar).toBeVisible();
+  await expect(snackbar).toBeHidden({ timeout: 8000 });
+});
+
 test("password visibility and dialog focus work in Storybook", async ({ page }) => {
   await page.goto("/iframe.html?id=components-passwordfield--default&viewMode=story");
   await page.getByRole("button", { name: "Password anzeigen" }).click();
