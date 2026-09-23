@@ -8,7 +8,10 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
   const html = await read("index.html");
   const manifest = JSON.parse(await read("public/site.webmanifest"));
   assert.match(html, /<title>Don't Phoget<\/title>/);
-  assert.match(html, /href="\/icon.svg"/);
+  assert.match(
+    html,
+    /<link rel="icon" href="\/icon-192.png" type="image\/png" sizes="192x192" \/>/,
+  );
   assert.match(html, /href="\/apple-touch-icon.png"/);
   assert.match(html, /href="\/site.webmanifest"/);
   assert.equal(manifest.name, "Don't Phoget");
