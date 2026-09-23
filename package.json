@@ -10,6 +10,7 @@
     "build": "NODE_ENV=production vite build && tsc -p tsconfig.server.json",
     "start": "node --env-file=.env dist/server/index.js",
     "db:seed": "tsx --env-file=.env server/db/seed.ts",
+    "dev:seed": "tsx --env-file=.env server/db/seedDevelopment.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
     "lint": "oxlint src server shared scripts tests .storybook *.ts && stylelint \"src/**/*.css\" \".storybook/*.css\"",
     "format": "oxfmt --write .",

@@ -11,10 +11,14 @@ npm ci
 node scripts/worktree.mjs bootstrap
 node scripts/worktree.mjs run npm run db:setup
 node scripts/worktree.mjs run npm run db:setup:test
+# Optional: create two local demo logins (development database only):
+node scripts/worktree.mjs run npm run dev:seed
 node scripts/worktree.mjs run npm run dev
 # In another terminal in the same worktree:
 node scripts/worktree.mjs run npm run check
 ```
+
+`dev:seed` creates `admin/admin` (administrator) and `user/user` (ordinary user) in this worktree's development database only. It refuses the test database or any non-loopback connection. It does not seed lists; use `node scripts/worktree.mjs run npm run db:seed` for sample lists. Re-running `dev:seed` leaves existing accounts, passwords, and other data unchanged; if you have changed a demo password, the printed credential is no longer valid. These short demo passwords deliberately bypass the normal five-character account-creation minimum **only in this local fixture script**. Never use them for a deployed database.
 
 Bootstrap stores its private port assignments in ignored `.runtime/worktree.json`; reusing a worktree reuses its ports and databases. `run` prints URLs/database names and passes the assigned URLs to the command. Dev runs on its own Vite and API ports. Tests run on the worktree's test database; `check` includes API, Chromium/Firefox/WebKit browser, and Storybook checks. Install browsers once with `npx playwright install --with-deps chromium firefox webkit`. `node scripts/worktree.mjs run npm run gallery:errors` uses the same isolated test origin. For interactive Storybook, use `node scripts/worktree.mjs run npm run storybook`.
 

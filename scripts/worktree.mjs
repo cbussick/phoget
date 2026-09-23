@@ -99,6 +99,7 @@ if (command === "clean") {
     PHOGET_STORYBOOK_PORT: String(storybook),
     PHOGET_STORYBOOK_DEV_PORT: String(storybookDev),
     PHOGET_TEST_DATABASE: names.test,
+    PHOGET_DEV_DATABASE: names.dev,
   };
   for (const [name, values] of [
     [".env", { DATABASE_URL: url(names.dev), PORT: api, APP_ORIGIN: env.APP_ORIGIN }],
