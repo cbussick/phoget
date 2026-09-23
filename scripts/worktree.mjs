@@ -8,7 +8,9 @@ import pg from "pg";
 const root = resolve(import.meta.dirname, "..");
 const id = createHash("sha256").update(root).digest("hex").slice(0, 12);
 const file = resolve(root, ".runtime/worktree.json");
+const browsers = ["chromium", "firefox", "webkit"];
 const names = { dev: `phoget_dev_${id}`, test: `phoget_test_${id}` };
+const browserName = (browser) => `${names.test}_${browser}`;
 const command = process.argv[2];
 if (!["bootstrap", "run", "clean"].includes(command))
   throw new Error("Usage: node scripts/worktree.mjs bootstrap|run <command...>|clean");
@@ -68,12 +70,15 @@ if (runtime && (runtime.id !== id || runtime.host !== adminUrl.host))
   );
 if (command === "clean") {
   if (!runtime) throw new Error("No worktree runtime found; refusing cleanup");
+  for (const browser of browsers) await database(browserName(browser), true);
   await database(names.test, true);
   await database(names.dev, true);
-  console.log(`Removed ${names.dev} and ${names.test}. Runtime ports are retained for reuse.`);
+  console.log(
+    `Removed ${names.dev}, ${names.test}, and browser test databases. Runtime ports are retained for reuse.`,
+  );
 } else {
   if (!runtime) {
-    const ports = await Promise.all(Array.from({ length: 5 }, () => port()));
+    const ports = await Promise.all(Array.from({ length: 8 }, () => port()));
     if (new Set(ports).size !== ports.length)
       throw new Error("Port allocation collision; retry bootstrap");
     runtime = { id, host: adminUrl.host, ports };
@@ -82,7 +87,15 @@ if (command === "clean") {
   }
   await database(names.dev);
   await database(names.test);
-  const [api, web, test, storybook, storybookDev] = runtime.ports;
+  if (runtime.ports.length === 5) {
+    const extra = await Promise.all(browsers.map(() => port()));
+    if (new Set([...runtime.ports, ...extra]).size !== 8)
+      throw new Error("Port allocation collision; retry bootstrap");
+    runtime.ports.push(...extra);
+    await writeFile(file, JSON.stringify(runtime, null, 2), { mode: 0o600 });
+  }
+  for (const browser of browsers) await database(browserName(browser));
+  const [api, web, test, storybook, storybookDev, ...browserPorts] = runtime.ports;
   const url = (name) => {
     const result = new URL(source);
     result.pathname = `/${name}`;
@@ -100,6 +113,12 @@ if (command === "clean") {
     PHOGET_STORYBOOK_DEV_PORT: String(storybookDev),
     PHOGET_TEST_DATABASE: names.test,
     PHOGET_DEV_DATABASE: names.dev,
+    ...Object.fromEntries(
+      browsers.flatMap((browser, index) => [
+        [`PHOGET_${browser.toUpperCase()}_TEST_URL`, url(browserName(browser))],
+        [`PHOGET_${browser.toUpperCase()}_TEST_PORT`, String(browserPorts[index])],
+      ]),
+    ),
   };
   for (const [name, values] of [
     [".env", { DATABASE_URL: url(names.dev), PORT: api, APP_ORIGIN: env.APP_ORIGIN }],
