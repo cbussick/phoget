@@ -64,8 +64,7 @@
   margin: 0;
   padding: var(--space-4);
   max-width: 18rem;
-  max-height: 28rem;
-  overflow: auto;
+  overflow: visible;
   border: var(--border-width) solid var(--color-line-strong);
   border-radius: var(--radius-md);
   background: var(--color-surface);

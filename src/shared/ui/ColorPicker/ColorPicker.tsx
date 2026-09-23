@@ -33,7 +33,7 @@ export function ColorPicker({ value, onValueChange, onBlur, disabled, error }: C
   const anchor = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLDivElement>(null);
-  useAnchoredPopup(open && !disabled, anchor, popup);
+  useAnchoredPopup(open && !disabled, anchor, popup, false);
   useLayoutEffect(() => {
     if (open && !disabled) popup.current?.focus();
   }, [open, disabled]);
