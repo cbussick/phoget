@@ -7,6 +7,6 @@ export function useSession() {
     queryKey: sessionKey,
     queryFn: ({ signal }) => request("/session", sessionSchema, { signal }),
     retry: false,
-    refetchInterval: 5000,
+    refetchInterval: 30_000,
   });
 }

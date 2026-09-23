@@ -1,6 +1,7 @@
 import express, { type ErrorRequestHandler } from "express";
 import helmet from "helmet";
 import { resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 import { HttpError, parseInput } from "./httpErrors.js";
 import { userSchema } from "../shared/accounts.js";
 import { authRouter, usersRouter, authenticate, requireReady, adminOnly } from "./auth/routes.js";
@@ -45,6 +46,31 @@ app.use(
     strictTransportSecurity: new URL(config.APP_ORIGIN).protocol === "https:",
   }),
 );
+app.use("/api", (request, response, next) => {
+  const started = performance.now();
+  const requestId = randomUUID();
+  response.setHeader("X-Request-Id", requestId);
+  response.once("finish", () => {
+    // Use Express route templates, never raw URLs (which may contain IDs or query strings).
+    const route = request.route?.path;
+    console.info(
+      JSON.stringify({
+        event: "api_request",
+        requestId,
+        method: request.method,
+        route:
+          typeof route === "string"
+            ? route.startsWith("/api/")
+              ? route
+              : `/api${route}`
+            : "/api/unmatched",
+        status: response.statusCode,
+        durationMs: Math.round(performance.now() - started),
+      }),
+    );
+  });
+  next();
+});
 app.use("/api", (_request, response, next) => {
   response.setHeader("Cache-Control", "no-store");
   next();

@@ -26,7 +26,7 @@ export function AddItemForm({
     queryKey: [...householdKey, "history", listId],
     queryFn: ({ signal }) =>
       request("/lists/" + listId + "/history", itemHistorySchema, { signal }),
-    refetchInterval: 5000,
+    refetchInterval: 30_000,
     retry: false,
   });
   const add = useAction(async (name: string) => {

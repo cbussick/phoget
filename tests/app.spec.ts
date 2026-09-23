@@ -66,7 +66,7 @@ test("complete household workflow persists through reload and a second browser",
   request,
   browserName,
 }) => {
-  test.slow(browserName === "webkit", "Long multi-step workflow is slower in WebKit.");
+  test.setTimeout(browserName === "webkit" ? 240_000 : 180_000); // Cross-browser sync now takes up to 10 seconds per change.
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const name = "Weekend " + crypto.randomUUID();
@@ -82,7 +82,9 @@ test("complete household workflow persists through reload and a second browser",
       .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Pack towels");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
-    await expect(second.getByRole("button", { name: "Pack towels", exact: true })).toBeVisible();
+    await expect(second.getByRole("button", { name: "Pack towels", exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
     await page.getByRole("button", { name: "Pack towels", exact: true }).click();
     await expect(
       page.getByRole("checkbox", { name: "Pack towels als erledigt markieren", exact: true }),
@@ -110,7 +112,9 @@ test("complete household workflow persists through reload and a second browser",
     await expect(
       page.getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true }),
     ).toBeChecked();
-    await expect(second.locator(".completed-items summary")).toContainText("1 Eintrag");
+    await expect(second.locator(".completed-items summary")).toContainText("1 Eintrag", {
+      timeout: 15_000,
+    });
     await second.locator(".completed-items summary").click();
     await expect(
       second.getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true }),
@@ -118,7 +122,9 @@ test("complete household workflow persists through reload and a second browser",
     await second
       .getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true })
       .click();
-    await expect(page.locator(".active-items")).toContainText("Pack two towels");
+    await expect(page.locator(".active-items")).toContainText("Pack two towels", {
+      timeout: 15_000,
+    });
     await page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
@@ -174,7 +180,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
     await expect(
       second.getByRole("heading", { name: "Liste nicht gefunden", exact: true }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
     expect(errors).toEqual([]);
   } finally {
     await second.close();

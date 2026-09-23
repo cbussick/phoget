@@ -11,6 +11,7 @@ test("administrator creates a user; user changes password and sees only personal
 }) => {
   await request.post("/api/session", { data: testCredentials });
   await page.context().addCookies((await request.storageState()).cookies);
+  test.setTimeout(120_000); // Session revocation may take up to one 30-second polling cycle.
   const username = "browser-" + crypto.randomUUID().slice(0, 8);
   const password = "temporary browser password";
   let userId: string | undefined;
@@ -107,7 +108,9 @@ test("administrator creates a user; user changes password and sees only personal
     await page.getByRole("button", { name: username + " löschen", exact: true }).click();
     await page.getByRole("button", { name: "Benutzer löschen", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(userPage.getByRole("heading", { name: "Willkommen zu Hause" })).toBeVisible();
+    await expect(userPage.getByRole("heading", { name: "Willkommen zu Hause" })).toBeVisible({
+      timeout: 35_000, // Session checks run every 30 seconds in an open tab.
+    });
   } finally {
     await other.close();
     if (userId) await request.delete("/api/users/" + userId);

@@ -6,7 +6,7 @@ export function useHousehold() {
   return useQuery({
     queryKey: householdKey,
     queryFn: ({ signal }) => request("/state", stateSchema, { signal }),
-    refetchInterval: 2000,
+    refetchInterval: 10_000,
     retry: 1,
   });
 }
