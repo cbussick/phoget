@@ -48,10 +48,10 @@ docker compose up -d db
 npm run db:setup
 npm run build
 npm run account:setup:production
-docker compose up -d --build app
+docker compose up -d --build --wait --wait-timeout 90 app
 ```
 
-The `app` container connects to PostgreSQL over Docker's private network and restarts automatically. Check it locally with `curl http://127.0.0.1:3001/api/health`; use `docker compose logs -f app` to follow application logs.
+The `app` container connects to PostgreSQL over Docker's private network and restarts automatically. Compose waits for its `/api/health` check (including database connectivity) before the deployment command succeeds; it fails after 90 seconds if the app does not become healthy. This is a readiness check, not zero-downtime deployment: replacing the container may briefly interrupt requests. Check it locally with `curl http://127.0.0.1:3001/api/health`; use `docker compose logs -f app` to follow application logs.
 
 ## Operations
 
