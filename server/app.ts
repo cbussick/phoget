@@ -151,10 +151,12 @@ app.use("/api", (_request, response) =>
 );
 if (config.NODE_ENV === "production") {
   const clientPath = resolve("dist/client");
-  app.use(express.static(clientPath, { index: false }));
+  // Worktrees live under .worktrees; Express otherwise treats the absolute path as a dotfile.
+  app.use(express.static(clientPath, { index: false, dotfiles: "allow" }));
   app.get(
     ["/", "/lists/:id", "/settings", "/all-lists.html", "/index.html"],
-    (_request, response) => response.sendFile(resolve(clientPath, "index.html")),
+    (_request, response) =>
+      response.sendFile(resolve(clientPath, "index.html"), { dotfiles: "allow" }),
   );
 }
 const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {

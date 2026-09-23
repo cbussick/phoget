@@ -12,7 +12,7 @@ test.beforeEach(async ({ request, context }) => {
 });
 test.afterEach(async ({ playwright, request }) => {
   const cleanup = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3002",
+    baseURL: `http://127.0.0.1:${process.env.PHOGET_TEST_PORT}`,
     extraHTTPHeaders: { "X-Phoget-Request": "1" },
     storageState: await request.storageState(),
   });
@@ -74,7 +74,9 @@ test("complete household workflow persists through reload and a second browser",
   const second = await browser.newPage();
   await second.context().addCookies((await page.context().storageState()).cookies);
   try {
-    await second.goto("http://127.0.0.1:3002/lists/" + id, { waitUntil: "commit" });
+    await second.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/lists/${id}`, {
+      waitUntil: "commit",
+    });
     await expect(second.getByRole("heading", { name, level: 1 })).toBeVisible();
     await page
       .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })

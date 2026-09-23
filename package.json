@@ -22,7 +22,7 @@
     "db:setup:test": "node --env-file=.env.test node_modules/drizzle-kit/bin.cjs push && tsx --env-file=.env.test server/db/setup.ts",
     "account:setup": "tsx --env-file=.env server/auth/setupAdmin.ts",
     "account:setup:production": "node --env-file=.env dist/server/auth/setupAdmin.js",
-    "storybook": "storybook dev -p 6006 --host 127.0.0.1 --no-open --disable-telemetry",
+    "storybook": "storybook dev -p ${PHOGET_STORYBOOK_DEV_PORT:-6006} --host 127.0.0.1 --no-open --disable-telemetry",
     "build:storybook": "storybook build --disable-telemetry",
     "test:storybook": "npm run build:storybook && playwright test --config playwright.storybook.config.ts",
     "gallery:errors": "npm run build && tsx --env-file=.env.test tests/prepareAccounts.ts && playwright test --config playwright.error-gallery.config.ts",
