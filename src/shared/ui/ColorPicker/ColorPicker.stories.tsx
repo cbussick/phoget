@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DEFAULT_LIST_COLOR } from "../../../../shared/colors";
 import { controlPreview } from "../../../../.storybook/controlPreview";
 import { ColorPicker, type ColorPickerProps } from "./ColorPicker";
+import { Dialog } from "../Dialog/Dialog";
 
 function Example(args: ColorPickerProps) {
   const [value, setValue] = useState(args.value);
@@ -21,6 +22,23 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 export const Custom: Story = { args: { value: "#243566" } };
 export const Disabled: Story = { args: { disabled: true } };
+export const ScrollingDialog: Story = {
+  render: (args) => (
+    <Dialog
+      title="Liste hinzufügen"
+      onClose={() => {}}
+      onSubmit={(event) => event.preventDefault()}
+    >
+      <p>Weitere Einstellungen vor der Farbauswahl</p>
+      <p>Weitere Einstellungen vor der Farbauswahl</p>
+      <p>Weitere Einstellungen vor der Farbauswahl</p>
+      <Example {...args} />
+      <p>Weitere Einstellungen nach der Farbauswahl</p>
+      <p>Weitere Einstellungen nach der Farbauswahl</p>
+      <p>Weitere Einstellungen nach der Farbauswahl</p>
+    </Dialog>
+  ),
+};
 export const Invalid: Story = {
   args: { value: "#xyz", error: "Gib einen Hex-Farbcode mit 6 Stellen ein, zum Beispiel #8bcdf1." },
 };

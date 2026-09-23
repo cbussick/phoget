@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PHO-6 · Color picker on a short mobile viewport</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f5f6f7;
+        color: #172b30;
+        margin: 0;
+        padding: 2rem;
+      }
+      main {
+        max-width: 960px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+      figure {
+        margin: 0;
+      }
+      img {
+        display: block;
+        width: 390px;
+        max-width: 100%;
+        border: 1px solid #abb7ba;
+      }
+      figcaption {
+        font-weight: 700;
+        margin: 0.75rem 0;
+      }
+      p {
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PHO-6 · Color picker confirmation</h1>
+      <p>
+        Playwright screenshots at 390 × 480 CSS pixels, Chromium mobile touch viewport. Before: the
+        confirmation button is inside the clipped scroll region. After: the entire popup fits in the
+        viewport without internal scrolling.
+      </p>
+      <div class="gallery">
+        <figure>
+          <figcaption>Before</figcaption>
+          <img
+            src="before.png"
+            alt="Color picker with confirmation button below the popup's visible edge"
+          />
+        </figure>
+        <figure>
+          <figcaption>After</figcaption>
+          <img
+            src="after.png"
+            alt="Entire color picker and confirmation button visible without scrolling"
+          />
+        </figure>
+      </div>
+    </main>
+  </body>
+</html>
