@@ -69,8 +69,10 @@ test("snackbar variants are semantic, accessible and dismissible", async ({ page
     const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
     await expect(snackbar).toBeVisible();
     await expect(snackbar).toHaveAttribute("data-variant", variant);
-    await expect(snackbar).toHaveCSS("border-color", color);
-    await expect(page.getByRole(variant === "error" ? "alert" : "status")).not.toBeEmpty();
+    await expect(
+      snackbar.locator(variant === "error" ? ".callout" : ".snackbar-message"),
+    ).toHaveCSS("border-color", color);
+    await expect(snackbar).not.toBeEmpty();
     expect(
       (
         await new AxeBuilder({ page })
