@@ -57,7 +57,7 @@ function HouseholdApp({ user }: { user: User }) {
   const members = useQuery({
     queryKey: ["members"],
     queryFn: ({ signal }) => request("/members", membersSchema, { signal }),
-    refetchInterval: 5000,
+    refetchInterval: 30_000,
   });
   const listId = path.startsWith("/lists/")
     ? path.slice("/lists/".length)

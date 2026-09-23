@@ -13,7 +13,7 @@ export function UsersPage({ currentUser }: { currentUser: User }) {
   const users = useQuery({
     queryKey: ["users"],
     queryFn: ({ signal }) => request("/users", usersSchema, { signal }),
-    refetchInterval: 5000,
+    refetchInterval: 30_000,
     retry: false,
   });
   return (
