@@ -122,10 +122,12 @@ export function ColorPicker({ value, onValueChange, onBlur, disabled, error }: C
             }
           }}
         >
-          <h3 id={id + "-popup-title"}>Eigene Farbe</h3>
-          <Suspense fallback={<p role="status">Farbauswahl wird geladen…</p>}>
-            <ColorSpectrum value={selected ?? DEFAULT_LIST_COLOR} onValueChange={onValueChange} />
-          </Suspense>
+          <div className="color-popover-content">
+            <h3 id={id + "-popup-title"}>Eigene Farbe</h3>
+            <Suspense fallback={<p role="status">Farbauswahl wird geladen…</p>}>
+              <ColorSpectrum value={selected ?? DEFAULT_LIST_COLOR} onValueChange={onValueChange} />
+            </Suspense>
+          </div>
           <div className="color-popover-footer">
             <span>{selected ?? DEFAULT_LIST_COLOR}</span>
             <Button variant="secondary" onClick={close}>

@@ -58,6 +58,25 @@ test("color picker presets, hex input, spectrum and disabled state stay synchron
   await expect(green).toBeDisabled();
 });
 
+test("color picker confirmation stays visible on short mobile viewports", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 480 });
+  await page.goto("/iframe.html?id=components-colorpicker--default&viewMode=story");
+  const trigger = page.getByRole("button", { name: "Farbe auswählen" });
+  await trigger.click();
+  const popup = page.getByRole("dialog", { name: "Eigene Farbe" });
+  await expect(popup.locator(".color-spectrum")).toBeVisible();
+  const confirm = popup.getByRole("button", { name: "Fertig" });
+  const popupBox = await popup.boundingBox();
+  const buttonBox = await confirm.boundingBox();
+  expect(popupBox).not.toBeNull();
+  expect(buttonBox).not.toBeNull();
+  expect(buttonBox!.y).toBeGreaterThanOrEqual(popupBox!.y);
+  expect(buttonBox!.y + buttonBox!.height).toBeLessThanOrEqual(popupBox!.y + popupBox!.height);
+  expect(buttonBox!.y + buttonBox!.height).toBeLessThanOrEqual(480);
+  await confirm.click();
+  await expect(trigger).toBeFocused();
+});
+
 test("snackbar variants are semantic, accessible and dismissible", async ({ page }) => {
   for (const [story, variant, color] of [
     ["default", "success", "rgb(39, 103, 73)"],
