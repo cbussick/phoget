@@ -1,6 +1,7 @@
 node_modules/
 .worktrees/
 .cache/
+.runtime/
 dist/
 .env
 .env.*

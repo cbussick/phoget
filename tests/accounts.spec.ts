@@ -59,7 +59,9 @@ test("administrator creates a user; user changes password and sees only personal
         .violations,
     ).toEqual([]);
     const userPage = await other.newPage();
-    await userPage.goto("http://127.0.0.1:3002/", { waitUntil: "commit" });
+    await userPage.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/`, {
+      waitUntil: "commit",
+    });
     await userPage.getByLabel("Benutzername", { exact: true }).fill(username);
     await userPage.getByLabel("Passwort", { exact: true }).fill(password);
     await userPage.getByRole("button", { name: "Anmelden", exact: true }).click();
@@ -77,7 +79,9 @@ test("administrator creates a user; user changes password and sees only personal
     await userPage.getByLabel("Vorläufiges Passwort", { exact: true }).fill(password);
     await userPage.getByRole("button", { name: "Passwort ändern", exact: true }).click();
     await expect(userPage.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
-    await userPage.goto("http://127.0.0.1:3002/settings", { waitUntil: "commit" });
+    await userPage.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/settings`, {
+      waitUntil: "commit",
+    });
     await expect(userPage.getByRole("heading", { name: "Mein Profil" })).toBeVisible();
     await expect(userPage.getByRole("button", { name: "Benutzer", exact: true })).toHaveCount(0);
     await expect(userPage.getByRole("button", { name: "Haushalt", exact: true })).toHaveCount(0);

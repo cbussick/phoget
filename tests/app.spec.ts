@@ -12,7 +12,7 @@ test.beforeEach(async ({ request, context }) => {
 });
 test.afterEach(async ({ playwright, request }) => {
   const cleanup = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3002",
+    baseURL: `http://127.0.0.1:${process.env.PHOGET_TEST_PORT}`,
     extraHTTPHeaders: { "X-Phoget-Request": "1" },
     storageState: await request.storageState(),
   });
@@ -44,6 +44,22 @@ async function createList(page: Page, name: string) {
   createdListIds.push(id);
   return id;
 }
+test("overview hides update activity while list detail retains it", async ({ page, request }) => {
+  const response = await request.post("/api/lists", {
+    data: { name: "Activity visibility " + crypto.randomUUID(), description: "Shared list" },
+  });
+  expect(response.status()).toBe(201);
+  const list = listSchema.parse(await response.json());
+  createdListIds.push(list.id);
+  await page.goto("/index.html");
+  await page.getByRole("link", { name: "Alle Listen" }).last().click();
+  const row = page.locator(".list-row").filter({ hasText: list.name });
+  await expect(row).toBeVisible();
+  await expect(row.locator(".list-activity")).toHaveCount(0);
+  await row.click();
+  await expect(page.locator(".list-meta time")).toContainText("aktualisiert");
+});
+
 test("complete household workflow persists through reload and a second browser", async ({
   page,
   browser,
@@ -58,7 +74,9 @@ test("complete household workflow persists through reload and a second browser",
   const second = await browser.newPage();
   await second.context().addCookies((await page.context().storageState()).cookies);
   try {
-    await second.goto("http://127.0.0.1:3002/lists/" + id, { waitUntil: "commit" });
+    await second.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/lists/${id}`, {
+      waitUntil: "commit",
+    });
     await expect(second.getByRole("heading", { name, level: 1 })).toBeVisible();
     await page
       .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })

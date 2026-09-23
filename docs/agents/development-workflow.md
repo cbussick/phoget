@@ -14,6 +14,8 @@ git worktree add .worktrees/<issue-key-or-task> -b <branch-name> <base-branch>
 
 For an existing branch, omit `-b`. Run task edits, checks, and commits in the task worktree. Never use the primary checkout for task work. If the primary checkout already has changes, preserve them and ask before integrating.
 
+After creating or entering the task worktree, follow [Development and testing](../development.md) to bootstrap its isolated runtime (`node scripts/worktree.mjs bootstrap`), set up its databases, and run dev/test commands through `node scripts/worktree.mjs run …`. Do not run checks against another worktree's database or ports.
+
 ## Hand off for human review
 
 Commit only task-related files. Run every applicable local check (see `docs/development.md`), review the full diff against the issue or request, and report the change, verification results, and any risks. Local checks are not remote CI. Address review feedback on the same task branch.

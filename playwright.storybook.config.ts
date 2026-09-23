@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+const port = process.env.PHOGET_STORYBOOK_PORT;
+if (!port) throw new Error("Run Storybook tests via the worktree runtime");
+const origin = `http://127.0.0.1:${port}`;
 export default defineConfig({
   outputDir: "storybook-test-results",
   testDir: "tests",
@@ -7,13 +10,13 @@ export default defineConfig({
   timeout: 30000,
   use: {
     ...devices["Desktop Chrome"],
-    baseURL: "http://127.0.0.1:6007",
+    baseURL: origin,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "python3 -m http.server 6007 --bind 127.0.0.1 --directory storybook-static",
-    url: "http://127.0.0.1:6007",
+    command: `python3 -m http.server ${port} --bind 127.0.0.1 --directory storybook-static`,
+    url: origin,
     reuseExistingServer: false,
   },
 });

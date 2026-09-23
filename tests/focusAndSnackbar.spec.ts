@@ -57,9 +57,7 @@ test("adding preserves input focus only for Enter in the combobox; new icons per
       expect(saved.lists.find((entry) => entry.id === list.id)?.icon).toBe(value);
     }
     await page.goto("/");
-    await expect(
-      page.getByRole("link", { name: list.name, exact: true }).locator(".list-activity"),
-    ).toContainText("aktualisiert von Test Admin");
+    await expect(page.getByRole("link", { name: list.name, exact: true })).toBeVisible();
   } finally {
     await request.delete(`/api/lists/${list.id}`);
   }

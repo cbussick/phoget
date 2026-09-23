@@ -2,7 +2,9 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { parseArgs } from "node:util";
 import { createServer } from "vite";
 
-const { values } = parseArgs({ options: { port: { type: "string", default: "5173" } } });
+const { values } = parseArgs({
+  options: { port: { type: "string", default: process.env.PHOGET_DEV_PORT ?? "5173" } },
+});
 const port = Number(values.port);
 const apiPort = Number(process.env.PORT ?? 3001);
 for (const value of [port, apiPort]) {
@@ -18,7 +20,7 @@ const vite = await createServer({
   server: {
     host: "127.0.0.1",
     port,
-    strictPort: false,
+    strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
     proxy: { "/api": `http://127.0.0.1:${apiPort}` },
   },
 });
