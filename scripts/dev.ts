@@ -20,7 +20,7 @@ const vite = await createServer({
   server: {
     host: "127.0.0.1",
     port,
-    strictPort: Boolean(process.env.PHOGET_DEV_PORT),
+    strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
     proxy: { "/api": `http://127.0.0.1:${apiPort}` },
   },
 });
