@@ -5,11 +5,11 @@ import { users, loginAttempts, lists } from "../server/db/schema.js";
 import { hashPassword } from "../server/auth/passwords.js";
 import { testCredentials } from "./testCredentials.js";
 export async function prepareAccounts() {
-  assert.match(
-    process.env.DATABASE_URL ?? "",
-    /phoget_test(?:\?|$)/,
-    "Only prepare accounts in phoget_test.",
+  assert.equal(
+    new URL(process.env.DATABASE_URL ?? "").pathname.slice(1),
+    process.env.PHOGET_TEST_DATABASE,
   );
+  assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
   const values = {
     name: "Test Admin",
     ...testCredentials,

@@ -21,11 +21,11 @@ let server: Server;
 let base: string;
 const created: string[] = [];
 before(async () => {
-  assert.match(
-    process.env.DATABASE_URL ?? "",
-    /phoget_test(?:\?|$)/,
-    "Use the isolated phoget_test database.",
+  assert.equal(
+    new URL(process.env.DATABASE_URL ?? "").pathname.slice(1),
+    process.env.PHOGET_TEST_DATABASE,
   );
+  assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
   await prepareAccounts();
   server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.on("listening", resolve));
