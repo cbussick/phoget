@@ -81,6 +81,24 @@ test("the entire color picker fits without internal scrolling on mobile", async 
   await expect(trigger).toBeFocused();
 });
 
+test("the containing dialog scrolls while the full color picker stays open", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 480 });
+  await page.goto("/iframe.html?id=components-colorpicker--scrolling-dialog&viewMode=story");
+  const dialog = page.locator("dialog.item-dialog");
+  await page.getByRole("button", { name: "Farbe auswählen" }).click();
+  const picker = page.getByRole("dialog", { name: "Eigene Farbe" });
+  await expect(picker.locator(".color-spectrum")).toBeVisible();
+  const before = await dialog.evaluate((element) => element.scrollTop);
+  await page.mouse.move(360, 400);
+  await page.mouse.wheel(0, 220);
+  await expect.poll(() => dialog.evaluate((element) => element.scrollTop)).toBeGreaterThan(before);
+  await expect(picker).toBeVisible();
+  await expect(picker).toHaveCSS("overflow-y", "visible");
+  const box = await picker.boundingBox();
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(480);
+});
+
 test("snackbar variants are semantic, accessible and dismissible", async ({ page }) => {
   for (const [story, variant, color] of [
     ["default", "success", "rgb(39, 103, 73)"],
