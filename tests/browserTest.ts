@@ -4,12 +4,12 @@ import { promisify } from "node:util";
 
 const run = promisify(execFile);
 
-export const test = base.extend<{}, { testDatabase: void }>({
+export const test = base.extend<{ testDatabase: void }>({
   testDatabase: [
     // Playwright requires destructuring even when a fixture has no dependencies.
     // eslint-disable-next-line no-empty-pattern
     async ({}, use, workerInfo) => {
-      // One Playwright process and worker per browser; each resets only its own database.
+      // One worker per browser; reset its database before every test, not once per worker.
       const browser = workerInfo.project.name.toUpperCase();
       const databaseUrl = process.env[`PHOGET_${browser}_TEST_URL`];
       const port = process.env[`PHOGET_${browser}_TEST_PORT`];
@@ -29,6 +29,6 @@ export const test = base.extend<{}, { testDatabase: void }>({
       );
       await use();
     },
-    { scope: "worker", auto: true },
+    { auto: true },
   ],
 });

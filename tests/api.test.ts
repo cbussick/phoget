@@ -1,4 +1,4 @@
-import { before, after, test } from "node:test";
+import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
 import { app } from "../server/app.js";
@@ -26,19 +26,21 @@ before(async () => {
     process.env.PHOGET_TEST_DATABASE,
   );
   assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
-  await prepareAccounts();
   server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.on("listening", resolve));
   const address = server.address();
   assert.ok(address && typeof address === "object");
   base = "http://127.0.0.1:" + address.port;
+});
+beforeEach(async () => {
+  await prepareAccounts();
   const response = await send("/session", "POST", testCredentials);
   assert.equal(response.status, 200);
   cookie = response.headers.get("set-cookie")!.split(";")[0];
   adminId = sessionSchema.parse(await response.json()).user!.id;
 });
 after(async () => {
-  for (const id of created) await send("/lists/" + id, "DELETE");
+  await prepareAccounts();
   await new Promise<void>((resolve) => server.close(() => resolve()));
   await pool.end();
 });
