@@ -47,8 +47,8 @@
       <h1>PHO-6 · Color picker confirmation</h1>
       <p>
         Playwright screenshots at 390 × 480 CSS pixels, Chromium mobile touch viewport. Before: the
-        confirmation button is inside the clipped scroll region. After: the button stays in the
-        fixed footer while the picker content scrolls independently.
+        confirmation button is inside the clipped scroll region. After: the entire popup fits in the
+        viewport without internal scrolling.
       </p>
       <div class="gallery">
         <figure>
@@ -60,7 +60,10 @@
         </figure>
         <figure>
           <figcaption>After</figcaption>
-          <img src="after.png" alt="Color picker with confirmation button visible in its footer" />
+          <img
+            src="after.png"
+            alt="Entire color picker and confirmation button visible without scrolling"
+          />
         </figure>
       </div>
     </main>

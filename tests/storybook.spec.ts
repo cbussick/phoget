@@ -58,7 +58,7 @@ test("color picker presets, hex input, spectrum and disabled state stay synchron
   await expect(green).toBeDisabled();
 });
 
-test("color picker confirmation stays visible on short mobile viewports", async ({ page }) => {
+test("the entire color picker fits without internal scrolling on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 480 });
   await page.goto("/iframe.html?id=components-colorpicker--default&viewMode=story");
   const trigger = page.getByRole("button", { name: "Farbe auswählen" });
@@ -66,10 +66,14 @@ test("color picker confirmation stays visible on short mobile viewports", async 
   const popup = page.getByRole("dialog", { name: "Eigene Farbe" });
   await expect(popup.locator(".color-spectrum")).toBeVisible();
   const confirm = popup.getByRole("button", { name: "Fertig" });
+  await expect(popup.getByRole("slider", { name: "Farbton" })).toBeVisible();
+  await expect(popup).toHaveCSS("overflow-y", "visible");
   const popupBox = await popup.boundingBox();
   const buttonBox = await confirm.boundingBox();
   expect(popupBox).not.toBeNull();
   expect(buttonBox).not.toBeNull();
+  expect(popupBox!.y).toBeGreaterThanOrEqual(0);
+  expect(popupBox!.y + popupBox!.height).toBeLessThanOrEqual(480);
   expect(buttonBox!.y).toBeGreaterThanOrEqual(popupBox!.y);
   expect(buttonBox!.y + buttonBox!.height).toBeLessThanOrEqual(popupBox!.y + popupBox!.height);
   expect(buttonBox!.y + buttonBox!.height).toBeLessThanOrEqual(480);

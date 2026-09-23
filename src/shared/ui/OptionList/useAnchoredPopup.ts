@@ -6,6 +6,7 @@ export function useAnchoredPopup(
   open: boolean,
   trigger: RefObject<HTMLElement | null>,
   popup: RefObject<HTMLDivElement | null>,
+  constrainHeight = true,
 ) {
   useLayoutEffect(() => {
     const element = popup.current;
@@ -19,6 +20,21 @@ export function useAnchoredPopup(
     const maxHeight = parseFloat(style.maxHeight);
     const position = () => {
       const rect = anchor.getBoundingClientRect();
+      if (!constrainHeight) {
+        element.style.width = Math.min(rect.width, window.innerWidth - gutter * 2) + "px";
+        const below = rect.bottom + gap;
+        const above = rect.top - gap - element.offsetHeight;
+        const preferred = window.innerHeight - below >= element.offsetHeight ? below : above;
+        element.style.left =
+          Math.max(gutter, Math.min(rect.left, window.innerWidth - element.offsetWidth - gutter)) +
+          "px";
+        element.style.top =
+          Math.max(
+            gutter,
+            Math.min(preferred, window.innerHeight - element.offsetHeight - gutter),
+          ) + "px";
+        return;
+      }
       const below = window.innerHeight - rect.bottom - gap - gutter;
       const above = rect.top - gap - gutter;
       const upwards = below < Math.min(element.scrollHeight, maxHeight) && above > below;
@@ -49,5 +65,5 @@ export function useAnchoredPopup(
       window.removeEventListener("scroll", viewportChanged, true);
       if (element.matches(":popover-open")) element.hidePopover();
     };
-  }, [open, trigger, popup]);
+  }, [open, trigger, popup, constrainHeight]);
 }
