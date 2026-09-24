@@ -231,18 +231,13 @@ test("keyboard handle reorders lists and items without changing row actions", as
     for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowUp");
     await page.keyboard.press("Space");
     await expect
-      .poll(async () =>
-        stateSchema
+      .poll(async () => {
+        const ids = stateSchema
           .parse(await (await request.get("/api/state")).json())
-          .lists.map((l) => l.id)
-          .indexOf(two.id),
-      )
-      .toBeLessThan(
-        stateSchema
-          .parse(await (await request.get("/api/state")).json())
-          .lists.map((l) => l.id)
-          .indexOf(one.id),
-      );
+          .lists.map((l) => l.id);
+        return ids.indexOf(two.id) < ids.indexOf(one.id);
+      })
+      .toBe(true);
     await expect(page.getByRole("link", { name: "Sort two", exact: true })).toBeVisible();
     const a = itemSchema.parse(
       await (await request.post(`/api/lists/${one.id}/items`, { data: { name: "Sort A" } })).json(),
