@@ -20,6 +20,7 @@ export const lists = pgTable("lists", {
   createdAt: timestamp({ withTimezone: true, mode: "string" }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: "string" }).notNull().defaultNow(),
   updatedById: uuid().references(() => users.id, { onDelete: "set null" }),
+  position: integer().notNull().default(0),
 });
 export const items = pgTable(
   "items",
@@ -31,6 +32,7 @@ export const items = pgTable(
     name: text().notNull(),
     note: text().notNull().default(""),
     completed: boolean().notNull().default(false),
+    position: integer().notNull().default(0),
     createdAt: timestamp({ withTimezone: true, mode: "string" }).notNull().defaultNow(),
   },
   (table) => [index("items_list_id_idx").on(table.listId)],

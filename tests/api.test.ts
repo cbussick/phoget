@@ -85,6 +85,77 @@ async function create(name = "API test") {
   created.push(list.id);
   return list;
 }
+test("shared reorder persists, rejects stale orders, and keeps sections separate", async () => {
+  const first = await create("Order first");
+  const second = await create("Order second");
+  const snapshot = stateSchema.parse(await (await send("/state")).json());
+  const before = snapshot.lists.map((row) => row.id);
+  const moved = before.filter((id) => id !== second.id);
+  moved.splice(moved.indexOf(first.id), 0, second.id);
+  const result = await send("/lists/order", "PUT", { before, after: moved });
+  assert.equal(result.status, 204, await result.text());
+  assert.deepEqual(
+    stateSchema.parse(await (await send("/state")).json()).lists.map((row) => row.id),
+    moved,
+  );
+  assert.equal((await send("/lists/order", "PUT", { before, after: before })).status, 409);
+  // Editing a name does not invalidate an order-only revision.
+  const renamed = await send(`/lists/${first.id}`, "PUT", { name: "Renamed first" });
+  assert.equal(renamed.status, 200);
+  assert.equal((await send("/lists/order", "PUT", { before: moved, after: before })).status, 204);
+  const a = itemSchema.parse(
+    await (await send(`/lists/${first.id}/items`, "POST", { name: "A" })).json(),
+  );
+  const b = itemSchema.parse(
+    await (await send(`/lists/${first.id}/items`, "POST", { name: "B" })).json(),
+  );
+  const path = `/lists/${first.id}/items/order/open`;
+  assert.equal(
+    (await send(path, "PUT", { before: [a.id, b.id], after: [b.id, a.id] })).status,
+    204,
+  );
+  assert.equal(
+    (await send(path, "PUT", { before: [a.id, b.id], after: [a.id, b.id] })).status,
+    409,
+  );
+  // Concurrent moves of the same snapshot must not silently both succeed.
+  const concurrent = await Promise.all([
+    send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
+    send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
+  ]);
+  assert.deepEqual(concurrent.map((response) => response.status).sort(), [204, 409]);
+  assert.equal(
+    (await send(path, "PUT", { before: [a.id, b.id], after: [b.id, a.id] })).status,
+    204,
+  );
+  assert.equal(
+    (await send(path, "PUT", { before: [b.id, a.id], after: [second.id, a.id] })).status,
+    400,
+  );
+  await send(`/items/${b.id}`, "PATCH", { completed: true });
+  assert.equal(
+    (await send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] })).status,
+    409,
+  );
+  assert.equal(
+    (
+      await send(`/lists/${first.id}/items/order/completed`, "PUT", {
+        before: [b.id],
+        after: [b.id],
+      })
+    ).status,
+    204,
+  );
+  await send(`/items/${b.id}`, "PATCH", { completed: false });
+  const items = stateSchema
+    .parse(await (await send("/state")).json())
+    .items.filter((row) => row.listId === first.id);
+  assert.deepEqual(
+    items.map((row) => row.id),
+    [a.id, b.id],
+  );
+});
+
 test("lists and items persist, edit, complete, restore, and cascade delete", async () => {
   const list = await create("  Shared errands  ");
   assert.equal(list.name, "Shared errands");

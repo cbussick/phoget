@@ -7,6 +7,14 @@ const { values } = parseArgs({
 });
 const port = Number(values.port);
 const apiPort = Number(process.env.PORT ?? 3001);
+// Opt-in tailnet review: keep both services loopback-only; Tailscale Serve handles TLS.
+const publicOrigin = process.env.PHOGET_DEV_PUBLIC_ORIGIN;
+if (
+  publicOrigin &&
+  (!publicOrigin.startsWith("https://") || new URL(publicOrigin).origin !== publicOrigin)
+) {
+  throw new Error("PHOGET_DEV_PUBLIC_ORIGIN must be an HTTPS origin without a path.");
+}
 for (const value of [port, apiPort]) {
   if (!Number.isInteger(value) || value < 1 || value > 65535) {
     throw new Error("Ports must be integers between 1 and 65535.");
@@ -21,6 +29,7 @@ const vite = await createServer({
     host: "127.0.0.1",
     port,
     strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
+    ...(publicOrigin ? { allowedHosts: [new URL(publicOrigin).hostname] } : {}),
     proxy: { "/api": `http://127.0.0.1:${apiPort}` },
   },
 });
@@ -42,11 +51,16 @@ try {
   const origin = `http://127.0.0.1:${address.port}`;
   api = spawn(process.execPath, ["node_modules/tsx/dist/cli.mjs", "watch", "server/index.ts"], {
     stdio: "inherit",
-    env: { ...process.env, NODE_ENV: "development", HOST: "127.0.0.1", APP_ORIGIN: origin },
+    env: {
+      ...process.env,
+      NODE_ENV: "development",
+      HOST: "127.0.0.1",
+      APP_ORIGIN: publicOrigin ?? origin,
+    },
   });
   api.once("error", () => void stop(1));
   api.once("exit", (code) => void stop(code ?? 1));
-  console.log(`Phoget dev origin: ${origin}`);
+  console.log(`Phoget dev origin: ${publicOrigin ?? origin}`);
   vite.printUrls();
 } catch (error) {
   await stop(1);

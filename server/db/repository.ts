@@ -1,4 +1,5 @@
 import { and, asc, eq, getTableColumns, sql } from "drizzle-orm";
+import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
 import { database } from "./database.js";
 import type { User } from "../../shared/accounts.js";
@@ -23,7 +24,7 @@ const databaseListSchema = listSchema
     updatedAt: databaseTimeSchema,
   })
   .strip(); // Internal foreign keys are not part of the public list response.
-const databaseItemSchema = itemSchema.extend({ createdAt: databaseTimeSchema });
+const databaseItemSchema = itemSchema.extend({ createdAt: databaseTimeSchema }).strip();
 export class NotFoundError extends Error {}
 export async function readState() {
   // A consistent snapshot avoids mismatched lists/items during concurrent deletion.
@@ -33,11 +34,17 @@ export async function readState() {
         .select({ ...getTableColumns(lists), updatedBy: users.name })
         .from(lists)
         .leftJoin(users, eq(lists.updatedById, users.id))
-        .orderBy(asc(lists.createdAt), asc(lists.id));
+        .orderBy(asc(lists.position), asc(lists.createdAt), asc(lists.id));
       const storedItems = await transaction
         .select()
         .from(items)
-        .orderBy(asc(items.createdAt), asc(items.id));
+        .orderBy(
+          asc(items.listId),
+          asc(items.completed),
+          asc(items.position),
+          asc(items.createdAt),
+          asc(items.id),
+        );
       const [storedSettings] = await transaction.select().from(settings).where(eq(settings.id, 1));
 
       return stateSchema.parse({
@@ -50,12 +57,75 @@ export async function readState() {
   );
 }
 type Actor = Pick<User, "id" | "name">;
+
+type OrderChange = { before: string[]; after: string[] };
+function validateOrder(current: string[], change: OrderChange) {
+  if (
+    current.length !== change.before.length ||
+    current.some((id, index) => id !== change.before[index])
+  )
+    throw new HttpError(409, "Die Reihenfolge wurde geändert. Bitte versuche es erneut.");
+  if (
+    new Set(change.after).size !== current.length ||
+    change.after.length !== current.length ||
+    change.after.some((id) => !current.includes(id))
+  )
+    throw new HttpError(400, "Ungültige Reihenfolge.");
+}
+
+export async function reorderLists(change: OrderChange) {
+  await database.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1010)`);
+    const current = await tx
+      .select({ id: lists.id })
+      .from(lists)
+      .orderBy(asc(lists.position), asc(lists.createdAt), asc(lists.id));
+    validateOrder(
+      current.map((row) => row.id),
+      change,
+    );
+    for (const [index, id] of change.after.entries())
+      await tx
+        .update(lists)
+        .set({ position: index + 1 })
+        .where(eq(lists.id, id));
+  });
+}
+
+export async function reorderItems(listId: string, completed: boolean, change: OrderChange) {
+  await database.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+    const [parent] = await tx.select({ id: lists.id }).from(lists).where(eq(lists.id, listId));
+    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    const current = await tx
+      .select({ id: items.id })
+      .from(items)
+      .where(and(eq(items.listId, listId), eq(items.completed, completed)))
+      .orderBy(asc(items.position), asc(items.createdAt), asc(items.id));
+    validateOrder(
+      current.map((row) => row.id),
+      change,
+    );
+    for (const [index, id] of change.after.entries())
+      await tx
+        .update(items)
+        .set({ position: index + 1 })
+        .where(eq(items.id, id));
+  });
+}
 export async function createList(input: z.infer<typeof listInputSchema>, actor: Actor) {
-  const [row] = await database
-    .insert(lists)
-    .values({ ...input, updatedById: actor.id })
-    .returning();
-  return databaseListSchema.parse({ ...row, updatedBy: actor.name });
+  return database.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1010)`);
+    const [row] = await tx
+      .insert(lists)
+      .values({
+        ...input,
+        updatedById: actor.id,
+        position: sql`(SELECT coalesce(max(position), 0) + 1 FROM lists)`,
+      })
+      .returning();
+    return databaseListSchema.parse({ ...row, updatedBy: actor.name });
+  });
 }
 export async function updateList(
   id: string,
@@ -71,9 +141,12 @@ export async function updateList(
   return databaseListSchema.parse({ ...row, updatedBy: actor.name });
 }
 export async function deleteList(id: string) {
-  const rows = await database.delete(lists).where(eq(lists.id, id)).returning();
-  if (!rows.length) throw new NotFoundError("Diese Liste existiert nicht mehr.");
-  databaseListSchema.parse(rows[0]);
+  await database.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1010)`);
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${id}))`);
+    const rows = await tx.delete(lists).where(eq(lists.id, id)).returning();
+    if (!rows.length) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+  });
 }
 export async function createItem(
   listId: string,
@@ -81,6 +154,7 @@ export async function createItem(
   actor: Actor,
 ) {
   return database.transaction(async (transaction) => {
+    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
     const [parent] = await transaction
       .update(lists)
       .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
@@ -90,7 +164,11 @@ export async function createItem(
     databaseListSchema.parse(parent);
     const [row] = await transaction
       .insert(items)
-      .values({ ...input, listId })
+      .values({
+        ...input,
+        listId,
+        position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
+      })
       .returning();
     const parsed = databaseItemSchema.parse(row);
     await transaction
@@ -106,13 +184,30 @@ export async function changeItem(
   actor: Actor,
 ) {
   return database.transaction(async (transaction) => {
+    const [located] = await transaction
+      .select({ listId: items.listId })
+      .from(items)
+      .where(eq(items.id, id));
+    if (!located) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${located.listId}))`);
     const [previous] = await transaction.select().from(items).where(eq(items.id, id)).for("update");
     if (!previous) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     const original = databaseItemSchema.parse(previous);
     const [row] =
       input === null
         ? await transaction.delete(items).where(eq(items.id, id)).returning()
-        : await transaction.update(items).set(input).where(eq(items.id, id)).returning();
+        : await transaction
+            .update(items)
+            .set({
+              ...input,
+              ...(input.completed !== undefined && input.completed !== previous.completed
+                ? {
+                    position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${previous.listId} AND completed = ${input.completed})`,
+                  }
+                : {}),
+            })
+            .where(eq(items.id, id))
+            .returning();
     if (!row) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     const parsed = databaseItemSchema.parse(row);
     for (const name of new Set([original.name, parsed.name])) {

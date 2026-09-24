@@ -1,0 +1,38 @@
+.sortable-row {
+  touch-action: pan-y;
+}
+
+.sortable-row.is-dragging {
+  opacity: 0.65;
+}
+
+.sort-handle {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: grab;
+  touch-action: none;
+  transform: translateY(-50%);
+}
+
+.sort-handle:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: -3px;
+}
+
+.sort-handle:active {
+  cursor: grabbing;
+}
+
+.sortable-row > .list-row,
+.sortable-row > .item-details {
+  padding-inline-start: 2.75rem;
+}

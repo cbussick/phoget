@@ -9,6 +9,8 @@ import { ItemRow } from "./ItemRow";
 import { ItemDialog } from "./ItemDialog";
 import { ListDialog } from "./ListDialog";
 import { AddItemForm } from "./AddItemForm";
+import { SortableRow, SortableRows } from "./SortableRows";
+import { listApi } from "./listApi";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 
 import { listActivityLabel, useActivityClock } from "../../shared/ui/listActivity";
@@ -31,7 +33,14 @@ export function ListPage({
     syncError ? "Verbindung unterbrochen. Die zuletzt gespeicherte Version wird angezeigt." : null,
   );
   const renderItem = (item: Item) => (
-    <ItemRow key={item.id} item={item} onEdit={setSelected} onAnnounce={setAnnouncement} />
+    <SortableRow
+      key={item.id}
+      id={item.id}
+      label={item.name}
+      className={"item-row" + (item.completed ? " is-complete" : "")}
+    >
+      <ItemRow item={item} onEdit={setSelected} onAnnounce={setAnnouncement} />
+    </SortableRow>
   );
   return (
     <>
@@ -69,7 +78,13 @@ export function ListPage({
           Offene Einträge
         </h2>
         <AddItemForm listId={list.id} color={list.color} onAnnounce={setAnnouncement} />
-        <ul className="items active-items">{active.map(renderItem)}</ul>
+        <SortableRows
+          getLabel={(item) => item.name}
+          rows={active}
+          className="items active-items"
+          save={(before, after) => listApi.reorderItems(list.id, "open", { before, after })}
+          renderRow={renderItem}
+        />
         {!active.length ? (
           <EmptyState
             title={completed.length ? "Alles erledigt!" : "Hier ist noch nichts"}
@@ -92,7 +107,15 @@ export function ListPage({
                 {completed.length} {completed.length === 1 ? "Eintrag" : "Einträge"}
               </span>
             </summary>
-            <ul className="items">{completed.map(renderItem)}</ul>
+            <SortableRows
+              getLabel={(item) => item.name}
+              rows={completed}
+              className="items"
+              save={(before, after) =>
+                listApi.reorderItems(list.id, "completed", { before, after })
+              }
+              renderRow={renderItem}
+            />
           </details>
         ) : null}
       </section>

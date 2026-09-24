@@ -46,6 +46,12 @@ export const itemPatchSchema = z
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, "Gib eine Änderung an.");
+export const reorderSchema = z
+  .object({
+    before: z.array(idSchema),
+    after: z.array(idSchema),
+  })
+  .strict();
 export const settingsInputSchema = z
   .object({
     householdName: nameSchema,
