@@ -3,6 +3,47 @@ import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
+test("dragging past either end stays within the list", async ({ page, request, context }) => {
+  const session = await request.post("/api/session", { data: testCredentials });
+  expect(session.ok()).toBeTruthy();
+  await context.addCookies((await request.storageState()).cookies);
+  const list = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Bounded drag" } })).json(),
+  );
+  try {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const rows = page.locator(".list-overview .sortable-row");
+    const container = page.locator(".list-overview");
+    for (const direction of ["up", "down"] as const) {
+      const row = direction === "up" ? rows.first() : rows.last();
+      await row.scrollIntoViewIfNeeded();
+      const handle = await row.locator(".sort-handle").boundingBox();
+      expect(handle).not.toBeNull();
+      const original = await container.boundingBox();
+      expect(original).not.toBeNull();
+      const cardHeight = await page
+        .locator(".lists-card")
+        .evaluate((node) => node.getBoundingClientRect().height);
+      const startX = handle!.x + handle!.width / 2;
+      const startY = handle!.y + handle!.height / 2;
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(startX, startY + (direction === "up" ? -900 : 900), { steps: 12 });
+      const dragged = await row.boundingBox();
+      const bounds = await container.boundingBox();
+      expect(dragged!.y).toBeGreaterThanOrEqual(bounds!.y - 2);
+      expect(dragged!.y + dragged!.height).toBeLessThanOrEqual(bounds!.y + bounds!.height + 2);
+      expect(
+        await page.locator(".lists-card").evaluate((node) => node.getBoundingClientRect().height),
+      ).toBeCloseTo(cardHeight, 0);
+      await page.mouse.up();
+    }
+  } finally {
+    await request.delete(`/api/lists/${list.id}`);
+  }
+});
+
 test("dragging a row sideways cannot shift it or widen the page", async ({
   page,
   request,

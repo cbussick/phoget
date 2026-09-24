@@ -8,7 +8,6 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-  type Modifier,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -18,12 +17,11 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useQueryClient } from "@tanstack/react-query";
 import { householdKey } from "../../shared/api/queryKeys";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import "./sortableRows.css";
-
-const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
 
 export function SortableRow({
   id,
@@ -142,7 +140,7 @@ export function SortableRows<T extends { id: string }>({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      modifiers={[verticalOnly]}
+      modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       onDragEnd={finish}
       accessibility={{
         screenReaderInstructions: {
