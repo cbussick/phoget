@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { test } from "./browserTest";
+import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { listSchema, stateSchema } from "../shared/contracts";
 
@@ -98,6 +98,7 @@ test("complete household workflow persists through reload and a second browser",
   const name = "Weekend " + crypto.randomUUID();
   const id = await createList(page, name);
   const second = await browser.newPage();
+  await installFirefoxNavigation(second.context(), browserName);
   await second.context().addCookies((await page.context().storageState()).cookies);
   try {
     await second.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/lists/${id}`, {
