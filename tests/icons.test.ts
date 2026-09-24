@@ -15,6 +15,22 @@ test("saved list icon names render local, decorative SVG artwork", () => {
   }
 });
 
+test("new writing icons retain the supplied Lucide paths and are valid list icons", () => {
+  const samples = {
+    notebookPen: "M21.378 5.626a1 1 0 1 0-3.004-3.004",
+    pencilRuler: "M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 0",
+    pencil: "M21.174 6.812a1 1 0 0 0-3.986-3.987",
+  } as const;
+  for (const [name, path] of Object.entries(samples)) {
+    assert.equal(iconSchema.parse(name), name);
+    assert.ok(
+      renderToStaticMarkup(createElement(Icon, { name: name as keyof typeof samples })).includes(
+        path,
+      ),
+    );
+  }
+});
+
 test("sewing uses the supplied Tabler Needle Thread paths", () => {
   const svg = renderToStaticMarkup(createElement(Icon, { name: "sewing" }));
   assert.ok(

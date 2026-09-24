@@ -17,6 +17,9 @@ export const iconSchema = z.enum([
   "city",
   "rice",
   "sewing",
+  "notebookPen",
+  "pencilRuler",
+  "pencil",
 ]);
 const nameSchema = z.string().trim().min(1, "Gib einen Namen ein.").max(200);
 export const listInputSchema = z

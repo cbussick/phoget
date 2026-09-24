@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { test } from "./browserTest";
+import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { listSchema, stateSchema } from "../shared/contracts";
 
@@ -68,10 +68,37 @@ test("complete household workflow persists through reload and a second browser",
 }) => {
   test.setTimeout(browserName === "webkit" ? 240_000 : 180_000); // Cross-browser sync now takes up to 10 seconds per change.
   const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+  const sessionTraffic: string[] = [];
+  const record = (event: string) => {
+    sessionTraffic.push(`${new Date().toISOString()} ${event}`);
+    if (sessionTraffic.length > 40) sessionTraffic.shift();
+  };
+  page.on("pageerror", (error) => {
+    errors.push(error.message);
+    record(`pageerror ${error.message}`);
+  });
+  const started = new WeakMap<object, number>();
+  page.on("request", (request) => {
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+      started.set(request, Date.now());
+  });
+  page.on("requestfailed", (request) => {
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+      record(
+        `${request.method()} ${new URL(request.url()).pathname} failed after ${Date.now() - (started.get(request) ?? Date.now())}ms: ${request.failure()?.errorText}`,
+      );
+  });
+  page.on("response", (response) => {
+    const request = response.request();
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+      record(
+        `${request.method()} ${new URL(request.url()).pathname} HTTP ${response.status()} after ${Date.now() - (started.get(request) ?? Date.now())}ms`,
+      );
+  });
   const name = "Weekend " + crypto.randomUUID();
   const id = await createList(page, name);
   const second = await browser.newPage();
+  await installFirefoxNavigation(second.context(), browserName);
   await second.context().addCookies((await page.context().storageState()).cookies);
   try {
     await second.goto(`http://127.0.0.1:${process.env.PHOGET_TEST_PORT}/lists/${id}`, {
@@ -181,7 +208,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(
       second.getByRole("heading", { name: "Liste nicht gefunden", exact: true }),
     ).toBeVisible({ timeout: 15_000 });
-    expect(errors).toEqual([]);
+    expect(errors, `Session traffic (latest 40 events):\n${sessionTraffic.join("\n")}`).toEqual([]);
   } finally {
     await second.close();
     await request.delete("/api/lists/" + id);
