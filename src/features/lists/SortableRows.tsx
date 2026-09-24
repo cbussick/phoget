@@ -65,13 +65,23 @@ export function SortableRow({
         aria-label={`${label} verschieben`}
         onClick={(event) => event.preventDefault()}
       >
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
-          <circle cx="5" cy="4" r="1.4" />
-          <circle cx="13" cy="4" r="1.4" />
-          <circle cx="5" cy="9" r="1.4" />
-          <circle cx="13" cy="9" r="1.4" />
-          <circle cx="5" cy="14" r="1.4" />
-          <circle cx="13" cy="14" r="1.4" />
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="9" r="1" />
+          <circle cx="19" cy="9" r="1" />
+          <circle cx="5" cy="9" r="1" />
+          <circle cx="12" cy="15" r="1" />
+          <circle cx="19" cy="15" r="1" />
+          <circle cx="5" cy="15" r="1" />
         </svg>
       </button>
       {children}
