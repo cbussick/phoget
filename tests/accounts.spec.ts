@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test } from "./browserTest";
+import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { testCredentials } from "./testCredentials";
 import { userSchema } from "../shared/accounts";
@@ -8,6 +8,7 @@ test("administrator creates a user; user changes password and sees only personal
   page,
   request,
   browser,
+  browserName,
 }) => {
   await request.post("/api/session", { data: testCredentials });
   await page.context().addCookies((await request.storageState()).cookies);
@@ -16,6 +17,7 @@ test("administrator creates a user; user changes password and sees only personal
   const password = "temporary browser password";
   let userId: string | undefined;
   const other = await browser.newContext();
+  await installFirefoxNavigation(other, browserName);
   try {
     await page.goto("/settings");
     await page.getByRole("button", { name: "Benutzer", exact: true }).click();
