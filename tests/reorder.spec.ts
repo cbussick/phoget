@@ -3,6 +3,41 @@ import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
+test("dragging a row sideways cannot shift it or widen the page", async ({
+  page,
+  request,
+  context,
+}) => {
+  const session = await request.post("/api/session", { data: testCredentials });
+  expect(session.ok()).toBeTruthy();
+  await context.addCookies((await request.storageState()).cookies);
+  const list = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Sideways drag" } })).json(),
+  );
+  try {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const row = page.locator(".sortable-row").filter({ hasText: "Sideways drag" });
+    const before = await row.boundingBox();
+    expect(before).not.toBeNull();
+    const handle = await row
+      .getByRole("button", { name: "Sideways drag verschieben" })
+      .boundingBox();
+    expect(handle).not.toBeNull();
+    await page.mouse.move(handle!.x + handle!.width / 2, handle!.y + handle!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(handle!.x + 450, handle!.y + handle!.height / 2, { steps: 8 });
+    const during = await row.boundingBox();
+    expect(Math.abs(during!.x - before!.x)).toBeLessThan(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      390,
+    );
+    await page.mouse.up();
+  } finally {
+    await request.delete(`/api/lists/${list.id}`);
+  }
+});
+
 test("dragging item text reorders without opening the editor or toggling the checkbox", async ({
   page,
   request,
