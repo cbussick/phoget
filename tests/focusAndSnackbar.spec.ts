@@ -101,6 +101,9 @@ test("settings success uses a dismissible snackbar without shifting the form", a
   expect(
     await reserved.evaluate((element) => Math.round(element.getBoundingClientRect().height)),
   ).toBe(21);
+  // Sonner pauses dismissal while hovered, so the accessibility audit cannot
+  // consume the five-second window for testing the dismiss button.
+  await snackbar.hover();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await snackbar.getByRole("button", { name: "Meldung schließen" }).click();
   await expect(snackbar).toBeHidden();
