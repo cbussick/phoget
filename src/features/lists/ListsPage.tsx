@@ -6,6 +6,8 @@ import { EmptyState } from "../../shared/ui/EmptyState/EmptyState";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ListRow } from "../../shared/ui/ListRow/ListRow";
 import { ListDialog } from "./ListDialog";
+import { SortableRow, SortableRows } from "./SortableRows";
+import { listApi } from "./listApi";
 export function ListsPage({ lists }: { lists: List[] }) {
   const [creating, setCreating] = useState(false);
   return (
@@ -30,9 +32,13 @@ export function ListsPage({ lists }: { lists: List[] }) {
           Eure Listen
         </h2>
         {lists.length ? (
-          <ul className="list-overview">
-            {lists.map((list) => (
-              <li key={list.id}>
+          <SortableRows
+            getLabel={(list) => list.name}
+            rows={lists}
+            className="list-overview"
+            save={(before, after) => listApi.reorderLists({ before, after })}
+            renderRow={(list) => (
+              <SortableRow key={list.id} id={list.id} label={list.name}>
                 <ListRow
                   linkComponent={Link}
                   href={"/lists/" + list.id}
@@ -41,9 +47,9 @@ export function ListsPage({ lists }: { lists: List[] }) {
                   name={list.name}
                   description={list.description}
                 />
-              </li>
-            ))}
-          </ul>
+              </SortableRow>
+            )}
+          />
         ) : (
           <EmptyState
             title="Noch keine Listen"

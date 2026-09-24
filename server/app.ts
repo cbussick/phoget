@@ -12,6 +12,7 @@ import {
   itemPatchSchema,
   listInputSchema,
   listUpdateSchema,
+  reorderSchema,
   settingsInputSchema,
   errorSchema,
   stateSchema,
@@ -28,6 +29,8 @@ import {
   deleteList,
   createItem,
   changeItem,
+  reorderLists,
+  reorderItems,
   updateSettings,
   NotFoundError,
 } from "./db/repository.js";
@@ -113,6 +116,10 @@ app.post("/api/lists", async (request, response) => {
     .status(201)
     .json(listSchema.parse(await createList(input, userSchema.parse(response.locals.user))));
 });
+app.put("/api/lists/order", async (request, response) => {
+  await reorderLists(parseInput(reorderSchema, request.body));
+  response.status(204).end();
+});
 app.put("/api/lists/:id", async (request, response) => {
   response.json(
     listSchema.parse(
@@ -123,6 +130,17 @@ app.put("/api/lists/:id", async (request, response) => {
       ),
     ),
   );
+});
+app.put("/api/lists/:id/items/order/:completed", async (request, response) => {
+  const completed = request.params.completed;
+  if (completed !== "open" && completed !== "completed")
+    throw new HttpError(400, "Ungültiger Abschnitt.");
+  await reorderItems(
+    parseInput(idSchema, request.params.id),
+    completed === "completed",
+    parseInput(reorderSchema, request.body),
+  );
+  response.status(204).end();
 });
 app.delete("/api/lists/:id", async (request, response) => {
   await deleteList(parseInput(idSchema, request.params.id));

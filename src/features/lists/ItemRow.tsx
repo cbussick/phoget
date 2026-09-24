@@ -22,7 +22,7 @@ export function ItemRow({
   });
   useErrorSnackbar(toggle.error);
   return (
-    <li className={"item-row" + (item.completed ? " is-complete" : "")}>
+    <>
       <hr className="item-divider" aria-hidden="true" />
       <Button variant="ghost" size="content" className="item-details" onClick={() => onEdit(item)}>
         <span className="item-copy">
@@ -32,6 +32,8 @@ export function ItemRow({
       </Button>
       <Checkbox
         label={item.name + (item.completed ? " als offen markieren" : " als erledigt markieren")}
+        onMouseDown={(event) => event.stopPropagation()}
+        onTouchStart={(event) => event.stopPropagation()}
         checked={toggle.isPending ? toggle.variables : item.completed}
         disabled={toggle.isPending}
         onChange={(event) => {
@@ -39,6 +41,6 @@ export function ItemRow({
           toggle.mutate(completed);
         }}
       />
-    </li>
+    </>
   );
 }

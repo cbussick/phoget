@@ -7,9 +7,20 @@ import {
   itemInputSchema,
   itemPatchSchema,
   itemSchema,
+  reorderSchema,
 } from "../../../shared/contracts";
 
 export const listApi = {
+  reorderLists: (input: z.input<typeof reorderSchema>) =>
+    request("/lists/order", z.undefined(), {
+      method: "PUT",
+      body: JSON.stringify(reorderSchema.parse(input)),
+    }),
+  reorderItems: (id: string, section: "open" | "completed", input: z.input<typeof reorderSchema>) =>
+    request(`/lists/${id}/items/order/${section}`, z.undefined(), {
+      method: "PUT",
+      body: JSON.stringify(reorderSchema.parse(input)),
+    }),
   create: (input: z.input<typeof listInputSchema>) =>
     request("/lists", listSchema, {
       method: "POST",
