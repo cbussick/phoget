@@ -100,6 +100,9 @@ export function ListDialog({ list, onClose }: { list?: List; onClose: () => void
                     city: "Innenstadt",
                     rice: "Asia-Supermarkt",
                     sewing: "Nähen",
+                    notebookPen: "Notizbuch mit Stift",
+                    pencilRuler: "Stift und Lineal",
+                    pencil: "Bleistift",
                   }[value],
                   icon: <Icon name={value} className="list-symbol-choice" />,
                 }))}
