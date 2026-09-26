@@ -54,7 +54,6 @@ export function SortableRow({
         zIndex: isDragging ? 2 : undefined,
       }}
       onMouseDown={(event) => listeners?.onMouseDown?.(event)}
-      onTouchStart={(event) => listeners?.onTouchStart?.(event)}
     >
       <button
         type="button"
@@ -62,6 +61,7 @@ export function SortableRow({
         ref={setActivatorNodeRef}
         {...attributes}
         onKeyDown={(event) => listeners?.onKeyDown?.(event)}
+        onTouchStart={(event) => listeners?.onTouchStart?.(event)}
         aria-label={`${label} verschieben`}
         onClick={(event) => event.preventDefault()}
       >
