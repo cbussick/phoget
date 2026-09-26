@@ -3,6 +3,43 @@ import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
+test("overview drag handle does not overlap the list link on iPad", async ({
+  page,
+  request,
+  context,
+}) => {
+  const session = await request.post("/api/session", { data: testCredentials });
+  expect(session.ok()).toBeTruthy();
+  await context.addCookies((await request.storageState()).cookies);
+  const list = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Handle clearance" } })).json(),
+  );
+  try {
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await page.goto("/");
+    const row = page
+      .locator(".list-overview .sortable-row")
+      .filter({ hasText: "Handle clearance" });
+    const handle = row.getByRole("button", { name: "Handle clearance verschieben" });
+    const link = row.getByRole("link", { name: "Handle clearance" });
+    const handleBox = await handle.boundingBox();
+    const linkBox = await link.boundingBox();
+    expect(handleBox && linkBox).toBeTruthy();
+    expect(handleBox!.x + handleBox!.width).toBeLessThanOrEqual(linkBox!.x + 0.5);
+    const hit = await handle.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return node.contains(
+        document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2),
+      );
+    });
+    expect(hit).toBe(true);
+    await link.click();
+    await expect(page).toHaveURL(new RegExp(`/lists/${list.id}$`));
+  } finally {
+    await request.delete(`/api/lists/${list.id}`);
+  }
+});
+
 test("dragging past either end stays within the list", async ({ page, request, context }) => {
   const session = await request.post("/api/session", { data: testCredentials });
   expect(session.ok()).toBeTruthy();
