@@ -12,6 +12,9 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
     html,
     /<link rel="icon" href="\/icon-192.png" type="image\/png" sizes="192x192" \/>/,
   );
+  // Safari uses the SVG favicon for Favorites on the Start Page (not just the tab).
+  assert.match(html, /<link rel="icon" href="\/icon.svg" type="image\/svg\+xml" \/>/);
+  await readFile(new URL("../public/icon.svg", import.meta.url));
   assert.match(html, /href="\/apple-touch-icon.png"/);
   assert.match(html, /href="\/site.webmanifest"/);
   assert.equal(manifest.name, "Don't Phoget");
