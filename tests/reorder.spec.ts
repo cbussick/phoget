@@ -3,6 +3,43 @@ import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
+test("overview drag handle does not overlap the list link on iPad", async ({
+  page,
+  request,
+  context,
+}) => {
+  const session = await request.post("/api/session", { data: testCredentials });
+  expect(session.ok()).toBeTruthy();
+  await context.addCookies((await request.storageState()).cookies);
+  const list = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Handle clearance" } })).json(),
+  );
+  try {
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await page.goto("/");
+    const row = page
+      .locator(".list-overview .sortable-row")
+      .filter({ hasText: "Handle clearance" });
+    const handle = row.getByRole("button", { name: "Handle clearance verschieben" });
+    const link = row.getByRole("link", { name: "Handle clearance" });
+    const handleBox = await handle.boundingBox();
+    const linkBox = await link.boundingBox();
+    expect(handleBox && linkBox).toBeTruthy();
+    expect(handleBox!.x + handleBox!.width).toBeLessThanOrEqual(linkBox!.x + 0.5);
+    const hit = await handle.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return node.contains(
+        document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2),
+      );
+    });
+    expect(hit).toBe(true);
+    await link.click();
+    await expect(page).toHaveURL(new RegExp(`/lists/${list.id}$`));
+  } finally {
+    await request.delete(`/api/lists/${list.id}`);
+  }
+});
+
 test("dragging past either end stays within the list", async ({ page, request, context }) => {
   const session = await request.post("/api/session", { data: testCredentials });
   expect(session.ok()).toBeTruthy();
@@ -128,7 +165,7 @@ test("dragging item text reorders without opening the editor or toggling the che
   }
 });
 
-test("touch hold on item text drags without opening the editor", async ({
+test("long touch hold on the handle drags without selecting text or opening the editor", async ({
   browser,
   request,
   browserName,
@@ -162,13 +199,46 @@ test("touch hold on item text drags without opening the editor", async ({
     );
     const page = await context.newPage();
     await page.goto(`/lists/${list.id}`);
-    const source = await page.getByRole("button", { name: "Touch B", exact: true }).boundingBox();
-    const target = await page.getByRole("button", { name: "Touch A", exact: true }).boundingBox();
+    const handle = page.getByRole("button", { name: "Touch B verschieben" });
+    await expect(handle).toHaveCSS("user-select", "none");
+    await expect(handle).toHaveCSS("touch-action", "none");
+    const source = await handle.boundingBox();
+    const target = await page.getByRole("button", { name: "Touch A verschieben" }).boundingBox();
     expect(source && target).toBeTruthy();
     const sx = source!.x + source!.width / 2;
     const sy = source!.y + source!.height / 2;
     const tx = target!.x + target!.width / 2;
     const ty = target!.y + target!.height / 2;
+    const text = await page.getByRole("button", { name: "Touch B", exact: true }).boundingBox();
+    expect(text).not.toBeNull();
+    await page.evaluate(
+      async ({ x, y, ty }) => {
+        const node = document.elementFromPoint(x, y)!;
+        const fire = (type: string, cy: number) => {
+          const touch = new Touch({ identifier: 1, target: node, clientX: x, clientY: cy });
+          node.dispatchEvent(
+            new TouchEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              touches: type === "touchend" ? [] : [touch],
+              targetTouches: type === "touchend" ? [] : [touch],
+              changedTouches: [touch],
+            }),
+          );
+        };
+        fire("touchstart", y);
+        await new Promise((resolve) => setTimeout(resolve, 320));
+        fire("touchmove", ty);
+        fire("touchend", ty);
+      },
+      { x: text!.x + text!.width / 2, y: text!.y + text!.height / 2, ty },
+    );
+    const itemIds = async () =>
+      stateSchema
+        .parse(await (await request.get("/api/state")).json())
+        .items.filter((i) => i.listId === list.id)
+        .map((i) => i.id);
+    expect(await itemIds()).toEqual([a.id, b.id]);
     await page.evaluate(
       async ({ sx, sy, tx, ty }) => {
         const node = document.elementFromPoint(sx, sy)!;
@@ -185,7 +255,7 @@ test("touch hold on item text drags without opening the editor", async ({
             }),
           );
         fire("touchstart", sx, sy);
-        await new Promise((resolve) => setTimeout(resolve, 320));
+        await new Promise((resolve) => setTimeout(resolve, 1100));
         for (let i = 1; i <= 10; i++) {
           fire("touchmove", sx + ((tx - sx) * i) / 10, sy + ((ty - sy) * i) / 10);
           await new Promise((resolve) => setTimeout(resolve, 16));
@@ -194,14 +264,7 @@ test("touch hold on item text drags without opening the editor", async ({
       },
       { sx, sy, tx, ty },
     );
-    await expect
-      .poll(async () =>
-        stateSchema
-          .parse(await (await request.get("/api/state")).json())
-          .items.filter((i) => i.listId === list.id)
-          .map((i) => i.id),
-      )
-      .toEqual([b.id, a.id]);
+    await expect.poll(itemIds).toEqual([b.id, a.id]);
     await expect(page.getByRole("dialog")).toHaveCount(0);
   } finally {
     await context.close();

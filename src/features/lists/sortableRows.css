@@ -13,14 +13,20 @@
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 0;
   background: transparent;
   color: var(--color-ink);
   cursor: grab;
   touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   transform: translateY(-50%);
+}
+
+.sort-handle svg {
+  pointer-events: none;
 }
 
 .sort-handle:focus-visible {
@@ -35,4 +41,24 @@
 .sortable-row > .list-row,
 .sortable-row > .item-details {
   padding-inline-start: 2.75rem;
+}
+
+/* Keep the link's touch area beside the handle, not underneath it. On iPadOS,
+   long-pressing an overlapping link can open its native preview instead of dragging. */
+.list-overview .sortable-row {
+  display: flex;
+  align-items: center;
+}
+
+.list-overview .sortable-row > .sort-handle {
+  position: relative;
+  top: auto;
+  flex: none;
+  transform: none;
+}
+
+.list-overview .sortable-row > .list-row {
+  flex: 1;
+  min-width: 0;
+  padding-inline-start: 0;
 }
