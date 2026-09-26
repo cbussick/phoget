@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { inflateSync } from "node:zlib";
 
 const read = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -33,6 +34,21 @@ test("navigation uses the canonical icon and the app's blue palette", async () =
     assert.ok(svg.includes(color));
     assert.ok(tokens.includes(color));
   }
+});
+
+test("iOS home-screen icon has an opaque light-blue background", async () => {
+  const png = await readFile(new URL("../public/apple-touch-icon.png", import.meta.url));
+  // RGB (type 2) has no alpha channel for iOS to fill with black.
+  assert.equal(png[25], 2);
+  const chunks: Buffer[] = [];
+  for (let offset = 8; offset < png.length;) {
+    const length = png.readUInt32BE(offset);
+    const type = png.toString("ascii", offset + 4, offset + 8);
+    if (type === "IDAT") chunks.push(png.subarray(offset + 8, offset + 8 + length));
+    offset += 12 + length;
+  }
+  // PNG's first pixel has no left or upper neighbor, regardless of its row filter.
+  assert.deepEqual(inflateSync(Buffer.concat(chunks)).subarray(1, 4), Buffer.from([139, 205, 241]));
 });
 
 test("home-screen PNG exports have the expected dimensions", async () => {
