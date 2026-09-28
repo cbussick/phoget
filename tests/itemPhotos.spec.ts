@@ -72,11 +72,23 @@ test("camera and gallery pickers share upload handling without losing the item e
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("button", { name: "Änderungen speichern" })).toBeEnabled();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByRole("button", { name: "Foto wählen" }).click();
+    const trigger = page.getByRole("button", { name: "Foto wählen" });
+    await trigger.click();
     await expect(choices).toBeVisible();
-    const sheet = await choices.boundingBox();
-    expect(sheet).not.toBeNull();
-    expect(Math.abs(sheet!.y + sheet!.height - 844)).toBeLessThan(2);
+    const buttonBox = await trigger.boundingBox();
+    const popupBox = await choices.boundingBox();
+    expect(buttonBox && popupBox).toBeTruthy();
+    expect(popupBox!.x).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.x + popupBox!.width).toBeLessThanOrEqual(390);
+    expect(popupBox!.y).toBeGreaterThanOrEqual(0);
+    expect(popupBox!.y + popupBox!.height).toBeLessThanOrEqual(844);
+    // The popup stays attached to the button, below when there is room, above otherwise.
+    expect(
+      Math.min(
+        Math.abs(popupBox!.y - buttonBox!.y - buttonBox!.height),
+        Math.abs(popupBox!.y + popupBox!.height - buttonBox!.y),
+      ),
+    ).toBeLessThanOrEqual(24);
     await page.keyboard.press("Escape");
     const state = stateSchema.parse(await (await request.get("/api/state")).json());
     expect(state.items.find((entry) => entry.id === item.id)?.hasPhoto).toBe(false);
