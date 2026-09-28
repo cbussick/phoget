@@ -2,6 +2,8 @@ import express, { type ErrorRequestHandler } from "express";
 import helmet from "helmet";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
+import { readItemPhoto, changeItemPhoto } from "./db/itemPhotos.js";
+import { processPhoto, maxUploadBytes } from "./photos/processPhoto.js";
 import { HttpError, parseInput } from "./httpErrors.js";
 import { userSchema } from "../shared/accounts.js";
 import { authRouter, usersRouter, authenticate, requireReady, adminOnly } from "./auth/routes.js";
@@ -92,7 +94,9 @@ app.use("/api", (request, response, next) => {
       response.status(403).json({ error: "Websiteübergreifende Anfragen sind nicht erlaubt." });
       return;
     }
-    if (request.method !== "DELETE" && !request.is("application/json")) {
+    const photoUpload =
+      request.method === "PUT" && /^\/items\/[0-9a-f-]+\/photo$/.test(request.path);
+    if (!photoUpload && request.method !== "DELETE" && !request.is("application/json")) {
       response.status(415).json({ error: "Sende Daten im JSON-Format." });
       return;
     }
@@ -107,6 +111,41 @@ app.get("/api/health", async (_request, response) => {
 app.use("/api", authRouter);
 app.use("/api", authenticate, requireReady);
 app.use("/api", usersRouter);
+app.get("/api/items/:id/photo", async (request, response) => {
+  const data = await readItemPhoto(parseInput(idSchema, request.params.id));
+  response.setHeader("Content-Type", "image/webp");
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.send(data);
+});
+app.put(
+  "/api/items/:id/photo",
+  express.raw({
+    type: [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+      "application/octet-stream",
+    ],
+    limit: maxUploadBytes,
+  }),
+  async (request, response) => {
+    const id = parseInput(idSchema, request.params.id);
+    if (!Buffer.isBuffer(request.body)) throw new HttpError(415, "Ungültiger Bildtyp.");
+    const data = await processPhoto(request.body);
+    await changeItemPhoto(id, data, userSchema.parse(response.locals.user).id);
+    response.status(204).end();
+  },
+);
+app.delete("/api/items/:id/photo", async (request, response) => {
+  await changeItemPhoto(
+    parseInput(idSchema, request.params.id),
+    null,
+    userSchema.parse(response.locals.user).id,
+  );
+  response.status(204).end();
+});
 app.get("/api/state", async (_request, response) =>
   response.json(stateSchema.parse(await readState())),
 );

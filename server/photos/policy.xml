@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policymap>
+  <policy domain="delegate" rights="none" pattern="*" />
+  <policy domain="filter" rights="none" pattern="*" />
+  <policy domain="path" rights="none" pattern="@*" />
+  <policy domain="module" rights="none" pattern="*" />
+  <policy domain="module" rights="read | write" pattern="JPEG" />
+  <policy domain="module" rights="read | write" pattern="PNG" />
+  <policy domain="module" rights="read | write" pattern="WEBP" />
+  <policy domain="module" rights="read | write" pattern="HEIC" />
+  <policy domain="resource" name="width" value="12KP" />
+  <policy domain="resource" name="height" value="12KP" />
+  <policy domain="resource" name="list-length" value="8" />
+  <policy domain="resource" name="memory" value="128MiB" />
+  <policy domain="resource" name="map" value="128MiB" />
+  <policy domain="resource" name="disk" value="256MiB" />
+  <policy domain="resource" name="time" value="15" />
+</policymap>

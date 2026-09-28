@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { ApiError } from "../../shared/api/request";
+import { errorSchema } from "../../../shared/contracts";
 import { request } from "../../shared/api/request";
 import {
   listInputSchema,
@@ -43,4 +45,20 @@ export const listApi = {
       body: JSON.stringify(itemPatchSchema.parse(input)),
     }),
   removeItem: (id: string) => request("/items/" + id, z.undefined(), { method: "DELETE" }),
+  removePhoto: (id: string) => request(`/items/${id}/photo`, z.undefined(), { method: "DELETE" }),
+  uploadPhoto: async (id: string, file: File) => {
+    const response = await fetch(`/api/items/${id}/photo`, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream", "X-Phoget-Request": "1" },
+      body: file,
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!response.ok) {
+      const parsed = errorSchema.safeParse(await response.json().catch(() => null));
+      throw new ApiError(
+        response.status,
+        parsed.success ? parsed.data.error : "Das Foto konnte nicht hochgeladen werden.",
+      );
+    }
+  },
 };

@@ -67,6 +67,7 @@ export const itemSchema = itemInputSchema.extend({
   id: idSchema,
   listId: idSchema,
   completed: z.boolean(),
+  hasPhoto: z.boolean().default(false),
   createdAt: z.iso.datetime(),
 });
 export const settingsSchema = settingsInputSchema.extend({ id: z.literal(1) });

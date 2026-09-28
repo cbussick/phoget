@@ -7,6 +7,7 @@ import {
   boolean,
   integer,
   index,
+  customType,
 } from "drizzle-orm/pg-core";
 
 import { DEFAULT_LIST_COLOR } from "../../shared/colors.js";
@@ -37,6 +38,13 @@ export const items = pgTable(
   },
   (table) => [index("items_list_id_idx").on(table.listId)],
 );
+const bytea = customType<{ data: Buffer }>({ dataType: () => "bytea" });
+export const itemPhotos = pgTable("item_photos", {
+  itemId: uuid()
+    .primaryKey()
+    .references(() => items.id, { onDelete: "cascade" }),
+  data: bytea().notNull(),
+});
 export const settings = pgTable("settings", {
   id: integer().primaryKey(),
   householdName: text().notNull(),

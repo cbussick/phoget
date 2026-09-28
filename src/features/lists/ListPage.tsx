@@ -39,7 +39,12 @@ export function ListPage({
       label={item.name}
       className={"item-row" + (item.completed ? " is-complete" : "")}
     >
-      <ItemRow item={item} onEdit={setSelected} onAnnounce={setAnnouncement} />
+      <ItemRow
+        item={item}
+        photoVersion={list.updatedAt}
+        onEdit={setSelected}
+        onAnnounce={setAnnouncement}
+      />
     </SortableRow>
   );
   return (

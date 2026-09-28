@@ -190,6 +190,79 @@ test("lists and items persist, edit, complete, restore, and cascade delete", asy
   assert.ok(!state.items.some((row) => row.listId === list.id));
   assert.equal((await send("/items/" + item.id, "PATCH", { completed: true })).status, 404);
 });
+test("photos are private, separate from state, replaceable and cascade with items", async () => {
+  const list = await create("Photo list");
+  const item = itemSchema.parse(
+    await (await send(`/lists/${list.id}/items`, "POST", { name: "Photo item" })).json(),
+  );
+  const path = `/items/${item.id}/photo`;
+  assert.equal((await fetch(base + "/api" + path)).status, 401);
+  assert.equal((await send(path)).status, 404);
+  assert.equal(
+    (
+      await fetch(base + "/api" + path, {
+        method: "PUT",
+        headers: { "Content-Type": "image/png", "X-Phoget-Request": "1" },
+        body: Buffer.from("not an image"),
+      })
+    ).status,
+    401,
+  );
+  const invalid = await fetch(base + "/api" + path, {
+    method: "PUT",
+    headers: { Cookie: cookie, "Content-Type": "image/png", "X-Phoget-Request": "1" },
+    body: Buffer.from("not an image"),
+  });
+  assert.equal(invalid.status, 415);
+  // Insert known bytes to isolate storage/auth/cascade tests from the system image converter.
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+    item.id,
+    Buffer.from("RIFFtestWEBP"),
+  ]);
+  const state = await (await send("/state")).json();
+  assert.equal(stateSchema.parse(state).items.find((row) => row.id === item.id)?.hasPhoto, true);
+  assert.ok(!JSON.stringify(state).includes("RIFFtestWEBP"));
+  const failedReplacement = await fetch(base + "/api" + path, {
+    method: "PUT",
+    headers: { Cookie: cookie, "Content-Type": "image/png", "X-Phoget-Request": "1" },
+    body: Buffer.from("not an image"),
+  });
+  assert.equal(failedReplacement.status, 415);
+  const photo = await send(path);
+  assert.equal(photo.status, 200);
+  assert.equal(photo.headers.get("content-type"), "image/webp");
+  assert.equal(photo.headers.get("cache-control"), "no-store");
+  assert.equal(await photo.text(), "RIFFtestWEBP");
+  assert.equal((await send(path, "DELETE")).status, 204);
+  assert.equal((await send(path)).status, 404);
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+    item.id,
+    Buffer.from("RIFFtestWEBP"),
+  ]);
+  assert.equal((await send(`/items/${item.id}`, "DELETE")).status, 204);
+  assert.equal(
+    (await pool.query('SELECT * FROM item_photos WHERE "itemId"=$1', [item.id])).rowCount,
+    0,
+  );
+});
+
+test("photo deletion and list deletion do not deadlock", async () => {
+  const list = await create("Concurrent photo deletion");
+  const item = itemSchema.parse(
+    await (await send(`/lists/${list.id}/items`, "POST", { name: "Camera" })).json(),
+  );
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+    item.id,
+    Buffer.from("RIFFtestWEBP"),
+  ]);
+  const results = await Promise.all([
+    send(`/items/${item.id}/photo`, "DELETE"),
+    send(`/lists/${list.id}`, "DELETE"),
+  ]);
+  assert.ok([204, 404].includes(results[0].status));
+  assert.equal(results[1].status, 204);
+});
+
 test("list activity is server-owned and covers every list/item mutation", async () => {
   const list = await create("Activity");
   assert.equal(list.updatedBy, "Test Admin");

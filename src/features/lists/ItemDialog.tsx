@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ItemPhoto } from "./ItemPhoto";
 import { itemInputSchema, type Item } from "../../../shared/contracts";
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
@@ -16,6 +18,7 @@ export function ItemDialog({
   onClose: () => void;
   onAnnounce: (message: string) => void;
 }) {
+  const [photoBusy, setPhotoBusy] = useState(false);
   const save = useAction((value: { name: string; note: string }) =>
     listApi.editItem(item.id, value),
   );
@@ -35,7 +38,7 @@ export function ItemDialog({
     },
   );
   useErrorSnackbar(error ?? remove.error);
-  const busy = saving || remove.isPending;
+  const busy = saving || remove.isPending || photoBusy;
   return (
     <Dialog
       title={item.name}
@@ -43,7 +46,7 @@ export function ItemDialog({
       onClose={onClose}
       busy={busy}
       onSubmit={(event) => {
-        if (remove.isPending) event.preventDefault();
+        if (remove.isPending || photoBusy) event.preventDefault();
         else submit(event);
       }}
     >
@@ -63,6 +66,7 @@ export function ItemDialog({
           />
         )}
       </form.Field>
+      <ItemPhoto item={item} onBusyChange={setPhotoBusy} />
       <div className="dialog-actions">
         <Button
           variant="danger"

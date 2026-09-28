@@ -57,5 +57,6 @@ The `app` container connects to PostgreSQL over Docker's private network and res
 
 - Serve over HTTPS and keep the app's listening port private.
 - Use `GET /api/health` to check database connectivity.
-- Back up PostgreSQL regularly.
+- Back up PostgreSQL regularly. Item photos are stored as bounded WebP bytes in the `item_photos` table, so backups and WAL now include photos; verify backup size and a restore before enabling uploads on an existing installation.
+- The app container installs ImageMagick with HEIC, JPEG and WebP modules. If running outside Docker, install equivalent `magick` codecs and configure the restricted `server/photos/policy.xml` via `MAGICK_CONFIGURE_PATH` before accepting uploads. Check HEIC conversion with a real photo on the final server image.
 - Run `npm audit --omit=dev` before releases.

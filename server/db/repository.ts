@@ -3,7 +3,7 @@ import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
 import { database } from "./database.js";
 import type { User } from "../../shared/accounts.js";
-import { items, lists, settings, itemNames, users } from "./schema.js";
+import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.js";
 import {
   itemSchema,
   itemHistorySchema,
@@ -46,10 +46,17 @@ export async function readState() {
           asc(items.id),
         );
       const [storedSettings] = await transaction.select().from(settings).where(eq(settings.id, 1));
+      const photoIds = new Set(
+        (await transaction.select({ itemId: itemPhotos.itemId }).from(itemPhotos)).map(
+          (row) => row.itemId,
+        ),
+      );
 
       return stateSchema.parse({
         lists: z.array(databaseListSchema).parse(storedLists),
-        items: z.array(databaseItemSchema).parse(storedItems),
+        items: z
+          .array(databaseItemSchema)
+          .parse(storedItems.map((row) => ({ ...row, hasPhoto: photoIds.has(row.id) }))),
         settings: settingsSchema.parse(storedSettings),
       });
     },
