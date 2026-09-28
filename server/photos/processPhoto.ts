@@ -64,6 +64,8 @@ export async function processPhoto(data: Buffer) {
         "-limit",
         "thread",
         "2",
+        // Decode large JPEGs at reduced resolution before pixel-cache limits apply.
+        ...(format === "jpg" ? ["-define", "jpeg:size=1600x1600"] : []),
         `${source}[0]`,
         "-auto-orient",
         "-resize",
