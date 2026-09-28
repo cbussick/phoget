@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../shared/ui/Button/Button";
 import "./updateNotice.css";
 
-const checkIntervalMs = 60_000;
+const checkIntervalMs = 10 * 60_000;
 
 export function UpdateNotice() {
   const [availableVersion, setAvailableVersion] = useState<string | null>(null);
