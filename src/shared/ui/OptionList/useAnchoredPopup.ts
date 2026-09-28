@@ -7,6 +7,7 @@ export function useAnchoredPopup(
   trigger: RefObject<HTMLElement | null>,
   popup: RefObject<HTMLDivElement | null>,
   constrainHeight = true,
+  mobileSheet = false,
 ) {
   useLayoutEffect(() => {
     const element = popup.current;
@@ -19,6 +20,12 @@ export function useAnchoredPopup(
     const gutter = gap * 2;
     const maxHeight = parseFloat(style.maxHeight);
     const position = () => {
+      if (mobileSheet && window.matchMedia("(max-width: 40rem)").matches) {
+        element.style.removeProperty("width");
+        element.style.removeProperty("left");
+        element.style.removeProperty("top");
+        return;
+      }
       const rect = anchor.getBoundingClientRect();
       if (!constrainHeight) {
         element.style.width = Math.min(rect.width, window.innerWidth - gutter * 2) + "px";
@@ -65,5 +72,5 @@ export function useAnchoredPopup(
       window.removeEventListener("scroll", viewportChanged, true);
       if (element.matches(":popover-open")) element.hidePopover();
     };
-  }, [open, trigger, popup, constrainHeight]);
+  }, [open, trigger, popup, constrainHeight, mobileSheet]);
 }
