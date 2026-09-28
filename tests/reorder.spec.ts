@@ -40,6 +40,48 @@ test("overview drag handle does not overlap the list link on iPad", async ({
   }
 });
 
+test("dragging a list link reorders without navigating on mouse release", async ({
+  page,
+  request,
+  context,
+}) => {
+  const session = await request.post("/api/session", { data: testCredentials });
+  expect(session.ok()).toBeTruthy();
+  await context.addCookies((await request.storageState()).cookies);
+  const one = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Release source" } })).json(),
+  );
+  const two = listSchema.parse(
+    await (await request.post("/api/lists", { data: { name: "Release target" } })).json(),
+  );
+  try {
+    await page.goto("/");
+    const source = await page.getByRole("link", { name: "Release target" }).boundingBox();
+    const target = await page.getByRole("link", { name: "Release source" }).boundingBox();
+    expect(source && target).toBeTruthy();
+    const x = source!.x + source!.width / 2;
+    const y = source!.y + source!.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, target!.y + target!.height / 2, { steps: 12 });
+    await page.mouse.up();
+    await expect
+      .poll(async () => {
+        const ids = stateSchema
+          .parse(await (await request.get("/api/state")).json())
+          .lists.map((l) => l.id);
+        return ids.indexOf(two.id) < ids.indexOf(one.id);
+      })
+      .toBe(true);
+    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole("link", { name: "Release target" }).click();
+    await expect(page).toHaveURL(new RegExp(`/lists/${two.id}$`));
+  } finally {
+    await request.delete(`/api/lists/${one.id}`);
+    await request.delete(`/api/lists/${two.id}`);
+  }
+});
+
 test("dragging past either end stays within the list", async ({ page, request, context }) => {
   const session = await request.post("/api/session", { data: testCredentials });
   expect(session.ok()).toBeTruthy();
