@@ -266,15 +266,6 @@
   box-shadow: var(--shadow-card);
 }
 
-@media (width <= 40rem) {
-  .item-photo-choices {
-    inset: auto 0 0;
-    width: 100%;
-    padding: var(--space-4) var(--space-6);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-}
-
 .item-photo-picker {
   position: relative;
   display: flex;

@@ -31,7 +31,7 @@ export function ItemPhoto({
   const restoreAfterRemoval = useRef(false);
   const [error, setError] = useState<string | null>(null);
   useErrorSnackbar(error);
-  useAnchoredPopup(choosing && !busy, trigger, popup, false, true);
+  useAnchoredPopup(choosing && !busy, trigger, popup, false);
   useLayoutEffect(() => {
     if (confirmDelete) cancelDelete.current?.focus();
   }, [confirmDelete]);
