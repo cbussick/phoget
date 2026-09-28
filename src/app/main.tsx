@@ -10,6 +10,7 @@ import "./extensions.css";
 import { App } from "./App";
 import { SnackbarProvider } from "../shared/ui/Snackbar/Snackbar";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { UpdateNotice } from "./UpdateNotice";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
@@ -18,6 +19,7 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <SnackbarProvider>
           <App />
+          <UpdateNotice />
         </SnackbarProvider>
       </QueryClientProvider>
     </ErrorBoundary>
