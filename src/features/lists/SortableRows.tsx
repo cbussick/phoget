@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -105,6 +105,21 @@ export function SortableRows<T extends { id: string }>({
   const [order, setOrder] = useState<string[]>(() => rows.map((row) => row.id));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // A drag started on a link can still produce a click after mouseup.
+  // Keep this until the next pointer press so no delayed compatibility click navigates.
+  const suppressClick = useRef(false);
+  const listRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    // dnd-kit intercepts the post-drag click at document capture, before React
+    // sees it. Prevent the browser's native link navigation at window capture.
+    const preventDragClick = (event: MouseEvent) => {
+      if (!suppressClick.current || !listRef.current?.contains(event.target as Node)) return;
+      event.preventDefault();
+      suppressClick.current = false;
+    };
+    window.addEventListener("click", preventDragClick, true);
+    return () => window.removeEventListener("click", preventDragClick, true);
+  }, []);
   const client = useQueryClient();
   const ids = rows.map((row) => row.id);
   const signature = ids.join("|");
@@ -151,6 +166,10 @@ export function SortableRows<T extends { id: string }>({
       sensors={sensors}
       collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+      onDragStart={({ activatorEvent }) => {
+        if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart")
+          suppressClick.current = true;
+      }}
       onDragEnd={finish}
       accessibility={{
         screenReaderInstructions: {
@@ -170,7 +189,18 @@ export function SortableRows<T extends { id: string }>({
       }}
     >
       <SortableContext items={visible} strategy={verticalListSortingStrategy}>
-        <ul className={className}>{visible.map((id) => renderRow(byId.get(id)!))}</ul>
+        <ul
+          ref={listRef}
+          className={className}
+          onMouseDownCapture={() => {
+            suppressClick.current = false;
+          }}
+          onTouchStartCapture={() => {
+            suppressClick.current = false;
+          }}
+        >
+          {visible.map((id) => renderRow(byId.get(id)!))}
+        </ul>
       </SortableContext>
     </DndContext>
   );
