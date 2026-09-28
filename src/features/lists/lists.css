@@ -223,7 +223,8 @@
 }
 
 .item-photo-label,
-.item-photo-hint {
+.item-photo-hint,
+.item-photo-status {
   flex-basis: 100%;
 }
 
@@ -245,6 +246,25 @@
   border: var(--border-width) solid var(--color-line);
   border-radius: var(--radius-sm);
   cursor: pointer;
+}
+
+.item-photo-camera-picker {
+  border-color: transparent;
+  color: var(--color-ink);
+  background: var(--color-accent);
+  font-weight: var(--font-weight-700);
+}
+
+@media (hover: hover) {
+  .item-photo-picker:not(:has(input:disabled)):hover {
+    border-color: var(--color-ink);
+    background: var(--color-fill-hover);
+  }
+
+  .item-photo-camera-picker:not(:has(input:disabled)):hover {
+    border-color: transparent;
+    background: var(--color-accent-hover);
+  }
 }
 
 .item-photo-picker:focus-within {

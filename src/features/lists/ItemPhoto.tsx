@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useId, useState, type ChangeEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Item } from "../../../shared/contracts";
 import { householdKey } from "../../shared/api/queryKeys";
@@ -15,6 +15,7 @@ export function ItemPhoto({
   onBusyChange: (busy: boolean) => void;
 }) {
   const client = useQueryClient();
+  const hintId = useId();
   const [hasPhoto, setHasPhoto] = useState(item.hasPhoto);
   const [version, setVersion] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -87,18 +88,36 @@ export function ItemPhoto({
           </Button>
         </>
       ) : null}
-      <label className="item-photo-picker">
-        <span>
-          {busy ? "Foto wird verarbeitet…" : hasPhoto ? "Foto ersetzen" : "Foto hinzufügen"}
-        </span>
+      <label className="item-photo-picker item-photo-camera-picker">
+        <span>{hasPhoto ? "Neues Foto aufnehmen" : "Foto aufnehmen"}</span>
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+          accept="image/*"
+          capture="environment"
+          aria-describedby={hintId}
           disabled={busy}
           onChange={upload}
         />
       </label>
-      <span className="item-photo-hint">JPEG, PNG, WebP oder HEIC · max. 12 MB</span>
+      <label className="item-photo-picker">
+        <span>{hasPhoto ? "Anderes Foto auswählen" : "Foto auswählen"}</span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+          aria-describedby={hintId}
+          disabled={busy}
+          onChange={upload}
+        />
+      </label>
+      {busy ? (
+        <span className="item-photo-status" role="status">
+          Foto wird verarbeitet…
+        </span>
+      ) : null}
+      <span className="item-photo-hint" id={hintId}>
+        JPEG, PNG, WebP oder HEIC · max. 12 MB. Je nach Gerät öffnet „Foto aufnehmen“ die Kamera
+        oder die Dateiauswahl.
+      </span>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { test } from "./browserTest";
 import { itemSchema, listSchema, stateSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-test("item photo picker keeps editing available after a rejected upload", async ({
+test("camera and gallery pickers share upload handling without losing the item edit", async ({
   page,
   request,
   context,
@@ -23,15 +23,31 @@ test("item photo picker keeps editing available after a rejected upload", async 
     await page.goto(`/lists/${list.id}`);
     await page.getByRole("button", { name: "A camera", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByText("Foto hinzufügen")).toBeVisible();
-    await page.locator('input[type="file"]').setInputFiles({
+    await expect(page.getByText("Foto aufnehmen", { exact: true })).toBeVisible();
+    await expect(page.getByText("Foto auswählen", { exact: true })).toBeVisible();
+    const camera = page.locator(".item-photo-camera-picker input");
+    const gallery = page.locator(".item-photo-picker:not(.item-photo-camera-picker) input");
+    await expect(camera).toHaveAttribute("capture", "environment");
+    await expect(camera).toHaveAttribute("accept", "image/*");
+    await expect(gallery).toHaveAttribute("accept", /image\/heic/);
+    await expect(gallery).not.toHaveAttribute("capture", "environment");
+    const badPhoto = {
       name: "bad.jpg",
       mimeType: "image/jpeg",
       buffer: Buffer.from("not a real image"),
-    });
-    await expect(
-      page.getByText("Bitte wähle ein JPEG-, PNG-, WebP- oder HEIC-Foto aus."),
-    ).toBeVisible();
+    };
+    for (const input of [camera, gallery]) {
+      const response = page.waitForResponse(
+        (result) =>
+          result.url().endsWith(`/api/items/${item.id}/photo`) &&
+          result.request().method() === "PUT",
+      );
+      await input.setInputFiles(badPhoto);
+      expect((await response).status()).toBe(415);
+      await expect(
+        page.getByText("Bitte wähle ein JPEG-, PNG-, WebP- oder HEIC-Foto aus.").last(),
+      ).toBeVisible();
+    }
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("button", { name: "Änderungen speichern" })).toBeEnabled();
     const state = stateSchema.parse(await (await request.get("/api/state")).json());
