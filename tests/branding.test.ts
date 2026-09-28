@@ -17,7 +17,11 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
   assert.match(html, /<link rel="icon" href="\/icon.svg" type="image\/svg\+xml" \/>/);
   await readFile(new URL("../public/icon.svg", import.meta.url));
   assert.match(html, /href="\/apple-touch-icon.png"/);
-  assert.match(html, /href="\/site.webmanifest"/);
+  // Cloudflare Access protects the manifest; Chrome must send its Access cookie.
+  assert.match(
+    html,
+    /<link rel="manifest" href="\/site.webmanifest" crossorigin="use-credentials" \/>/,
+  );
   assert.equal(manifest.name, "Don't Phoget");
   assert.equal(manifest.short_name, "Don't Phoget");
   for (const icon of manifest.icons) {
