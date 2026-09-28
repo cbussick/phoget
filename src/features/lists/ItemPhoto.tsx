@@ -16,16 +16,18 @@ export function ItemPhoto({
 }) {
   const client = useQueryClient();
   const hintId = useId();
+  const choicesId = useId();
   const [hasPhoto, setHasPhoto] = useState(item.hasPhoto);
   const [version, setVersion] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [choosing, setChoosing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useErrorSnackbar(error);
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
+    setChoosing(false);
     if (!file) return;
     setError(null);
     if (file.size > 12 * 1024 * 1024) {
@@ -57,7 +59,7 @@ export function ItemPhoto({
     try {
       await listApi.removePhoto(item.id);
       setHasPhoto(false);
-      setExpanded(false);
+      setChoosing(false);
       await client.invalidateQueries({ queryKey: householdKey });
     } catch (cause) {
       setError(
@@ -73,50 +75,56 @@ export function ItemPhoto({
     <div className="item-photo-field">
       <span className="item-photo-label">Foto</span>
       {hasPhoto ? (
-        <>
-          <Button
-            variant="ghost"
-            className="item-photo-preview"
-            disabled={busy}
-            onClick={() => setExpanded((value) => !value)}
-            aria-label={expanded ? "Foto verkleinern" : "Foto vergrößern"}
-          >
-            <img src={url} alt={`Foto zu ${item.name}`} className={expanded ? "is-expanded" : ""} />
-          </Button>
+        <img src={url} alt={`Foto zu ${item.name}`} className="item-photo-image" />
+      ) : null}
+      <div className="item-photo-actions">
+        {hasPhoto ? (
           <Button variant="secondary" disabled={busy} onClick={remove}>
             Foto entfernen
           </Button>
-        </>
+        ) : null}
+        <Button
+          variant={hasPhoto ? "secondary" : "primary"}
+          disabled={busy}
+          aria-expanded={choosing}
+          aria-controls={choosing ? choicesId : undefined}
+          onClick={() => setChoosing((value) => !value)}
+        >
+          {hasPhoto ? "Anderes Foto wählen" : "Foto wählen"}
+        </Button>
+      </div>
+      {choosing ? (
+        <div className="item-photo-choices" id={choicesId} role="group" aria-label="Fotoquelle">
+          <label className="item-photo-picker">
+            <span>Foto aufnehmen</span>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              aria-describedby={hintId}
+              disabled={busy}
+              onChange={upload}
+            />
+          </label>
+          <label className="item-photo-picker">
+            <span>Foto auswählen</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+              aria-describedby={hintId}
+              disabled={busy}
+              onChange={upload}
+            />
+          </label>
+        </div>
       ) : null}
-      <label className="item-photo-picker item-photo-camera-picker">
-        <span>{hasPhoto ? "Neues Foto aufnehmen" : "Foto aufnehmen"}</span>
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          aria-describedby={hintId}
-          disabled={busy}
-          onChange={upload}
-        />
-      </label>
-      <label className="item-photo-picker">
-        <span>{hasPhoto ? "Anderes Foto auswählen" : "Foto auswählen"}</span>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-          aria-describedby={hintId}
-          disabled={busy}
-          onChange={upload}
-        />
-      </label>
       {busy ? (
         <span className="item-photo-status" role="status">
           Foto wird verarbeitet…
         </span>
       ) : null}
       <span className="item-photo-hint" id={hintId}>
-        JPEG, PNG, WebP oder HEIC · max. 12 MB. Je nach Gerät öffnet „Foto aufnehmen“ die Kamera
-        oder die Dateiauswahl.
+        JPEG, PNG, WebP oder HEIC · max. 12 MB.
       </span>
     </div>
   );

@@ -9,10 +9,8 @@ export function ItemRow({
   item,
   onEdit,
   onAnnounce,
-  photoVersion,
 }: {
   item: Item;
-  photoVersion: string;
   onEdit: (item: Item) => void;
   onAnnounce: (message: string) => void;
 }) {
@@ -27,14 +25,6 @@ export function ItemRow({
     <>
       <hr className="item-divider" aria-hidden="true" />
       <Button variant="ghost" size="content" className="item-details" onClick={() => onEdit(item)}>
-        {item.hasPhoto ? (
-          <img
-            className="item-photo-thumb"
-            src={`/api/items/${item.id}/photo?v=${encodeURIComponent(photoVersion)}`}
-            alt=""
-            loading="lazy"
-          />
-        ) : null}
         <span className="item-copy">
           <span className="item-name">{item.name}</span>
           {item.note ? <span className="item-note">{item.note}</span> : null}
