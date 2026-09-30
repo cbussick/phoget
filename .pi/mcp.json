@@ -2,7 +2,7 @@
   "mcpServers": {
     "linear-phoget": {
       "type": "http",
-      "url": "https://mcp.linear.app/mcp"
+      "url": "https://mcp.linear.app/mcp#phoget"
     }
   }
 }
