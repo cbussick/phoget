@@ -3,6 +3,56 @@ import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+  test(`overview link hover highlights the whole row (${reducedMotion})`, async ({
+    page,
+    request,
+    context,
+  }) => {
+    await page.emulateMedia({ reducedMotion });
+    const session = await request.post("/api/session", { data: testCredentials });
+    expect(session.ok()).toBeTruthy();
+    await context.addCookies((await request.storageState()).cookies);
+    const list = listSchema.parse(
+      await (await request.post("/api/lists", { data: { name: "Whole row hover" } })).json(),
+    );
+    try {
+      await page.goto("/");
+      const row = page.locator(".list-overview .sortable-row").filter({ hasText: list.name });
+      const link = row.getByRole("link", { name: list.name, exact: true });
+      const handle = row.getByRole("button", { name: `${list.name} verschieben` });
+      const hoverFill = await row.evaluate((node) => {
+        const probe = document.createElement("div");
+        probe.style.backgroundColor = "var(--color-fill-hover)";
+        node.append(probe);
+        const color = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return color;
+      });
+      expect(hoverFill).not.toBe("rgba(0, 0, 0, 0)");
+      await handle.hover();
+      await expect(row).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await link.hover();
+      await expect(row).toHaveCSS("background-color", hoverFill);
+      await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(handle).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(row).not.toHaveCSS("border-radius", "0px");
+      await handle.hover();
+      await expect(row).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await page.mouse.move(0, 0);
+      await handle.focus();
+      await page.keyboard.press("Tab");
+      await expect(link).toBeFocused();
+      await expect(link).toHaveCSS("outline-style", "solid");
+      await expect(row).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(new RegExp(`/lists/${list.id}$`));
+    } finally {
+      await request.delete(`/api/lists/${list.id}`);
+    }
+  });
+}
+
 test("overview drag handle does not overlap the list link on iPad", async ({
   page,
   request,

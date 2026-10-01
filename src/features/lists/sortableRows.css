@@ -48,6 +48,24 @@
 .list-overview .sortable-row {
   display: flex;
   align-items: center;
+  border-radius: var(--radius-md);
+}
+
+/* Only the navigation link triggers hover, but paint behind the handle too. */
+@media (hover: hover) {
+  .list-overview .sortable-row:has(> .list-row:hover) {
+    background: var(--color-fill-hover);
+  }
+
+  .list-overview .sortable-row > .list-row:hover:not(:active) {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .list-overview .sortable-row {
+    transition: background-color var(--duration-control) ease;
+  }
 }
 
 .list-overview .sortable-row > .sort-handle {
