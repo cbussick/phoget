@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 import { Pool } from "pg";
 import { test } from "./browserTest";
-import { itemSchema, listSchema, stateSchema } from "../shared/contracts";
+import { addItemResultSchema, listSchema, stateSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
 test("camera and gallery pickers share upload handling without losing the item edit", async ({
@@ -18,7 +18,7 @@ test("camera and gallery pickers share upload handling without losing the item e
     await (await request.post("/api/lists", { data: { name: "Photo picker" } })).json(),
   );
   try {
-    const item = itemSchema.parse(
+    const item = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "A camera" } })
       ).json(),
@@ -110,7 +110,7 @@ test("existing photo appears above its actions only in the edit dialog", async (
     await (await request.post("/api/lists", { data: { name: "Photo layout" } })).json(),
   );
   try {
-    const item = itemSchema.parse(
+    const item = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "With photo" } })
       ).json(),

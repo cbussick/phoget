@@ -70,6 +70,9 @@ export const itemSchema = itemInputSchema.extend({
   hasPhoto: z.boolean().default(false),
   createdAt: z.iso.datetime(),
 });
+export const addItemResultSchema = itemSchema.extend({
+  outcome: z.enum(["created", "restored", "duplicate"]),
+});
 export const settingsSchema = settingsInputSchema.extend({ id: z.literal(1) });
 export const stateSchema = z.object({
   lists: z.array(listSchema),

@@ -9,6 +9,7 @@ import {
   itemInputSchema,
   itemPatchSchema,
   itemSchema,
+  addItemResultSchema,
   reorderSchema,
 } from "../../../shared/contracts";
 
@@ -35,7 +36,7 @@ export const listApi = {
     }),
   remove: (id: string) => request("/lists/" + id, z.undefined(), { method: "DELETE" }),
   addItem: (id: string, input: z.input<typeof itemInputSchema>) =>
-    request("/lists/" + id + "/items", itemSchema, {
+    request("/lists/" + id + "/items", addItemResultSchema, {
       method: "POST",
       body: JSON.stringify(itemInputSchema.parse(input)),
     }),
