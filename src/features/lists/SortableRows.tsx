@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -7,6 +7,7 @@ import {
   closestCenter,
   useSensor,
   useSensors,
+  useDndContext,
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
@@ -43,16 +44,20 @@ export function SortableRow({
     transition,
     isDragging,
   } = useSortable({ id });
+  const { activatorEvent } = useDndContext();
   return (
     <li
       ref={setNodeRef}
       className={`${className} sortable-row${isDragging ? " is-dragging" : ""}`}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        position: "relative",
-        zIndex: isDragging ? 2 : undefined,
-      }}
+      data-keyboard-drag={activatorEvent?.type === "keydown" || undefined}
+      style={
+        {
+          transform: CSS.Transform.toString(transform),
+          "--sort-transition": transition ?? "transform 0s",
+          position: "relative",
+          zIndex: isDragging ? 2 : undefined,
+        } as CSSProperties
+      }
       onMouseDown={(event) => listeners?.onMouseDown?.(event)}
     >
       <button

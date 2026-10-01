@@ -1,5 +1,6 @@
 .sortable-row {
   touch-action: pan-y;
+  transition: var(--sort-transition);
 }
 
 .sortable-row.is-dragging {
@@ -51,21 +52,63 @@
   border-radius: var(--radius-md);
 }
 
-/* Only the navigation link triggers hover, but paint behind the handle too. */
-@media (hover: hover) {
-  .list-overview .sortable-row:has(> .list-row:hover) {
+.list-overview .sort-handle {
+  color: var(--color-ink-soft);
+}
+
+/* One row surface, with separate navigation and reorder affordances. */
+@media (hover: hover) and (pointer: fine) {
+  .list-overview .sortable-row:not(.is-dragging):hover {
     background: var(--color-fill-hover);
   }
 
-  .list-overview .sortable-row > .list-row:hover:not(:active) {
-    background: transparent;
+  .list-overview .sort-handle:hover {
+    color: var(--color-ink);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .list-overview .sortable-row {
-    transition: background-color var(--duration-control) ease;
+    transition:
+      var(--sort-transition),
+      background-color var(--duration-control) ease;
   }
+}
+
+/* Press wins over hover, immediately, across the link and handle areas. */
+.list-overview .sortable-row:not(.is-dragging):has(> .list-row:active) {
+  background: var(--color-fill-pressed);
+  transition: var(--sort-transition);
+}
+
+.list-overview .sortable-row.is-dragging {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-popover);
+  opacity: 0.9;
+  cursor: grabbing;
+  transition: var(--sort-transition);
+}
+
+.list-overview .sortable-row.is-dragging > .list-row {
+  cursor: grabbing;
+}
+
+.list-overview .sortable-row.is-dragging > .sort-handle,
+.list-overview .sort-handle:active {
+  color: var(--color-control-pressed);
+  cursor: grabbing;
+}
+
+/* Follow the pointer directly; keyboard and reduced-motion sorting are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .sortable-row {
+    /* Override every hover, press, and drag transition without changing position. */
+    transition: none !important;
+  }
+}
+
+.sortable-row[data-keyboard-drag] {
+  transition: none !important;
 }
 
 .list-overview .sortable-row > .sort-handle {
@@ -79,4 +122,6 @@
   flex: 1;
   min-width: 0;
   padding-inline-start: 0;
+  background: transparent;
+  transition: none;
 }

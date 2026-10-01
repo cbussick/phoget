@@ -4,7 +4,7 @@ import { testCredentials } from "./testCredentials";
 import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
 
 for (const reducedMotion of ["no-preference", "reduce"] as const) {
-  test(`overview link hover highlights the whole row (${reducedMotion})`, async ({
+  test(`overview row has unified hover, press, and drag feedback (${reducedMotion})`, async ({
     page,
     request,
     context,
@@ -21,24 +21,67 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       const row = page.locator(".list-overview .sortable-row").filter({ hasText: list.name });
       const link = row.getByRole("link", { name: list.name, exact: true });
       const handle = row.getByRole("button", { name: `${list.name} verschieben` });
-      const hoverFill = await row.evaluate((node) => {
-        const probe = document.createElement("div");
-        probe.style.backgroundColor = "var(--color-fill-hover)";
-        node.append(probe);
-        const color = getComputedStyle(probe).backgroundColor;
-        probe.remove();
-        return color;
-      });
+      const [hoverFill, pressedFill, raisedFill, idleDots, emphasizedDots] = await row.evaluate(
+        (node) =>
+          [
+            "--color-fill-hover",
+            "--color-fill-pressed",
+            "--color-surface-raised",
+            "--color-ink-soft",
+            "--color-ink",
+          ].map((token) => {
+            const probe = document.createElement("div");
+            probe.style.backgroundColor = `var(${token})`;
+            node.append(probe);
+            const color = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return color;
+          }),
+      );
       expect(hoverFill).not.toBe("rgba(0, 0, 0, 0)");
+      await page.mouse.move(0, 0);
+      await expect(handle).toHaveCSS("color", idleDots);
       await handle.hover();
-      await expect(row).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(row).toHaveCSS("background-color", hoverFill);
+      await expect(handle).toHaveCSS("color", emphasizedDots);
+      await expect(handle).toHaveCSS("cursor", "grab");
       await link.hover();
       await expect(row).toHaveCSS("background-color", hoverFill);
       await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
       await expect(handle).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
       await expect(row).not.toHaveCSS("border-radius", "0px");
+      await expect(handle).toHaveCSS("color", idleDots);
+      await page.mouse.down();
+      await expect(row).toHaveCSS("background-color", pressedFill);
+      await expect(row).toHaveCSS("transition-duration", "0s");
+      await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(handle).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await page.mouse.up();
+      await expect(page).toHaveURL(new RegExp(`/lists/${list.id}$`));
+      await page.goto("/");
       await handle.hover();
-      await expect(row).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await page.mouse.down();
+      await expect(row).toHaveCSS("background-color", hoverFill);
+      await expect(handle).toHaveCSS("cursor", "grabbing");
+      const handleBox = await handle.boundingBox();
+      expect(handleBox).not.toBeNull();
+      await page.mouse.move(
+        handleBox!.x + handleBox!.width / 2,
+        handleBox!.y + handleBox!.height / 2 - 12,
+        { steps: 3 },
+      );
+      await expect(row).toHaveClass(/is-dragging/);
+      await expect(row).toHaveCSS("background-color", raisedFill);
+      await expect(row).toHaveCSS("opacity", "0.9");
+      await expect(row).not.toHaveCSS("box-shadow", "none");
+      await expect(link).toHaveCSS("cursor", "grabbing");
+      if (reducedMotion === "reduce") await expect(row).toHaveCSS("transition-duration", "0s");
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await expect(row).not.toHaveClass(/is-dragging/);
+      await expect(row).toHaveCSS("opacity", "1");
+      await expect(row).toHaveCSS("box-shadow", "none");
+      await expect(page).toHaveURL(/\/$/);
       await page.mouse.move(0, 0);
       await handle.focus();
       await page.keyboard.press("Tab");
@@ -382,7 +425,15 @@ test("keyboard handle reorders lists and items without changing row actions", as
     await page.goto("/");
     const handle = page.getByRole("button", { name: "Sort two verschieben" });
     await handle.focus();
+    await expect(handle).toHaveCSS("outline-style", "solid");
     await page.keyboard.press("Space");
+    const draggedRow = page.locator(".list-overview .sortable-row.is-dragging");
+    await expect(draggedRow).toHaveAttribute("data-keyboard-drag", "true");
+    await expect(draggedRow).toHaveCSS("transition-duration", "0s");
+    await expect(page.locator(".list-overview .sortable-row").first()).toHaveCSS(
+      "transition-duration",
+      "0s",
+    );
     for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowUp");
     await page.keyboard.press("Space");
     await expect
