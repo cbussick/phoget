@@ -6,6 +6,7 @@ import { useValidatedForm, fieldError } from "../../shared/forms/useValidatedFor
 import { Button } from "../../shared/ui/Button/Button";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ComboBox } from "../../shared/ui/ComboBox/ComboBox";
+import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { request } from "../../shared/api/request";
 import { householdKey } from "../../shared/api/queryKeys";
@@ -21,6 +22,7 @@ export function AddItemForm({
   color: string;
   onAnnounce: (message: string) => void;
 }) {
+  const notify = useSnackbar();
   const input = useRef<HTMLInputElement>(null);
   const restoreInputFocus = useRef(false);
   const history = useQuery({
@@ -31,8 +33,12 @@ export function AddItemForm({
     retry: false,
   });
   const add = useAction(async (name: string) => {
-    await listApi.addItem(listId, { name });
-    onAnnounce(name + " zur Liste hinzugefügt");
+    const result = await listApi.addItem(listId, { name });
+    if (result.outcome === "duplicate") {
+      notify("Dieser Eintrag steht bereits auf der Liste.", "info");
+    } else if (result.outcome === "created") {
+      onAnnounce(name + " zur Liste hinzugefügt");
+    }
   });
   const suggestions = history.data?.oftenBought ?? [];
   const {

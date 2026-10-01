@@ -162,13 +162,52 @@ export async function createItem(
 ) {
   return database.transaction(async (transaction) => {
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    const [parent] = await transaction
+    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    // The list lock also serializes edits, toggles and reorders. Match with the
+    // same JavaScript case folding as item history; prefer an open legacy copy.
+    const candidates = await transaction
+      .select()
+      .from(items)
+      .where(eq(items.listId, listId))
+      .orderBy(asc(items.completed), asc(items.position), asc(items.createdAt), asc(items.id));
+    const existing = candidates.find(
+      (item) => item.name.toLowerCase() === input.name.toLowerCase(),
+    );
+    if (existing && !existing.completed) {
+      const [photo] = await transaction
+        .select()
+        .from(itemPhotos)
+        .where(eq(itemPhotos.itemId, existing.id));
+      return {
+        ...databaseItemSchema.parse(existing),
+        hasPhoto: !!photo,
+        outcome: "duplicate" as const,
+      };
+    }
+    await transaction
       .update(lists)
       .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
-      .where(eq(lists.id, listId))
-      .returning();
-    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
-    databaseListSchema.parse(parent);
+      .where(eq(lists.id, listId));
+    if (existing) {
+      const [restored] = await transaction
+        .update(items)
+        .set({
+          completed: false,
+          position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
+        })
+        .where(eq(items.id, existing.id))
+        .returning();
+      const [photo] = await transaction
+        .select()
+        .from(itemPhotos)
+        .where(eq(itemPhotos.itemId, existing.id));
+      return {
+        ...databaseItemSchema.parse(restored),
+        hasPhoto: !!photo,
+        outcome: "restored" as const,
+      };
+    }
     const [row] = await transaction
       .insert(items)
       .values({
@@ -182,7 +221,7 @@ export async function createItem(
       .insert(itemNames)
       .values({ listId, key: parsed.name.toLowerCase(), name: parsed.name })
       .onConflictDoNothing();
-    return parsed;
+    return { ...parsed, outcome: "created" as const };
   });
 }
 export async function changeItem(

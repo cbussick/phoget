@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 import { test } from "./browserTest";
 import { testCredentials } from "./testCredentials";
-import { stateSchema, itemSchema, listSchema } from "../shared/contracts";
+import { stateSchema, addItemResultSchema, listSchema } from "../shared/contracts";
 
 test("overview drag handle does not overlap the list link on iPad", async ({
   page,
@@ -170,12 +170,12 @@ test("dragging item text reorders without opening the editor or toggling the che
     await (await request.post("/api/lists", { data: { name: "Drag text" } })).json(),
   );
   try {
-    const a = itemSchema.parse(
+    const a = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "Drag A" } })
       ).json(),
     );
-    const b = itemSchema.parse(
+    const b = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "Drag B" } })
       ).json(),
@@ -229,12 +229,12 @@ test("long touch hold on the handle drags without selecting text or opening the 
     storageState: await request.storageState(),
   });
   try {
-    const a = itemSchema.parse(
+    const a = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "Touch A" } })
       ).json(),
     );
-    const b = itemSchema.parse(
+    const b = addItemResultSchema.parse(
       await (
         await request.post(`/api/lists/${list.id}/items`, { data: { name: "Touch B" } })
       ).json(),
@@ -344,10 +344,10 @@ test("keyboard handle reorders lists and items without changing row actions", as
       })
       .toBe(true);
     await expect(page.getByRole("link", { name: "Sort two", exact: true })).toBeVisible();
-    const a = itemSchema.parse(
+    const a = addItemResultSchema.parse(
       await (await request.post(`/api/lists/${one.id}/items`, { data: { name: "Sort A" } })).json(),
     );
-    const b = itemSchema.parse(
+    const b = addItemResultSchema.parse(
       await (await request.post(`/api/lists/${one.id}/items`, { data: { name: "Sort B" } })).json(),
     );
     await page.goto(`/lists/${one.id}`);

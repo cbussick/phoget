@@ -19,6 +19,7 @@ import {
   errorSchema,
   stateSchema,
   itemSchema,
+  addItemResultSchema,
   itemHistorySchema,
   listSchema,
   settingsSchema,
@@ -191,17 +192,14 @@ app.get("/api/lists/:id/history", async (request, response) => {
   );
 });
 app.post("/api/lists/:id/items", async (request, response) => {
-  response
-    .status(201)
-    .json(
-      itemSchema.parse(
-        await createItem(
-          parseInput(idSchema, request.params.id),
-          parseInput(itemInputSchema, request.body),
-          userSchema.parse(response.locals.user),
-        ),
-      ),
-    );
+  const result = addItemResultSchema.parse(
+    await createItem(
+      parseInput(idSchema, request.params.id),
+      parseInput(itemInputSchema, request.body),
+      userSchema.parse(response.locals.user),
+    ),
+  );
+  response.status(result.outcome === "created" ? 201 : 200).json(result);
 });
 app.patch("/api/items/:id", async (request, response) => {
   response.json(

@@ -7,6 +7,7 @@ import {
   stateSchema,
   listSchema,
   itemSchema,
+  addItemResultSchema,
   settingsSchema,
   itemHistorySchema,
 } from "../shared/contracts.js";
@@ -103,10 +104,10 @@ test("shared reorder persists, rejects stale orders, and keeps sections separate
   const renamed = await send(`/lists/${first.id}`, "PUT", { name: "Renamed first" });
   assert.equal(renamed.status, 200);
   assert.equal((await send("/lists/order", "PUT", { before: moved, after: before })).status, 204);
-  const a = itemSchema.parse(
+  const a = addItemResultSchema.parse(
     await (await send(`/lists/${first.id}/items`, "POST", { name: "A" })).json(),
   );
-  const b = itemSchema.parse(
+  const b = addItemResultSchema.parse(
     await (await send(`/lists/${first.id}/items`, "POST", { name: "B" })).json(),
   );
   const path = `/lists/${first.id}/items/order/open`;
@@ -164,7 +165,7 @@ test("lists and items persist, edit, complete, restore, and cascade delete", asy
     note: "Sweet ones",
   });
   assert.equal(added.status, 201);
-  const item = itemSchema.parse(await added.json());
+  const item = addItemResultSchema.parse(await added.json());
   assert.equal(item.name, "Tomatoes");
   const edited = await send("/items/" + item.id, "PATCH", {
     name: "Two packs",
@@ -190,9 +191,52 @@ test("lists and items persist, edit, complete, restore, and cascade delete", asy
   assert.ok(!state.items.some((row) => row.listId === list.id));
   assert.equal((await send("/items/" + item.id, "PATCH", { completed: true })).status, 404);
 });
+test("adding matches case-insensitively, restores details, and isolates lists", async () => {
+  const list = await create();
+  const other = await create("Other");
+  const path = `/lists/${list.id}/items`;
+  const original = addItemResultSchema.parse(
+    await (await send(path, "POST", { name: "Äpfel", note: "Original note" })).json(),
+  );
+  assert.equal(original.outcome, "created");
+  const before = stateSchema
+    .parse(await (await send("/state")).json())
+    .lists.find((row) => row.id === list.id);
+  const duplicateResponse = await send(path, "POST", { name: "ÄPFEL", note: "Ignored" });
+  assert.equal(duplicateResponse.status, 200);
+  const duplicate = addItemResultSchema.parse(await duplicateResponse.json());
+  assert.equal(duplicate.outcome, "duplicate");
+  assert.equal(duplicate.id, original.id);
+  assert.equal(duplicate.note, original.note);
+  const after = stateSchema
+    .parse(await (await send("/state")).json())
+    .lists.find((row) => row.id === list.id);
+  assert.deepEqual(after, before);
+  assert.equal((await send(`/lists/${other.id}/items`, "POST", { name: "äpfel" })).status, 201);
+  await send(`/items/${original.id}`, "PATCH", { completed: true });
+  const restored = addItemResultSchema.parse(
+    await (await send(path, "POST", { name: "äpfel" })).json(),
+  );
+  assert.equal(restored.outcome, "restored");
+  assert.equal(restored.id, original.id);
+  assert.equal(restored.completed, false);
+  assert.equal(restored.name, original.name);
+  assert.equal(restored.note, original.note);
+  assert.equal(restored.createdAt, original.createdAt);
+  const concurrent = await Promise.all(
+    ["Milk", "MILK"].map(async (name) =>
+      addItemResultSchema.parse(await (await send(path, "POST", { name })).json()),
+    ),
+  );
+  assert.deepEqual(concurrent.map((row) => row.outcome).sort(), ["created", "duplicate"]);
+  assert.equal(concurrent[0].id, concurrent[1].id);
+  const state = stateSchema.parse(await (await send("/state")).json());
+  assert.equal(state.items.filter((row) => row.listId === list.id).length, 2);
+});
+
 test("photos are private, separate from state, replaceable and cascade with items", async () => {
   const list = await create("Photo list");
-  const item = itemSchema.parse(
+  const item = addItemResultSchema.parse(
     await (await send(`/lists/${list.id}/items`, "POST", { name: "Photo item" })).json(),
   );
   const path = `/items/${item.id}/photo`;
@@ -248,7 +292,7 @@ test("photos are private, separate from state, replaceable and cascade with item
 
 test("photo deletion and list deletion do not deadlock", async () => {
   const list = await create("Concurrent photo deletion");
-  const item = itemSchema.parse(
+  const item = addItemResultSchema.parse(
     await (await send(`/lists/${list.id}/items`, "POST", { name: "Camera" })).json(),
   );
   await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
@@ -266,7 +310,7 @@ test("photo deletion and list deletion do not deadlock", async () => {
 test("list activity is server-owned and covers every list/item mutation", async () => {
   const list = await create("Activity");
   assert.equal(list.updatedBy, "Test Admin");
-  const item = itemSchema.parse(
+  const item = addItemResultSchema.parse(
     await (await send(`/lists/${list.id}/items`, "POST", { name: "Activity item" })).json(),
   );
   const readList = async () =>
@@ -392,7 +436,7 @@ test("parallel independent edits preserve both people’s changes", async () => 
     name: "Original",
     note: "Original note",
   });
-  const item = itemSchema.parse(await response.json());
+  const item = addItemResultSchema.parse(await response.json());
   const results = await Promise.all([
     send("/items/" + item.id, "PATCH", { name: "New name" }),
     send("/items/" + item.id, "PATCH", { completed: true }),
@@ -690,7 +734,7 @@ test("item history is per-list and preserves completed, renamed and removed name
   const first = await create("History");
   const second = await create("Other history");
   const response = await send("/lists/" + first.id + "/items", "POST", { name: "Coffee" });
-  const item = itemSchema.parse(await response.json());
+  const item = addItemResultSchema.parse(await response.json());
   await send("/items/" + item.id, "PATCH", { completed: true });
   await send("/items/" + item.id, "PATCH", { name: "Decaf coffee" });
   await send("/items/" + item.id, "DELETE");
@@ -718,7 +762,9 @@ test("Often Bought ranks completed names per list, excludes unfinished names and
   const history = async () =>
     itemHistorySchema.parse(await (await send("/lists/" + list.id + "/history")).json());
   const add = async (name: string) =>
-    itemSchema.parse(await (await send("/lists/" + list.id + "/items", "POST", { name })).json());
+    addItemResultSchema.parse(
+      await (await send("/lists/" + list.id + "/items", "POST", { name })).json(),
+    );
   for (const [name, count] of [
     ["Coffee", 4],
     ["Apples", 3],
@@ -759,9 +805,9 @@ test("Often Bought ranks completed names per list, excludes unfinished names and
   const unfinishedCoffee = await add("coffee");
   assert.ok(
     !(await history()).oftenBought.some((entry) => entry.name === "Coffee"),
-    "an unfinished copy excludes a name even when a done copy exists",
+    "restoring a done item excludes its name from quick-add suggestions",
   );
-  await send("/items/" + unfinishedCoffee.id, "DELETE");
+  assert.equal(unfinishedCoffee.id, coffee.id);
   await send("/items/" + coffee.id, "PATCH", { name: "Decaf" });
   assert.deepEqual((await history()).oftenBought[0], { name: "Coffee", completionCount: 5 });
   await send("/items/" + coffee.id, "DELETE");
