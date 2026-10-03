@@ -1,4 +1,6 @@
 import { expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { Pool } from "pg";
 import AxeBuilder from "@axe-core/playwright";
 import { test } from "./browserTest";
 import {
@@ -9,10 +11,11 @@ import {
 } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-test("suggestions exclude active items; forgetting completed items confirms and deletes both records", async ({
+test("completed suggestions can be forgotten and fully restored with Undo", async ({
   page,
   request,
   context,
+  browserName,
 }) => {
   await request.post("/api/session", { data: testCredentials });
   await context.addCookies((await request.storageState()).cookies);
@@ -29,6 +32,18 @@ test("suggestions exclude active items; forgetting completed items confirms and 
   await add("Mint");
   await request.patch(`/api/items/${milk.id}`, { data: { completed: true, name: "Milk" } });
   try {
+    const databaseUrl = process.env[`PHOGET_${browserName.toUpperCase()}_TEST_URL`];
+    if (!databaseUrl) throw new Error("Missing browser test database");
+    const pool = new Pool({ connectionString: databaseUrl });
+    const photo = readFileSync("tests/fixtures/photo-synthetic.webp");
+    try {
+      await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+        milk.id,
+        photo,
+      ]);
+    } finally {
+      await pool.end();
+    }
     await page.goto(`/lists/${list.id}`);
     const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await expect(page.getByRole("button", { name: "+ MILK", exact: true })).toBeVisible();
@@ -63,6 +78,22 @@ test("suggestions exclude active items; forgetting completed items confirms and 
         .parse(await (await request.get("/api/state")).json())
         .items.some((row) => row.id === milk.id),
     ).toBe(false);
+    await page.getByRole("button", { name: "Rückgängig", exact: true }).click();
+    await expect(page.locator(".completed-count")).toHaveText("1 Eintrag");
+    const restored = stateSchema
+      .parse(await (await request.get("/api/state")).json())
+      .items.find((row) => row.id === milk.id);
+    expect(restored).toMatchObject({
+      name: "Milk",
+      note: "Organic",
+      completed: true,
+      hasPhoto: true,
+    });
+    expect(await (await request.get(`/api/items/${milk.id}/photo`)).body()).toEqual(photo);
+    expect(
+      itemHistorySchema.parse(await (await request.get(`/api/lists/${list.id}/history`)).json())
+        .oftenBought,
+    ).toEqual([{ name: "MILK", completionCount: 1 }]);
   } finally {
     await request.delete(`/api/lists/${list.id}`);
   }
@@ -87,6 +118,12 @@ test("manage suggestions searches history and history-only forgetting supports U
     await request.patch(`/api/items/${item.id}`, { data: { completed: true } });
     await request.delete(`/api/items/${item.id}`);
   }
+  const completed = addItemResultSchema.parse(
+    await (
+      await request.post(`/api/lists/${list.id}/items`, { data: { name: "Milk", note: "Keep me" } })
+    ).json(),
+  );
+  await request.patch(`/api/items/${completed.id}`, { data: { completed: true } });
   try {
     await page.goto(`/lists/${list.id}`);
     await page.getByRole("button", { name: "Weitere Optionen" }).click();
@@ -110,6 +147,20 @@ test("manage suggestions searches history and history-only forgetting supports U
       await (await request.get(`/api/lists/${list.id}/history`)).json(),
     );
     expect(history.oftenBought.find((item) => item.name === "Coffee")?.completionCount).toBe(1);
+    await search.fill("Milk");
+    await manager.getByRole("button", { name: "Vorschlag vergessen: Milk" }).click();
+    await page
+      .getByRole("dialog", { name: "Eintrag vergessen?" })
+      .getByRole("button", { name: "Eintrag vergessen", exact: true })
+      .click();
+    await expect(manager).toContainText("Keine passenden Vorschläge.");
+    await manager.getByRole("button", { name: "Rückgängig", exact: true }).click();
+    await expect(manager.getByRole("button", { name: "Vorschlag vergessen: Milk" })).toBeVisible();
+    expect(
+      stateSchema
+        .parse(await (await request.get("/api/state")).json())
+        .items.find((item) => item.id === completed.id),
+    ).toMatchObject({ completed: true, note: "Keep me" });
     await manager.getByRole("button", { name: "Schließen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Weitere Optionen" })).toBeFocused();
     // Keyboard users can tab from the input to a separate forget action.

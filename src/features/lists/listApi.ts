@@ -13,7 +13,7 @@ import {
   reorderSchema,
   forgetItemSchema,
   forgetItemResultSchema,
-  rememberedItemSchema,
+  undoForgetItemSchema,
 } from "../../../shared/contracts";
 
 export const listApi = {
@@ -22,10 +22,10 @@ export const listApi = {
       method: "DELETE",
       body: JSON.stringify(forgetItemSchema.parse(input)),
     }),
-  restoreSuggestion: (id: string, input: z.input<typeof rememberedItemSchema>) =>
-    request(`/lists/${id}/history`, z.undefined(), {
+  undoForgetItem: (id: string, token: string) =>
+    request(`/lists/${id}/history/undo`, z.undefined(), {
       method: "POST",
-      body: JSON.stringify(rememberedItemSchema.parse(input)),
+      body: JSON.stringify(undoForgetItemSchema.parse({ token })),
     }),
   reorderLists: (input: z.input<typeof reorderSchema>) =>
     request("/lists/order", z.undefined(), {

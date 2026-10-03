@@ -170,12 +170,20 @@ test("snackbar supports touch swipe dismissal without firing Undo", async ({
   }
 });
 
-test("snackbar disappears automatically after five seconds", async ({ page }) => {
-  await page.goto("/iframe.html?id=components-snackbar--default&viewMode=story");
-  await page.getByRole("button", { name: "Meldung anzeigen" }).click();
-  const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
-  await expect(snackbar).toBeVisible();
-  await expect(snackbar).toBeHidden({ timeout: 8000 });
+test("snackbars with and without Undo disappear automatically after five seconds", async ({
+  page,
+}) => {
+  for (const story of ["default", "with-undo"]) {
+    await page.goto(`/iframe.html?id=components-snackbar--${story}&viewMode=story`);
+    const started = Date.now();
+    await page.getByRole("button", { name: "Meldung anzeigen" }).click();
+    const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
+    await expect(snackbar).toBeVisible();
+    await expect(snackbar).toBeHidden({ timeout: 8000 });
+    expect(Date.now() - started).toBeGreaterThanOrEqual(4500);
+    if (story === "with-undo")
+      await expect(page.getByRole("status")).toHaveText("0 Mal rückgängig gemacht");
+  }
 });
 
 test("password visibility and dialog focus work in Storybook", async ({ page }) => {

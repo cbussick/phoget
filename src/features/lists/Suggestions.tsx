@@ -8,7 +8,7 @@ import { useAction } from "../../shared/api/useAction";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";
-import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
+import { snackbarDurationMs, useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
 
@@ -18,36 +18,53 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
   const [confirmation, setConfirmation] = useState<{ name: string; completed: Item[] } | null>(
     null,
   );
-  const [forgotten, setForgotten] = useState<{ name: string; completionCount: number } | null>(
-    null,
-  );
+  const [forgotten, setForgotten] = useState<{
+    name: string;
+    token: string;
+    removedCompleted: boolean;
+  } | null>(null);
   useEffect(() => {
     if (!managing) setForgotten(null);
   }, [managing]);
+  useEffect(() => {
+    if (!forgotten) return;
+    const timeout = window.setTimeout(() => setForgotten(null), snackbarDurationMs);
+    return () => window.clearTimeout(timeout);
+  }, [forgotten]);
   const history = useQuery({
     queryKey: [...householdKey, "history", listId],
     queryFn: ({ signal }) => request(`/lists/${listId}/history`, itemHistorySchema, { signal }),
     refetchInterval: sessionPollMs,
     retry: false,
   });
-  const restore = useAction(async (remembered: { name: string; completionCount: number }) => {
-    await listApi.restoreSuggestion(listId, remembered);
-    setForgotten(null);
-    notify("Vorschlag wiederhergestellt.");
-  });
+  const restore = useAction(
+    async ({ token, removedCompleted }: { token: string; removedCompleted: boolean }) => {
+      await listApi.undoForgetItem(listId, token);
+      setForgotten(null);
+      notify(
+        removedCompleted
+          ? "Eintrag und Vorschlag wiederhergestellt."
+          : "Vorschlag wiederhergestellt.",
+      );
+    },
+  );
   const remove = useAction(async (input: { name: string; completedIds: string[] }) => {
     try {
       const result = await listApi.forgetItem(listId, input);
       setConfirmation(null);
-      setForgotten(managing && !result.removedCompleted ? result.remembered : null);
+      const undo = result.undoToken
+        ? {
+            name: input.name,
+            token: result.undoToken,
+            removedCompleted: result.removedCompleted,
+          }
+        : null;
+      setForgotten(managing ? undo : null);
       notify(
         result.removedCompleted ? "Eintrag und Vorschlag entfernt." : "Vorschlag entfernt.",
         "success",
-        !managing && !result.removedCompleted && result.remembered
-          ? {
-              label: "Rückgängig",
-              onClick: () => restore.mutate(result.remembered!),
-            }
+        !managing && undo
+          ? { label: "Rückgängig", onClick: () => restore.mutate(undo) }
           : undefined,
       );
     } finally {

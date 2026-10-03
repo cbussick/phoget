@@ -5,6 +5,7 @@ import { Button } from "../Button/Button";
 import { Callout } from "../Callout/Callout";
 import "./Snackbar.css";
 
+export const snackbarDurationMs = 5000;
 export type SnackbarVariant = "success" | "error" | "info";
 export type SnackbarAction = { label: string; onClick: () => void };
 const SnackbarContext = createContext<
@@ -88,7 +89,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
             </div>
           );
         },
-        { duration: 5000, className: "snackbar-item" },
+        { duration: snackbarDurationMs, className: "snackbar-item" },
       );
       promoteToaster();
     },
@@ -106,7 +107,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         gap={10}
         offset={desktopOffset}
         mobileOffset={mobileOffset}
-        duration={5000}
+        duration={snackbarDurationMs}
         expand
         richColors={false}
         closeButton={false}
