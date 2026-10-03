@@ -93,6 +93,32 @@
   min-height: var(--space-12);
 }
 
+.suggestion-manager {
+  list-style: none;
+  padding: var(--space-none);
+  margin: var(--space-none);
+}
+
+.suggestion-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.suggestion-manager > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-line);
+}
+
+.suggestion-manager > li > span {
+  overflow-wrap: anywhere;
+}
+
 .quick-add {
   display: flex;
   flex-wrap: wrap;

@@ -14,7 +14,15 @@ import { Icon } from "../../shared/ui/Icon/Icon";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
-export function ListDialog({ list, onClose }: { list?: List; onClose: () => void }) {
+export function ListDialog({
+  list,
+  onClose,
+  onManageSuggestions,
+}: {
+  list?: List;
+  onClose: () => void;
+  onManageSuggestions?: () => void;
+}) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const save = useAction((value: z.input<typeof listInputSchema>) =>
     list ? listApi.update(list.id, value) : listApi.create(value),
@@ -122,6 +130,11 @@ export function ListDialog({ list, onClose }: { list?: List; onClose: () => void
           </form.Field>
         </>
       )}
+      {onManageSuggestions && !confirmDelete ? (
+        <Button variant="secondary" disabled={busy} onClick={onManageSuggestions}>
+          Vorschläge verwalten
+        </Button>
+      ) : null}
       {list && !confirmDelete ? (
         <section className="list-delete-section" aria-label="Liste löschen">
           <h3>Liste löschen</h3>

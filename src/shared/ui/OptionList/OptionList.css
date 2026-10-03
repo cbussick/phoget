@@ -33,6 +33,16 @@
   font-weight: var(--font-weight-700);
 }
 
+.suggestion-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.suggestion-option-row[data-highlighted="true"] {
+  background: var(--color-fill-hover);
+}
+
 .listbox-option > svg {
   flex-shrink: 0;
 }

@@ -21,12 +21,17 @@ import {
   itemSchema,
   addItemResultSchema,
   itemHistorySchema,
+  forgetItemSchema,
+  forgetItemResultSchema,
+  rememberedItemSchema,
   listSchema,
   settingsSchema,
 } from "../shared/contracts.js";
 import {
   readState,
   readItemHistory,
+  forgetItem,
+  restoreRememberedItem,
   createList,
   updateList,
   deleteList,
@@ -190,6 +195,24 @@ app.get("/api/lists/:id/history", async (request, response) => {
   response.json(
     itemHistorySchema.parse(await readItemHistory(parseInput(idSchema, request.params.id))),
   );
+});
+app.delete("/api/lists/:id/history", async (request, response) => {
+  response.json(
+    forgetItemResultSchema.parse(
+      await forgetItem(
+        parseInput(idSchema, request.params.id),
+        parseInput(forgetItemSchema, request.body),
+        userSchema.parse(response.locals.user),
+      ),
+    ),
+  );
+});
+app.post("/api/lists/:id/history", async (request, response) => {
+  await restoreRememberedItem(
+    parseInput(idSchema, request.params.id),
+    parseInput(rememberedItemSchema.strict(), request.body),
+  );
+  response.status(204).end();
 });
 app.post("/api/lists/:id/items", async (request, response) => {
   const result = addItemResultSchema.parse(

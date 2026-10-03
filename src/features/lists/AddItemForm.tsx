@@ -1,15 +1,12 @@
-import { sessionPollMs } from "../../app/pollingIntervals";
-import { useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { itemInputSchema, itemHistorySchema } from "../../../shared/contracts";
+import { useEffect, useRef } from "react";
+import { itemInputSchema } from "../../../shared/contracts";
+import type { useSuggestions } from "./Suggestions";
 import { useValidatedForm, fieldError } from "../../shared/forms/useValidatedForm";
 import { Button } from "../../shared/ui/Button/Button";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ComboBox } from "../../shared/ui/ComboBox/ComboBox";
 import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
-import { request } from "../../shared/api/request";
-import { householdKey } from "../../shared/api/queryKeys";
 import { listApi } from "./listApi";
 import { useAction } from "../../shared/api/useAction";
 
@@ -17,21 +14,24 @@ export function AddItemForm({
   listId,
   color,
   onAnnounce,
+  suggestionState,
 }: {
   listId: string;
   color: string;
   onAnnounce: (message: string) => void;
+  suggestionState: ReturnType<typeof useSuggestions>;
 }) {
   const notify = useSnackbar();
   const input = useRef<HTMLInputElement>(null);
   const restoreInputFocus = useRef(false);
-  const history = useQuery({
-    queryKey: [...householdKey, "history", listId],
-    queryFn: ({ signal }) =>
-      request("/lists/" + listId + "/history", itemHistorySchema, { signal }),
-    refetchInterval: sessionPollMs,
-    retry: false,
-  });
+  const focusAfterForget = useRef(false);
+  const { history, names, forget } = suggestionState;
+  useEffect(() => {
+    if (!suggestionState.busy && focusAfterForget.current) {
+      focusAfterForget.current = false;
+      if (document.activeElement === document.body) input.current?.focus();
+    }
+  }, [suggestionState.busy]);
   const add = useAction(async (name: string) => {
     const result = await listApi.addItem(listId, { name });
     if (result.outcome === "duplicate") {
@@ -40,7 +40,10 @@ export function AddItemForm({
       onAnnounce(name + " zur Liste hinzugefügt");
     }
   });
-  const suggestions = history.data?.oftenBought ?? [];
+  const eligibleNames = new Set(names.map((name) => name.toLowerCase()));
+  const suggestions = (history.data?.oftenBought ?? []).filter((item) =>
+    eligibleNames.has(item.name.toLowerCase()),
+  );
   const {
     form,
     busy: formBusy,
@@ -59,7 +62,7 @@ export function AddItemForm({
     }
   });
   useErrorSnackbar(error ?? add.error);
-  const busy = formBusy || add.isPending;
+  const busy = formBusy || add.isPending || suggestionState.busy;
   return (
     <>
       <form
@@ -90,7 +93,11 @@ export function AddItemForm({
               onValueChange={field.handleChange}
               onBlur={field.handleBlur}
               error={fieldError(field)}
-              options={history.data?.names ?? []}
+              options={names}
+              onRemove={(name) => {
+                focusAfterForget.current = true;
+                forget(name);
+              }}
               disabled={busy}
               placeholder="Eintrag hinzufügen…"
             />

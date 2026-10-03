@@ -742,7 +742,11 @@ test("item history is per-list and preserves completed, renamed and removed name
   const { names } = itemHistorySchema.parse(
     await (await send("/lists/" + first.id + "/history")).json(),
   );
-  assert.equal(names.filter((name: string) => name.toLowerCase() === "coffee").length, 1);
+  assert.equal(
+    names.filter((name: string) => name.toLowerCase() === "coffee").length,
+    0,
+    "active items are not offered in autocomplete",
+  );
   assert.ok(names.includes("Decaf coffee"));
   assert.deepEqual(await (await send("/lists/" + second.id + "/history")).json(), {
     names: [],
@@ -754,6 +758,96 @@ test("item history is per-list and preserves completed, renamed and removed name
   );
   await send("/lists/" + first.id, "DELETE");
   assert.equal((await send("/lists/" + first.id + "/history")).status, 404);
+});
+
+test("forget deletes history outright, confirms completed IDs, protects active items, and resets future counts", async () => {
+  const list = await create("Forget history");
+  const other = await create("Independent history");
+  const add = async (listId: string, name: string) =>
+    addItemResultSchema.parse(
+      await (await send(`/lists/${listId}/items`, "POST", { name, note: "Attached note" })).json(),
+    );
+  const history = async () =>
+    itemHistorySchema.parse(await (await send(`/lists/${list.id}/history`)).json());
+  const forget = (name: string, completedIds: string[] = []) =>
+    send(`/lists/${list.id}/history`, "DELETE", { name, completedIds });
+  const item = await add(list.id, "Milk");
+  const independent = await add(other.id, "Milk");
+  assert.deepEqual((await history()).names, []);
+  assert.equal((await forget("MILK")).status, 409);
+  await send(`/items/${item.id}`, "PATCH", { completed: true });
+  assert.deepEqual((await history()).names, ["Milk"]);
+  assert.equal(
+    (await forget("Milk")).status,
+    409,
+    "completed entries require explicit confirmation",
+  );
+  assert.equal((await forget("Milk", [independent.id])).status, 409);
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+    item.id,
+    Buffer.from("photo"),
+  ]);
+  const removed = await forget("mILk", [item.id]);
+  assert.equal(removed.status, 200);
+  assert.equal((await removed.json()).removedCompleted, true);
+  assert.deepEqual(await history(), { names: [], oftenBought: [] });
+  assert.equal(
+    (await pool.query('SELECT * FROM item_names WHERE "listId" = $1', [list.id])).rowCount,
+    0,
+  );
+  assert.equal(
+    (await pool.query('SELECT * FROM item_photos WHERE "itemId" = $1', [item.id])).rowCount,
+    0,
+  );
+  const state = stateSchema.parse(await (await send("/state")).json());
+  assert.ok(!state.items.some((row) => row.id === item.id));
+  assert.ok(state.items.some((row) => row.id === independent.id));
+  const fresh = await add(list.id, "Milk");
+  assert.notEqual(fresh.id, item.id);
+  await send(`/items/${fresh.id}`, "PATCH", { completed: true });
+  assert.deepEqual((await history()).oftenBought, [{ name: "Milk", completionCount: 1 }]);
+  await send(`/items/${fresh.id}`, "DELETE");
+  const historyOnly = await forget("Milk");
+  const result = await historyOnly.json();
+  assert.equal(result.removedCompleted, false);
+  assert.deepEqual(result.remembered, { name: "Milk", completionCount: 1 });
+  assert.deepEqual(await history(), { names: [], oftenBought: [] });
+  assert.equal((await send(`/lists/${list.id}/history`, "POST", result.remembered)).status, 204);
+  assert.deepEqual((await history()).oftenBought, [{ name: "Milk", completionCount: 1 }]);
+  // Repeated undo must not replace a newer counter.
+  assert.equal(
+    (await send(`/lists/${list.id}/history`, "POST", { name: "Milk", completionCount: 99 })).status,
+    204,
+  );
+  assert.deepEqual((await history()).oftenBought, [{ name: "Milk", completionCount: 1 }]);
+  assert.equal(
+    (await send(`/lists/${list.id}/history`, "DELETE", { name: "Milk" }, { Cookie: "" })).status,
+    401,
+  );
+  assert.equal((await send(`/lists/${list.id}/history`, "DELETE", { name: "" })).status, 400);
+  assert.equal(
+    (await send(`/lists/${list.id}/history`, "POST", { name: "Milk", completionCount: -1 })).status,
+    400,
+  );
+});
+
+test("forget cannot delete an item restored after the confirmation was opened", async () => {
+  const list = await create("Stale confirmation");
+  const item = addItemResultSchema.parse(
+    await (await send(`/lists/${list.id}/items`, "POST", { name: "Tea" })).json(),
+  );
+  await send(`/items/${item.id}`, "PATCH", { completed: true });
+  await send(`/lists/${list.id}/items`, "POST", { name: "TEA" });
+  assert.equal(
+    (await send(`/lists/${list.id}/history`, "DELETE", { name: "Tea", completedIds: [item.id] }))
+      .status,
+    409,
+  );
+  assert.ok(
+    stateSchema
+      .parse(await (await send("/state")).json())
+      .items.some((row) => row.id === item.id && !row.completed),
+  );
 });
 
 test("Often Bought ranks completed names per list, excludes unfinished names and counts transitions once", async () => {
