@@ -21,7 +21,8 @@
   border-radius: var(--radius-lg);
   background: transparent;
   box-shadow: var(--shadow-popover);
-  touch-action: auto;
+
+  /* Keep Sonner's touch-action: none so touch scrolling cannot cancel swipes. */
 }
 
 .snackbar {
@@ -48,6 +49,24 @@
   font-size: var(--font-small);
   line-height: var(--line-height-1-5);
   box-shadow: var(--shadow-popover);
+}
+
+.snackbar-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.snackbar-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.snackbar-action {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .snackbar[data-variant="success"] .snackbar-message {
