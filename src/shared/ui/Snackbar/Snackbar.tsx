@@ -6,8 +6,9 @@ import { Callout } from "../Callout/Callout";
 import "./Snackbar.css";
 
 export type SnackbarVariant = "success" | "error" | "info";
+export type SnackbarAction = { label: string; onClick: () => void };
 const SnackbarContext = createContext<
-  ((message: string, variant?: SnackbarVariant) => void) | null
+  ((message: string, variant?: SnackbarVariant, action?: SnackbarAction) => void) | null
 >(null);
 
 export function useSnackbar() {
@@ -39,37 +40,51 @@ function promoteToaster() {
 
 export function SnackbarProvider({ children }: { children: ReactNode }) {
   useEffect(() => promoteToaster(), []);
-  const notify = useCallback((text: string, variant: SnackbarVariant = "success") => {
-    toast.custom(
-      (id) => (
-        <div
-          className="snackbar"
-          data-variant={variant}
-          role="region"
-          aria-label="Benachrichtigung"
-        >
-          {variant === "error" ? (
-            <Callout className="snackbar-callout" announce={false}>
-              {text}
-            </Callout>
-          ) : (
-            <div className="snackbar-message">{text}</div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="snackbar-dismiss"
-            aria-label="Meldung schließen"
-            onClick={() => toast.dismiss(id)}
+  const notify = useCallback(
+    (text: string, variant: SnackbarVariant = "success", action?: SnackbarAction) => {
+      toast.custom(
+        (id) => (
+          <div
+            className="snackbar"
+            data-variant={variant}
+            role="region"
+            aria-label="Benachrichtigung"
           >
-            ×
-          </Button>
-        </div>
-      ),
-      { duration: 5000, className: "snackbar-item" },
-    );
-    promoteToaster();
-  }, []);
+            {variant === "error" ? (
+              <Callout className="snackbar-callout" announce={false}>
+                {text}
+              </Callout>
+            ) : (
+              <div className="snackbar-message">{text}</div>
+            )}
+            {action ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  toast.dismiss(id);
+                  action.onClick();
+                }}
+              >
+                {action.label}
+              </Button>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="snackbar-dismiss"
+              aria-label="Meldung schließen"
+              onClick={() => toast.dismiss(id)}
+            >
+              ×
+            </Button>
+          </div>
+        ),
+        { duration: 5000, className: "snackbar-item" },
+      );
+      promoteToaster();
+    },
+    [],
+  );
 
   return (
     <SnackbarContext.Provider value={notify}>

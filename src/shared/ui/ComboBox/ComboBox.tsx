@@ -12,6 +12,7 @@ export function ComboBox({
   options,
   onValueChange,
   onBlur,
+  onRemove,
   inputRef,
   disabled,
   required,
@@ -23,6 +24,7 @@ export function ComboBox({
   options: readonly string[];
   onValueChange: (value: string) => void;
   onBlur?: () => void;
+  onRemove?: (value: string) => void;
   inputRef?: Ref<HTMLInputElement>;
   disabled?: boolean;
   required?: boolean;
@@ -57,9 +59,9 @@ export function ComboBox({
   }, [highlighted, expanded, popupId]);
   function choose(next: string) {
     onValueChange(next);
+    input.current?.focus();
     setOpen(false);
     setActive(undefined);
-    input.current?.focus();
   }
   return (
     <div className="combo-box">
@@ -80,7 +82,7 @@ export function ComboBox({
         }}
         role="combobox"
         aria-autocomplete="list"
-        aria-haspopup="listbox"
+        aria-haspopup={onRemove ? "grid" : "listbox"}
         aria-expanded={expanded}
         aria-controls={expanded ? popupId : undefined}
         aria-activedescendant={
@@ -92,8 +94,8 @@ export function ComboBox({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setOpen(false);
+        onBlur={(event) => {
+          if (!popup.current?.contains(event.relatedTarget)) setOpen(false);
           onBlur?.();
         }}
         onKeyDown={(event) => {
@@ -154,6 +156,32 @@ export function ComboBox({
           active={highlighted}
           onActive={setActive}
           onChoose={choose}
+          onRemove={
+            onRemove
+              ? (option) => {
+                  input.current?.focus();
+                  setOpen(false);
+                  setActive(undefined);
+                  onRemove(option);
+                }
+              : undefined
+          }
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              input.current?.focus();
+              setOpen(false);
+              setActive(undefined);
+            }
+          }}
+          onBlur={(event) => {
+            if (
+              !popup.current?.contains(event.relatedTarget) &&
+              event.relatedTarget !== input.current
+            )
+              setOpen(false);
+          }}
         />
       ) : null}
     </div>

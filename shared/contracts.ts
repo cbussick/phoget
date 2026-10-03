@@ -83,6 +83,20 @@ export const oftenBoughtItemSchema = z.object({
   name: nameSchema,
   completionCount: z.number().int().positive(),
 });
+export const rememberedItemSchema = z.object({
+  name: nameSchema,
+  completionCount: z.number().int().nonnegative().max(2147483647),
+});
+export const forgetItemSchema = z
+  .object({
+    name: nameSchema,
+    completedIds: z.array(idSchema).default([]),
+  })
+  .strict();
+export const forgetItemResultSchema = z.object({
+  remembered: rememberedItemSchema.nullable(),
+  removedCompleted: z.boolean(),
+});
 export const itemHistorySchema = z.object({
   names: z.array(nameSchema),
   oftenBought: z.array(oftenBoughtItemSchema).max(3),

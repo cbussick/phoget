@@ -7,6 +7,8 @@ import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.j
 import {
   itemSchema,
   itemHistorySchema,
+  forgetItemSchema,
+  rememberedItemSchema,
   listSchema,
   listInputSchema,
   listUpdateSchema,
@@ -286,6 +288,70 @@ export async function updateSettings(input: z.input<typeof settingsSchema>) {
   return settingsSchema.parse(row);
 }
 
+// Share the list lock with add/edit/complete so a stale suggestion cannot delete an active item.
+export async function forgetItem(
+  listId: string,
+  input: z.infer<typeof forgetItemSchema>,
+  actor: Actor,
+) {
+  return database.transaction(async (transaction) => {
+    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    const key = input.name.toLowerCase();
+    const matching = await transaction
+      .select()
+      .from(items)
+      .where(and(eq(items.listId, listId), sql`lower(${items.name}) = ${key}`));
+    if (matching.some((item) => !item.completed))
+      throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");
+    const actualIds = matching.map((item) => item.id).sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify([...input.completedIds].sort()))
+      throw new HttpError(
+        409,
+        "Die erledigten Einträge haben sich geändert. Bitte prüfe den Vorschlag erneut.",
+      );
+    if (matching.length) {
+      await transaction
+        .delete(items)
+        .where(
+          and(
+            eq(items.listId, listId),
+            sql`lower(${items.name}) = ${key}`,
+            eq(items.completed, true),
+          ),
+        );
+    }
+    const [remembered] = await transaction
+      .delete(itemNames)
+      .where(and(eq(itemNames.listId, listId), eq(itemNames.key, key)))
+      .returning({ name: itemNames.name, completionCount: itemNames.completionCount });
+    if (matching.length) {
+      await transaction
+        .update(lists)
+        .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
+        .where(eq(lists.id, listId));
+    }
+    return { remembered: remembered ?? null, removedCompleted: matching.length > 0 };
+  });
+}
+
+// Undo is only offered for history-only removal. Never overwrite newly learned history.
+export async function restoreRememberedItem(
+  listId: string,
+  input: z.infer<typeof rememberedItemSchema>,
+) {
+  await database.transaction(async (transaction) => {
+    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    await transaction
+      .insert(itemNames)
+      .values({ ...input, listId, key: input.name.toLowerCase() })
+      .onConflictDoNothing();
+  });
+}
+
 export async function readItemHistory(listId: string) {
   return database.transaction(
     async (transaction) => {
@@ -319,7 +385,9 @@ export async function readItemHistory(listId: string) {
           ...new Map(
             [...history, ...present].map((row) => [row.name.toLowerCase(), row.name]),
           ).values(),
-        ].sort((a, b) => a.localeCompare(b)),
+        ]
+          .filter((name) => !existingNames.has(name.toLowerCase()))
+          .sort((a, b) => a.localeCompare(b)),
         oftenBought: history
           .filter((row) => row.completionCount > 0 && !existingNames.has(row.name.toLowerCase()))
           .sort((a, b) => b.completionCount - a.completionCount || a.name.localeCompare(b.name))

@@ -9,6 +9,7 @@ import { ItemRow } from "./ItemRow";
 import { ItemDialog } from "./ItemDialog";
 import { ListDialog } from "./ListDialog";
 import { AddItemForm } from "./AddItemForm";
+import { useSuggestions, SuggestionsDialog } from "./Suggestions";
 import { SortableRow, SortableRows } from "./SortableRows";
 import { listApi } from "./listApi";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
@@ -26,6 +27,8 @@ export function ListPage({
   const now = useActivityClock();
   const [selected, setSelected] = useState<Item | null>(null);
   const [options, setOptions] = useState(false);
+  const [manageSuggestions, setManageSuggestions] = useState(false);
+  const suggestions = useSuggestions(list.id, items, manageSuggestions);
   const [announcement, setAnnouncement] = useState("");
   const active = items.filter((item) => !item.completed);
   const completed = items.filter((item) => item.completed);
@@ -77,7 +80,12 @@ export function ListPage({
         <h2 id="list-title" className="visually-hidden">
           Offene Einträge
         </h2>
-        <AddItemForm listId={list.id} color={list.color} onAnnounce={setAnnouncement} />
+        <AddItemForm
+          listId={list.id}
+          color={list.color}
+          onAnnounce={setAnnouncement}
+          suggestionState={suggestions}
+        />
         <SortableRows
           getLabel={(item) => item.name}
           rows={active}
@@ -129,7 +137,28 @@ export function ListPage({
           onAnnounce={setAnnouncement}
         />
       ) : null}
-      {options ? <ListDialog list={list} onClose={() => setOptions(false)} /> : null}
+      {options ? (
+        <ListDialog
+          list={list}
+          onClose={() => setOptions(false)}
+          onManageSuggestions={() => {
+            setOptions(false);
+            setManageSuggestions(true);
+          }}
+        />
+      ) : null}
+      {manageSuggestions ? (
+        <SuggestionsDialog
+          names={suggestions.names}
+          busy={suggestions.busy}
+          loading={suggestions.history.isPending}
+          error={suggestions.history.isError}
+          undo={suggestions.undo}
+          onForget={suggestions.forget}
+          onClose={() => setManageSuggestions(false)}
+        />
+      ) : null}
+      {suggestions.confirmationDialog}
     </>
   );
 }

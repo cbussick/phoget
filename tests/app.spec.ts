@@ -188,7 +188,9 @@ test("complete household workflow persists through reload and a second browser",
     await expect(page.getByRole("dialog")).toBeHidden();
     const combo = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await combo.fill("ban");
-    await expect(page.getByRole("option", { name: "Bananas", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("grid").getByRole("button", { name: "Bananas", exact: true }),
+    ).toBeVisible();
     await combo.press("ArrowDown");
     await combo.press("Enter");
     await expect(combo).toHaveValue("Bananas");
