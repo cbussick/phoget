@@ -96,7 +96,9 @@ export const forgetItemSchema = z
 export const forgetItemResultSchema = z.object({
   remembered: rememberedItemSchema.nullable(),
   removedCompleted: z.boolean(),
+  undoToken: idSchema.nullable(),
 });
+export const undoForgetItemSchema = z.object({ token: idSchema }).strict();
 export const itemHistorySchema = z.object({
   names: z.array(nameSchema),
   oftenBought: z.array(oftenBoughtItemSchema).max(3),

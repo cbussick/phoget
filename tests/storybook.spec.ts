@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 test("color picker presets, hex input, spectrum and disabled state stay synchronized", async ({
   page,
 }) => {
@@ -93,12 +94,96 @@ test("snackbar variants are semantic, accessible and dismissible", async ({ page
   }
 });
 
-test("snackbar disappears automatically after five seconds", async ({ page }) => {
-  await page.goto("/iframe.html?id=components-snackbar--default&viewMode=story");
-  await page.getByRole("button", { name: "Meldung anzeigen" }).click();
-  const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
-  await expect(snackbar).toBeVisible();
-  await expect(snackbar).toBeHidden({ timeout: 8000 });
+test("snackbar Undo stays inside the colored surface at mobile widths", async ({ page }) => {
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/iframe.html?id=components-snackbar--with-undo&viewMode=story");
+    await page.getByRole("button", { name: "Meldung anzeigen" }).click();
+    const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
+    const undo = snackbar.getByRole("button", { name: "Rückgängig", exact: true });
+    await expect(undo).toBeVisible();
+    const insideSurface = await undo.evaluate((button) => {
+      const surface = button
+        .closest(".snackbar")!
+        .querySelector(".snackbar-message")!
+        .getBoundingClientRect();
+      const action = button.getBoundingClientRect();
+      return (
+        action.top >= surface.top &&
+        action.bottom <= surface.bottom &&
+        action.left >= surface.left &&
+        action.right <= surface.right
+      );
+    });
+    expect(insideSurface).toBe(true);
+    expect((await new AxeBuilder({ page }).include(".snackbar").analyze()).violations).toEqual([]);
+    await snackbar.screenshot({ path: test.info().outputPath(`undo-${width}.png`) });
+    await undo.click();
+    await expect(page.getByRole("status")).toHaveText("1 Mal rückgängig gemacht");
+    await expect(snackbar).toBeHidden();
+  }
+});
+
+test("snackbar supports touch swipe dismissal without firing Undo", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({
+    baseURL,
+    hasTouch: true,
+    viewport: { width: 390, height: 844 },
+  });
+  const page = await context.newPage();
+  const touch = await context.newCDPSession(page);
+  try {
+    for (const direction of ["left", "right", "bottom"]) {
+      await page.goto("/iframe.html?id=components-snackbar--with-undo&viewMode=story");
+      await page.getByRole("button", { name: "Meldung anzeigen" }).tap();
+      const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
+      await expect(snackbar).toBeVisible();
+      await expect(page.locator(".snackbar-item")).toHaveCSS("touch-action", "none");
+      const message = snackbar.getByText("Vorschlag entfernt.", { exact: true });
+      await message.tap({ trial: true });
+      const box = (await message.boundingBox())!;
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await touch.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+      for (let step = 1; step <= 6; step++) {
+        await touch.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [
+            {
+              x: x + (direction === "left" ? -1 : direction === "right" ? 1 : 0) * step * 12,
+              y: y + (direction === "bottom" ? step * 12 : 0),
+            },
+          ],
+        });
+      }
+      await touch.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await expect(snackbar, `swiping ${direction} dismisses the snackbar`).toBeHidden({
+        timeout: 1500,
+      });
+      await expect(page.getByRole("status")).toHaveText("0 Mal rückgängig gemacht");
+    }
+  } finally {
+    await context.close();
+  }
+});
+
+test("snackbars with and without Undo disappear automatically after five seconds", async ({
+  page,
+}) => {
+  for (const story of ["default", "with-undo"]) {
+    await page.goto(`/iframe.html?id=components-snackbar--${story}&viewMode=story`);
+    const started = Date.now();
+    await page.getByRole("button", { name: "Meldung anzeigen" }).click();
+    const snackbar = page.getByRole("region", { name: "Benachrichtigung" });
+    await expect(snackbar).toBeVisible();
+    await expect(snackbar).toBeHidden({ timeout: 8000 });
+    expect(Date.now() - started).toBeGreaterThanOrEqual(4500);
+    if (story === "with-undo")
+      await expect(page.getByRole("status")).toHaveText("0 Mal rückgängig gemacht");
+  }
 });
 
 test("password visibility and dialog focus work in Storybook", async ({ page }) => {

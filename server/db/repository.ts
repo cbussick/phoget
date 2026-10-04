@@ -1,4 +1,5 @@
-import { and, asc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
+import { createUndoStore } from "../undoStore.js";
 import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
 import { database } from "./database.js";
@@ -288,55 +289,110 @@ export async function updateSettings(input: z.input<typeof settingsSchema>) {
   return settingsSchema.parse(row);
 }
 
-// Share the list lock with add/edit/complete so a stale suggestion cannot delete an active item.
+type ForgottenItem = {
+  items: (typeof items.$inferSelect)[];
+  photos: (typeof itemPhotos.$inferSelect)[];
+  remembered: z.infer<typeof rememberedItemSchema> | null;
+};
+const forgottenItems = createUndoStore<ForgottenItem>();
+const undoScope = (listId: string, actor: Actor) => `${listId}:${actor.id}`;
+
+// Share the list lock with add/edit/complete and photo updates so the snapshot is consistent.
 export async function forgetItem(
   listId: string,
   input: z.infer<typeof forgetItemSchema>,
   actor: Actor,
 ) {
-  return database.transaction(async (transaction) => {
+  let undoToken: string | null = null;
+  try {
+    return await database.transaction(async (transaction) => {
+      await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+      const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+      if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+      const key = input.name.toLowerCase();
+      const matching = (
+        await transaction.select().from(items).where(eq(items.listId, listId))
+      ).filter((item) => item.name.toLowerCase() === key);
+      if (matching.some((item) => !item.completed))
+        throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");
+      const actualIds = matching.map((item) => item.id).sort();
+      if (JSON.stringify(actualIds) !== JSON.stringify([...input.completedIds].sort()))
+        throw new HttpError(
+          409,
+          "Die erledigten Einträge haben sich geändert. Bitte prüfe den Vorschlag erneut.",
+        );
+      const photos = actualIds.length
+        ? await transaction.select().from(itemPhotos).where(inArray(itemPhotos.itemId, actualIds))
+        : [];
+      const [remembered] = await transaction
+        .delete(itemNames)
+        .where(and(eq(itemNames.listId, listId), eq(itemNames.key, key)))
+        .returning({ name: itemNames.name, completionCount: itemNames.completionCount });
+      if (matching.length || remembered) {
+        const snapshot = { items: matching, photos, remembered: remembered ?? null };
+        const bytes =
+          Buffer.byteLength(JSON.stringify({ items: matching, remembered })) +
+          photos.reduce((total, photo) => total + photo.data.length, 0) +
+          256;
+        undoToken = forgottenItems.remember(undoScope(listId, actor), snapshot, bytes);
+        if (!undoToken)
+          throw new HttpError(
+            503,
+            "Rückgängig ist gerade nicht verfügbar. Der Eintrag wurde nicht entfernt. Bitte versuche es gleich erneut.",
+          );
+      }
+      if (actualIds.length) {
+        await transaction.delete(items).where(inArray(items.id, actualIds));
+        await transaction
+          .update(lists)
+          .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
+          .where(eq(lists.id, listId));
+      }
+      return { remembered: remembered ?? null, removedCompleted: matching.length > 0, undoToken };
+    });
+  } catch (error) {
+    if (undoToken) forgottenItems.discard(undoToken);
+    throw error;
+  }
+}
+
+export async function undoForgetItem(listId: string, token: string, actor: Actor) {
+  await database.transaction(async (transaction) => {
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+    const snapshot = forgottenItems.get(undoScope(listId, actor), token);
+    if (!snapshot) throw new HttpError(410, "Rückgängig ist nicht mehr verfügbar.");
     const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
     if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
-    const key = input.name.toLowerCase();
-    const matching = await transaction
-      .select()
-      .from(items)
-      .where(and(eq(items.listId, listId), sql`lower(${items.name}) = ${key}`));
-    if (matching.some((item) => !item.completed))
-      throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");
-    const actualIds = matching.map((item) => item.id).sort();
-    if (JSON.stringify(actualIds) !== JSON.stringify([...input.completedIds].sort()))
-      throw new HttpError(
-        409,
-        "Die erledigten Einträge haben sich geändert. Bitte prüfe den Vorschlag erneut.",
-      );
-    if (matching.length) {
-      await transaction
-        .delete(items)
-        .where(
-          and(
-            eq(items.listId, listId),
-            sql`lower(${items.name}) = ${key}`,
-            eq(items.completed, true),
-          ),
+    if (snapshot.items.length) {
+      const current = await transaction.select().from(items).where(eq(items.listId, listId));
+      if (
+        current.some((item) =>
+          snapshot.items.some((saved) => saved.name.toLowerCase() === item.name.toLowerCase()),
+        )
+      )
+        throw new HttpError(
+          409,
+          "Ein Eintrag mit diesem Namen wurde inzwischen hinzugefügt. Es wurde nichts überschrieben.",
         );
-    }
-    const [remembered] = await transaction
-      .delete(itemNames)
-      .where(and(eq(itemNames.listId, listId), eq(itemNames.key, key)))
-      .returning({ name: itemNames.name, completionCount: itemNames.completionCount });
-    if (matching.length) {
+      await transaction.insert(items).values(snapshot.items);
+      if (snapshot.photos.length) await transaction.insert(itemPhotos).values(snapshot.photos);
       await transaction
         .update(lists)
         .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
         .where(eq(lists.id, listId));
     }
-    return { remembered: remembered ?? null, removedCompleted: matching.length > 0 };
+    if (snapshot.remembered) {
+      await transaction
+        .insert(itemNames)
+        .values({ ...snapshot.remembered, listId, key: snapshot.remembered.name.toLowerCase() })
+        .onConflictDoNothing();
+    }
   });
+  // Consume only after a successful commit; a transient failure can be retried.
+  forgottenItems.discard(token);
 }
 
-// Undo is only offered for history-only removal. Never overwrite newly learned history.
+// Compatibility with older clients' history-only Undo. Never overwrite newly learned history.
 export async function restoreRememberedItem(
   listId: string,
   input: z.infer<typeof rememberedItemSchema>,

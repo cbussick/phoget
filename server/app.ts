@@ -23,6 +23,7 @@ import {
   itemHistorySchema,
   forgetItemSchema,
   forgetItemResultSchema,
+  undoForgetItemSchema,
   rememberedItemSchema,
   listSchema,
   settingsSchema,
@@ -31,6 +32,7 @@ import {
   readState,
   readItemHistory,
   forgetItem,
+  undoForgetItem,
   restoreRememberedItem,
   createList,
   updateList,
@@ -206,6 +208,14 @@ app.delete("/api/lists/:id/history", async (request, response) => {
       ),
     ),
   );
+});
+app.post("/api/lists/:id/history/undo", async (request, response) => {
+  await undoForgetItem(
+    parseInput(idSchema, request.params.id),
+    parseInput(undoForgetItemSchema, request.body).token,
+    userSchema.parse(response.locals.user),
+  );
+  response.status(204).end();
 });
 app.post("/api/lists/:id/history", async (request, response) => {
   await restoreRememberedItem(

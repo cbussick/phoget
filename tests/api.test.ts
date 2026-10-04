@@ -10,6 +10,7 @@ import {
   addItemResultSchema,
   settingsSchema,
   itemHistorySchema,
+  forgetItemResultSchema,
 } from "../shared/contracts.js";
 
 import { prepareAccounts } from "./prepareAccounts.js";
@@ -828,6 +829,91 @@ test("forget deletes history outright, confirms completed IDs, protects active i
   assert.equal(
     (await send(`/lists/${list.id}/history`, "POST", { name: "Milk", completionCount: -1 })).status,
     400,
+  );
+});
+
+test("Undo restores completed items, exact notes/photos/identity/order and usage counts", async () => {
+  const list = await create("Completed Undo");
+  const other = await create("Other list");
+  const item = addItemResultSchema.parse(
+    await (
+      await send(`/lists/${list.id}/items`, "POST", {
+        name: "Milk",
+        note: "Keep this note",
+      })
+    ).json(),
+  );
+  for (let index = 0; index < 2; index++) {
+    await send(`/items/${item.id}`, "PATCH", { completed: false });
+    await send(`/items/${item.id}`, "PATCH", { completed: true });
+  }
+  const photo = Buffer.from("exact saved photo bytes");
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [item.id, photo]);
+  const before = (await pool.query("SELECT * FROM items WHERE id = $1", [item.id])).rows[0];
+  const result = forgetItemResultSchema.parse(
+    await (
+      await send(`/lists/${list.id}/history`, "DELETE", {
+        name: "MILK",
+        completedIds: [item.id],
+      })
+    ).json(),
+  );
+  assert.ok(result.undoToken);
+  assert.equal(result.removedCompleted, true);
+  assert.equal((await pool.query("SELECT * FROM items WHERE id = $1", [item.id])).rowCount, 0);
+  assert.equal(
+    (await pool.query('SELECT * FROM item_photos WHERE "itemId" = $1', [item.id])).rowCount,
+    0,
+  );
+  assert.equal(
+    (await pool.query('SELECT * FROM item_names WHERE "listId" = $1', [list.id])).rowCount,
+    0,
+  );
+  const path = `/lists/${list.id}/history/undo`;
+  const body = { token: result.undoToken };
+  assert.equal((await send(path, "POST", body, { Cookie: "" })).status, 401);
+  assert.equal((await send(`/lists/${other.id}/history/undo`, "POST", body)).status, 410);
+  assert.equal((await send(path, "POST", { token: "invalid" })).status, 400);
+  const responses = await Promise.all([send(path, "POST", body), send(path, "POST", body)]);
+  assert.equal(responses.filter((response) => response.status === 204).length, 1);
+  assert.ok(responses.some((response) => [409, 410].includes(response.status)));
+  assert.deepEqual(
+    (await pool.query("SELECT * FROM items WHERE id = $1", [item.id])).rows[0],
+    before,
+  );
+  assert.deepEqual(Buffer.from(await (await send(`/items/${item.id}/photo`)).arrayBuffer()), photo);
+  assert.deepEqual(
+    itemHistorySchema.parse(await (await send(`/lists/${list.id}/history`)).json()).oftenBought,
+    [{ name: "Milk", completionCount: 2 }],
+  );
+  assert.equal((await send(path, "POST", body)).status, 410, "successful Undo consumes its token");
+});
+
+test("Undo does not overwrite an item added while the old completed entry was forgotten", async () => {
+  const list = await create("Conflicting Undo");
+  const add = async (name: string, note: string) =>
+    addItemResultSchema.parse(
+      await (await send(`/lists/${list.id}/items`, "POST", { name, note })).json(),
+    );
+  const old = await add("Milk", "Old note");
+  await send(`/items/${old.id}`, "PATCH", { completed: true });
+  const forgotten = forgetItemResultSchema.parse(
+    await (
+      await send(`/lists/${list.id}/history`, "DELETE", { name: "Milk", completedIds: [old.id] })
+    ).json(),
+  );
+  const fresh = await add("MILK", "New note");
+  assert.equal(
+    (await send(`/lists/${list.id}/history/undo`, "POST", { token: forgotten.undoToken })).status,
+    409,
+  );
+  const state = stateSchema.parse(await (await send("/state")).json());
+  assert.ok(!state.items.some((row) => row.id === old.id));
+  assert.equal(state.items.find((row) => row.id === fresh.id)?.note, "New note");
+  assert.equal(
+    (await pool.query('SELECT "completionCount" FROM item_names WHERE "listId" = $1', [list.id]))
+      .rows[0].completionCount,
+    0,
   );
 });
 
