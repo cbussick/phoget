@@ -43,6 +43,7 @@ export function ItemDialog({
     <Dialog
       title={item.name}
       eyebrow="Eintrag bearbeiten"
+      initialFocus="close"
       onClose={onClose}
       busy={busy}
       onSubmit={(event) => {

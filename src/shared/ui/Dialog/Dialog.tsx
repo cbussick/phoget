@@ -9,6 +9,7 @@ export function Dialog({
   children,
   busy = false,
   spacious = false,
+  initialFocus = "input",
 }: {
   title: string;
   eyebrow?: string;
@@ -17,6 +18,7 @@ export function Dialog({
   children: ReactNode;
   busy?: boolean;
   spacious?: boolean;
+  initialFocus?: "input" | "close";
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -24,12 +26,14 @@ export function Dialog({
     const dialog = ref.current!;
     const previous = document.activeElement;
     dialog.showModal();
-    dialog.querySelector<HTMLInputElement>("input")?.focus();
+    dialog
+      .querySelector<HTMLElement>(initialFocus === "input" ? "input" : ".dialog-close")
+      ?.focus();
     return () => {
       dialog.close();
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
     };
-  }, []);
+  }, [initialFocus]);
   return (
     <dialog
       ref={ref}

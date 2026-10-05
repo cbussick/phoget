@@ -247,7 +247,7 @@ test("failed saves retain input, whitespace is rejected, and keyboard dialog foc
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     const item = page.getByRole("button", { name: "Keep this draft", exact: true });
     await item.click();
-    await expect(page.getByRole("textbox", { name: "Eintrag", exact: true })).toBeFocused();
+    await expect(page.getByRole("button", { name: "Dialog schließen" })).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(item).toBeFocused();
     await item.click();
@@ -259,6 +259,7 @@ test("failed saves retain input, whitespace is rejected, and keyboard dialog foc
       "Gib einen Namen ein.",
     );
     expect(await page.getByRole("dialog").boundingBox()).toEqual(dialogBeforeError);
+    await expect(itemField).toBeFocused();
     await itemField.fill("Keep this draft");
     await expect(page.getByRole("textbox", { name: "Notiz", exact: true })).toHaveCSS(
       "resize",
