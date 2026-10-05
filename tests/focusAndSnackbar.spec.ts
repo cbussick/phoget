@@ -63,6 +63,48 @@ test("adding preserves input focus only for Enter in the combobox; new icons per
   }
 });
 
+test("opening an entry avoids text focus and retains keyboard editing and focus restoration", async ({
+  page,
+  request,
+  context,
+}) => {
+  expect((await request.post("/api/session", { data: testCredentials })).status()).toBe(200);
+  await context.addCookies((await request.storageState()).cookies);
+  const list = listSchema.parse(
+    await (
+      await request.post("/api/lists", { data: { name: "Dialog focus " + crypto.randomUUID() } })
+    ).json(),
+  );
+  try {
+    expect(
+      (await request.post(`/api/lists/${list.id}/items`, { data: { name: "Milk" } })).status(),
+    ).toBe(201);
+    await page.setViewportSize({ width: 320, height: 750 });
+    await page.goto(`/lists/${list.id}`);
+    const item = page.getByRole("button", { name: "Milk", exact: true });
+    const dialog = page.getByRole("dialog");
+    const name = dialog.getByRole("textbox", { name: "Eintrag", exact: true });
+    for (const method of ["pointer", "keyboard"] as const) {
+      if (method === "pointer") await item.click();
+      else await item.press("Enter");
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "Dialog schließen" })).toBeFocused();
+      await expect(name).not.toBeFocused();
+      await expect(dialog.getByRole("textbox", { name: "Notiz", exact: true })).not.toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(name).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(item).toBeFocused();
+    }
+    await page.getByRole("button", { name: "Weitere Optionen" }).click();
+    await expect(dialog.getByRole("textbox", { name: "Listenname", exact: true })).toBeFocused();
+    await page.keyboard.press("Escape");
+  } finally {
+    await request.delete(`/api/lists/${list.id}`);
+  }
+});
+
 test("settings success uses a dismissible snackbar without shifting the form", async ({
   page,
   request,
