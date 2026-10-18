@@ -8,3 +8,4 @@ export const pool = new pg.Pool({
   connectionTimeoutMillis: 5000,
 });
 export const database = drizzle(pool);
+export type Transaction = Parameters<Parameters<typeof database.transaction>[0]>[0];

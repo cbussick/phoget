@@ -3,10 +3,10 @@ import { Button } from "../Button/Button";
 import { FieldLayout, type FieldPresentation } from "../FieldLayout/FieldLayout";
 import { Icon } from "../Icon/Icon";
 import { useAnchoredPopup } from "../OptionList/useAnchoredPopup";
-import { OptionList } from "../OptionList/OptionList";
+import { OptionList, type ListOption } from "../OptionList/OptionList";
 import "./Select.css";
 
-export type SelectOption = { value: string; label: string; disabled?: boolean };
+export type SelectOption = ListOption;
 export type SelectProps = FieldPresentation & {
   options: readonly SelectOption[];
   value?: string;

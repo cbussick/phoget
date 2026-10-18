@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { and, asc, eq, gt, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { database } from "../db/database.js";
+import { database, type Transaction } from "../db/database.js";
 import { users, sessions, settings, loginAttempts } from "../db/schema.js";
 import {
   userSchema,
@@ -22,7 +22,6 @@ const storedUserSchema = userSchema.extend({ passwordHash: z.string() });
 const sessionLifetime = 7 * 24 * 60 * 60 * 1000;
 export const tokenDigest = (token: string) => createHash("sha256").update(token).digest("hex");
 const dummyHash = "scrypt-v1$" + "0".repeat(32) + "$" + "0".repeat(128);
-type Transaction = Parameters<Parameters<typeof database.transaction>[0]>[0];
 
 async function lockAccounts(transaction: Transaction) {
   // The singleton household row serializes account administration, including bootstrap.

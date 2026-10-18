@@ -39,9 +39,8 @@ export function ComboBox({
   const anchor = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>();
-  const matches = options.filter((option) =>
-    option.toLocaleLowerCase().includes(value.trim().toLocaleLowerCase()),
-  );
+  const search = value.trim().toLocaleLowerCase();
+  const matches = options.filter((option) => option.toLocaleLowerCase().includes(search));
   const expanded = open && !disabled && matches.length > 0;
   const highlighted = active && matches.includes(active) ? active : undefined;
   useAnchoredPopup(expanded, anchor, popup);

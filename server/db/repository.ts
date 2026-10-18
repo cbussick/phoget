@@ -2,7 +2,8 @@ import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { createUndoStore } from "../undoStore.js";
 import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
-import { database } from "./database.js";
+import { database, type Transaction } from "./database.js";
+import { markListUpdated } from "./listActivity.js";
 import type { User } from "../../shared/accounts.js";
 import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.js";
 import {
@@ -29,6 +30,12 @@ const databaseListSchema = listSchema
   .strip(); // Internal foreign keys are not part of the public list response.
 const databaseItemSchema = itemSchema.extend({ createdAt: databaseTimeSchema }).strip();
 export class NotFoundError extends Error {}
+
+async function requireList(transaction: Transaction, listId: string) {
+  const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+  if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+  return parent;
+}
 export async function readState() {
   // A consistent snapshot avoids mismatched lists/items during concurrent deletion.
   return database.transaction(
@@ -105,8 +112,7 @@ export async function reorderLists(change: OrderChange) {
 export async function reorderItems(listId: string, completed: boolean, change: OrderChange) {
   await database.transaction(async (tx) => {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    const [parent] = await tx.select({ id: lists.id }).from(lists).where(eq(lists.id, listId));
-    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    await requireList(tx, listId);
     const current = await tx
       .select({ id: items.id })
       .from(items)
@@ -165,8 +171,7 @@ export async function createItem(
 ) {
   return database.transaction(async (transaction) => {
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
-    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    await requireList(transaction, listId);
     // The list lock also serializes edits, toggles and reorders. Match with the
     // same JavaScript case folding as item history; prefer an open legacy copy.
     const candidates = await transaction
@@ -177,40 +182,30 @@ export async function createItem(
     const existing = candidates.find(
       (item) => item.name.toLowerCase() === input.name.toLowerCase(),
     );
-    if (existing && !existing.completed) {
-      const [photo] = await transaction
-        .select()
-        .from(itemPhotos)
-        .where(eq(itemPhotos.itemId, existing.id));
-      return {
-        ...databaseItemSchema.parse(existing),
-        hasPhoto: !!photo,
-        outcome: "duplicate" as const,
-      };
-    }
-    await transaction
-      .update(lists)
-      .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
-      .where(eq(lists.id, listId));
     if (existing) {
-      const [restored] = await transaction
-        .update(items)
-        .set({
-          completed: false,
-          position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
-        })
-        .where(eq(items.id, existing.id))
-        .returning();
+      let row = existing;
+      if (existing.completed) {
+        await markListUpdated(transaction, listId, actor.id);
+        [row] = await transaction
+          .update(items)
+          .set({
+            completed: false,
+            position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
+          })
+          .where(eq(items.id, existing.id))
+          .returning();
+      }
       const [photo] = await transaction
         .select()
         .from(itemPhotos)
         .where(eq(itemPhotos.itemId, existing.id));
       return {
-        ...databaseItemSchema.parse(restored),
+        ...databaseItemSchema.parse(row),
         hasPhoto: !!photo,
-        outcome: "restored" as const,
+        outcome: existing.completed ? ("restored" as const) : ("duplicate" as const),
       };
     }
+    await markListUpdated(transaction, listId, actor.id);
     const [row] = await transaction
       .insert(items)
       .values({
@@ -273,10 +268,7 @@ export async function changeItem(
           and(eq(itemNames.listId, parsed.listId), eq(itemNames.key, parsed.name.toLowerCase())),
         );
     }
-    await transaction
-      .update(lists)
-      .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
-      .where(eq(lists.id, parsed.listId));
+    await markListUpdated(transaction, parsed.listId, actor.id);
     return parsed;
   });
 }
@@ -307,8 +299,7 @@ export async function forgetItem(
   try {
     return await database.transaction(async (transaction) => {
       await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-      const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
-      if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+      await requireList(transaction, listId);
       const key = input.name.toLowerCase();
       const matching = (
         await transaction.select().from(items).where(eq(items.listId, listId))
@@ -343,10 +334,7 @@ export async function forgetItem(
       }
       if (actualIds.length) {
         await transaction.delete(items).where(inArray(items.id, actualIds));
-        await transaction
-          .update(lists)
-          .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
-          .where(eq(lists.id, listId));
+        await markListUpdated(transaction, listId, actor.id);
       }
       return { remembered: remembered ?? null, removedCompleted: matching.length > 0, undoToken };
     });
@@ -361,8 +349,7 @@ export async function undoForgetItem(listId: string, token: string, actor: Actor
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
     const snapshot = forgottenItems.get(undoScope(listId, actor), token);
     if (!snapshot) throw new HttpError(410, "Rückgängig ist nicht mehr verfügbar.");
-    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
-    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    await requireList(transaction, listId);
     if (snapshot.items.length) {
       const current = await transaction.select().from(items).where(eq(items.listId, listId));
       if (
@@ -376,10 +363,7 @@ export async function undoForgetItem(listId: string, token: string, actor: Actor
         );
       await transaction.insert(items).values(snapshot.items);
       if (snapshot.photos.length) await transaction.insert(itemPhotos).values(snapshot.photos);
-      await transaction
-        .update(lists)
-        .set({ updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
-        .where(eq(lists.id, listId));
+      await markListUpdated(transaction, listId, actor.id);
     }
     if (snapshot.remembered) {
       await transaction
@@ -399,8 +383,7 @@ export async function restoreRememberedItem(
 ) {
   await database.transaction(async (transaction) => {
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
-    if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    await requireList(transaction, listId);
     await transaction
       .insert(itemNames)
       .values({ ...input, listId, key: input.name.toLowerCase() })
@@ -411,9 +394,7 @@ export async function restoreRememberedItem(
 export async function readItemHistory(listId: string) {
   return database.transaction(
     async (transaction) => {
-      const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
-      if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
-      databaseListSchema.parse(parent);
+      databaseListSchema.parse(await requireList(transaction, listId));
       const names = await transaction
         .select({ name: itemNames.name, completionCount: itemNames.completionCount })
         .from(itemNames)
