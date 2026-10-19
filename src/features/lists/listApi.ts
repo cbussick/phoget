@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { ApiError } from "../../shared/api/request";
-import { errorSchema } from "../../../shared/contracts";
-import { request } from "../../shared/api/request";
+import { ApiError, request } from "../../shared/api/request";
 import {
+  errorSchema,
   listInputSchema,
   listUpdateSchema,
   listSchema,

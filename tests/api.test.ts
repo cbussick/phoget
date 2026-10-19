@@ -21,7 +21,6 @@ let cookie = "";
 let adminId = "";
 let server: Server;
 let base: string;
-const created: string[] = [];
 before(async () => {
   assert.equal(
     new URL(process.env.DATABASE_URL ?? "").pathname.slice(1),
@@ -83,9 +82,7 @@ test("request logs use route templates without exposing query strings or list ID
 async function create(name = "API test") {
   const response = await send("/lists", "POST", { name });
   assert.equal(response.status, 201);
-  const list = listSchema.parse(await response.json());
-  created.push(list.id);
-  return list;
+  return listSchema.parse(await response.json());
 }
 test("shared reorder persists, rejects stale orders, and keeps sections separate", async () => {
   const first = await create("Order first");
@@ -200,6 +197,12 @@ test("adding matches case-insensitively, restores details, and isolates lists", 
     await (await send(path, "POST", { name: "Äpfel", note: "Original note" })).json(),
   );
   assert.equal(original.outcome, "created");
+  assert.equal(original.hasPhoto, false);
+  const photo = Buffer.from("preserved photo");
+  await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
+    original.id,
+    photo,
+  ]);
   const before = stateSchema
     .parse(await (await send("/state")).json())
     .lists.find((row) => row.id === list.id);
@@ -209,6 +212,7 @@ test("adding matches case-insensitively, restores details, and isolates lists", 
   assert.equal(duplicate.outcome, "duplicate");
   assert.equal(duplicate.id, original.id);
   assert.equal(duplicate.note, original.note);
+  assert.equal(duplicate.hasPhoto, true);
   const after = stateSchema
     .parse(await (await send("/state")).json())
     .lists.find((row) => row.id === list.id);
@@ -224,6 +228,11 @@ test("adding matches case-insensitively, restores details, and isolates lists", 
   assert.equal(restored.name, original.name);
   assert.equal(restored.note, original.note);
   assert.equal(restored.createdAt, original.createdAt);
+  assert.equal(restored.hasPhoto, true);
+  assert.deepEqual(
+    Buffer.from(await (await send(`/items/${original.id}/photo`)).arrayBuffer()),
+    photo,
+  );
   const concurrent = await Promise.all(
     ["Milk", "MILK"].map(async (name) =>
       addItemResultSchema.parse(await (await send(path, "POST", { name })).json()),
@@ -355,7 +364,6 @@ test("list colors persist, validate, and survive updates from clients omitting c
   const response = await send("/lists", "POST", { name: "Colored", color: "#ABCDEF" });
   assert.equal(response.status, 201);
   const list = listSchema.parse(await response.json());
-  created.push(list.id);
   assert.equal(list.color, "#abcdef");
   const update = await send("/lists/" + list.id, "PUT", {
     name: "Colored",
@@ -545,7 +553,6 @@ test("user lifecycle enforces roles, temporary passwords and session revocation"
     );
     assert.equal(sharedList.status, 201);
     const list = listSchema.parse(await sharedList.json());
-    created.push(list.id);
     assert.equal(list.updatedBy, "Jamie New");
     const listed = await (await send("/users")).json();
     assert.ok(!JSON.stringify(listed).includes("passwordHash"));

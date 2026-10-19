@@ -146,9 +146,8 @@ export function SuggestionsDialog({
   useEffect(() => {
     if (!busy && document.activeElement === document.body) input.current?.focus();
   }, [busy]);
-  const matches = names.filter((name) =>
-    name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()),
-  );
+  const query = search.trim().toLocaleLowerCase();
+  const matches = names.filter((name) => name.toLocaleLowerCase().includes(query));
   return (
     <Dialog
       title="Vorschläge verwalten"

@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { database } from "./database.js";
-import { itemPhotos, items, lists } from "./schema.js";
+import { itemPhotos, items } from "./schema.js";
+import { markListUpdated } from "./listActivity.js";
 import { NotFoundError } from "./repository.js";
 
 export async function readItemPhoto(itemId: string) {
@@ -36,9 +37,6 @@ export async function changeItemPhoto(itemId: string, data: Buffer | null, actor
       const deleted = await tx.delete(itemPhotos).where(eq(itemPhotos.itemId, itemId)).returning();
       if (!deleted.length) throw new NotFoundError("Dieses Foto existiert nicht mehr.");
     }
-    await tx
-      .update(lists)
-      .set({ updatedAt: sql`clock_timestamp()`, updatedById: actorId })
-      .where(eq(lists.id, item.listId));
+    await markListUpdated(tx, item.listId, actorId);
   });
 }

@@ -3,10 +3,6 @@
   overflow-wrap: anywhere;
 }
 
-.item-row > .error-message {
-  grid-column: 1 / -1;
-}
-
 .dialog-heading h2,
 .title-row h1,
 .household strong {
@@ -15,10 +11,6 @@
 
 .title-row > div {
   min-width: 0;
-}
-
-.danger {
-  color: var(--color-error);
 }
 
 .dialog-actions {

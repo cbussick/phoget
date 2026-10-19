@@ -33,7 +33,7 @@ export function AppShell({
         className={isSettings ? "active" : undefined}
         aria-current={isSettings ? "page" : undefined}
       >
-        <Icon name={mobile ? "mobileSettings" : "settings"} />
+        <Icon name="settings" />
         {mobile ? <span>Einstellungen</span> : "Einstellungen"}
       </Link>
     </>
