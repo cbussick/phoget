@@ -1,6 +1,8 @@
 .git
 node_modules
 .cache
+.runtime
+.worktrees
 dist
 .env
 .env.*
