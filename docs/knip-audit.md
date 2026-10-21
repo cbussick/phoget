@@ -87,3 +87,17 @@ failure traces remain in ignored diagnostics. Publishing now uses ordinary Git
 over SSH. The combined branch retains newer main's Node 24.22.1 floor; its
 verification and integration status are tracked in
 [PR #3](https://github.com/cbussick/phoget/pull/3).
+
+## Combined integration verification
+
+After integrating newer main, the complete `node scripts/worktree.mjs run npm
+run check` command passed in one invocation on Node 24.22.1, without the earlier
+external execution cap. This includes typecheck, lint, formatting, all 40
+Node/API tests, production-container photo conversions, all browser projects
+(106 passed, two existing skips), and all 17 Storybook tests. The original
+account/household cases and the previously timed-out WebKit feedback case pass.
+
+Normal Knip passes; production retains only the documented Radio finding. The
+three subprocess regressions and Docker context exclusion probe pass. No test
+assertions, application timeouts, or browser coverage were weakened. Task-owned
+databases, dependencies, browsers and builds were removed after the run.
