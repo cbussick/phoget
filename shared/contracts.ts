@@ -107,4 +107,3 @@ export const errorSchema = z.object({ error: z.string(), field: z.string().optio
 export type List = z.infer<typeof listSchema>;
 export type Item = z.infer<typeof itemSchema>;
 export type Settings = z.infer<typeof settingsSchema>;
-export type State = z.infer<typeof stateSchema>;

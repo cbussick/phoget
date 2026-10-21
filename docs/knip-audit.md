@@ -17,13 +17,14 @@ redundancy hints); they remain necessary in production mode.
 
 Same-file consumers are counted with `ignoreExportsUsedInFile`: login throttling,
 validation schemas, color presets and SelectOption are live implementations,
-not deletion candidates. No source or tests were deleted. No blanket ignores,
-export annotations or suppressed issue categories were added.
+not deletion candidates. The unused `State` type was removed; no source files or
+tests were deleted. No blanket ignores, export annotations or suppressed issue
+categories were added.
 
 ## Findings
 
-- Normal: exit 1, unused exported type `State` in `shared/contracts.ts`.
-- Production: exit 1, the same type plus `src/shared/ui/Radio/Radio.tsx`,
+- Normal: exit 0 after removing the unused `State` type in `shared/contracts.ts`.
+- Production: exit 1 for `src/shared/ui/Radio/Radio.tsx`,
   currently used only by its Storybook story. Retained pending a UI-library
   decision; this is real development-only reachability, not a runtime root.
 - No remaining dependency findings. No external package API is published.
@@ -31,19 +32,24 @@ export annotations or suppressed issue categories were added.
 
 A temporary `src/knipProbe.ts` function imported only by
 `tests/knipProbe.test.ts` added no normal-mode finding, but production reported
-its source file as unused. Both probes were removed. Normal mode still exited 1
-for the independent baseline `State` finding.
+its source file as unused. Both probes were removed. During that original probe,
+normal mode exited 1 for the independent `State` finding, which is now resolved.
 
 ## Verification and limitations
 
-- `npm run typecheck`, `npm run lint`, `npm run build`: passed as standalone,
-  read-only checks without database configuration.
-- `npm run format:check`: initially flagged the new config; corrected and rerun.
-- `node scripts/worktree.mjs run npm run typecheck`: blocked by local PostgreSQL
-  authentication (`28P01`, password authentication failed for user `phoget`).
-  Thus the prescribed runtime wrapper, API tests and database-backed browser
-  suite could not be verified. No migrations, account setup or data resets ran.
-- Full `check`/container/browser tests were not run: runtime authentication,
-  the no-migration constraint and limited disk prevent safe full provisioning.
+- `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`:
+  passed after removing `State`.
+- Earlier PostgreSQL authentication failures were resolved using the documented
+  local connection and worktree runtime wrapper. Only isolated worktree databases
+  were provisioned and initialized; primary application databases were untouched.
+- `npm test`: all 37 tests passed after installing task-local Playwright browsers.
+- `npm run test:photo-container`: passed for JPEG, PNG, WebP, HEIC and both
+  high-resolution synthetic JPEG cases using the actual production image build.
+- Full `check` is not green: the account-creation/password-change E2E test failed
+  in Chromium, Firefox and WebKit. The second-browser household workflow also
+  failed in WebKit. Remaining browser cases were interrupted after these failures;
+  the aggregate did not reach Storybook tests. These failures were not diagnosed
+  or waived, and the branch was not merged.
 - Dependency installs and builds use `/tmp/fernblick-knip-heavy.lock`.
-  Task-created dependencies and build outputs are removed after verification.
+  Task-created dependencies, browsers and build outputs are cleaned up after
+  verification; failure traces are retained in the task worktree.
