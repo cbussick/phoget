@@ -28,4 +28,16 @@ Run **all** data-changing test commands via `worktree.mjs run`; direct `npm run 
 
 Stop foreground servers with Ctrl-C. To discard only this worktree's dev and test databases after stopping its processes, run `node scripts/worktree.mjs clean`. This refuses to drop databases with active connections. The runtime file retains port assignments so the next bootstrap recreates those databases; to reallocate ports, remove `.runtime/worktree.json` **after** cleaning and stopping servers. If a saved port is occupied by another process, stop that process or clean and remove the runtime file before bootstrapping again; never kill a process by a copied PID. Do not run two check suites concurrently _inside the same worktree_ (they share its test database and build outputs).
 
+The E2E runner runs Chromium, Firefox and WebKit sequentially, retaining each
+browser's separate database and single worker. This bounds peak memory on shared
+development hosts without skipping browser coverage or extending test timeouts.
+A failed browser still fails the command, and later browsers still run. An
+interrupt stops the active browser and leaves queued browsers unstarted.
+`npm run test:browser-runner` checks this orchestration without a database or
+installed browsers; the same regression tests are included in `npm test`.
+
+Docker build contexts exclude `.runtime`, `.cache` and `.worktrees`. Keep local
+browser downloads and runtime diagnostics in these ignored directories so the
+container check cannot copy them into build layers or exhaust the shared disk.
+
 For a two-worktree exercise, bootstrap and set up each worktree as above, start both dev commands, then start both `node scripts/worktree.mjs run npm run check` commands concurrently. Confirm the printed ports and database names differ, both suites pass, and data written to one dev database remains after the other worktree's test reset. Each worktree has its own `test-results/`, `dist/`, and `storybook-static/` outputs.
