@@ -56,7 +56,7 @@ and `.worktrees`, alongside the existing `.cache` exclusion. A Docker COPY probe
 confirmed that runtime metadata is unavailable in the build context; the normal
 production-container photo check still passes.
 
-## Verification and limitations
+## Initial resource follow-up verification and limitations
 
 Checks used the prescribed worktree runtime wrapper, task-local browsers and
 isolated databases. Production application data and deployment were untouched.
@@ -83,6 +83,7 @@ suppressed; no failed-check integration waiver was requested or assumed.
 
 Installs and heavy checks use `/tmp/fernblick-knip-heavy.lock`. Task-created
 dependencies, browsers and build outputs were removed after verification;
-failure traces remain in ignored diagnostics. Ordinary Git over SSH is blocked
-while the configured key is locked, so this follow-up remains local and unmerged
-and remote CI has not verified it.
+failure traces remain in ignored diagnostics. Publishing now uses ordinary Git
+over SSH. The combined branch retains newer main's Node 24.22.1 floor; its
+verification and integration status are tracked in
+[PR #3](https://github.com/cbussick/phoget/pull/3).
