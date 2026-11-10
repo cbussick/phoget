@@ -67,9 +67,10 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
           ? { label: "Rückgängig", onClick: () => restore.mutate(undo) }
           : undefined,
       );
-    } finally {
-      // Refresh on conflicts too: another household member may have restored this item.
+    } catch (error) {
+      // useAction refreshes successes; conflicts also need the latest household state.
       await client.invalidateQueries({ queryKey: householdKey });
+      throw error;
     }
   });
   useErrorSnackbar(remove.error ?? restore.error);

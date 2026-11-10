@@ -16,9 +16,12 @@ export async function request<T>(
   schema: z.ZodType<T>,
   options: RequestInit = {},
 ): Promise<T> {
+  const headers = new Headers(options.headers);
+  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  headers.set("X-Phoget-Request", "1");
   const response = await fetch("/api" + path, {
     ...options,
-    headers: { "Content-Type": "application/json", "X-Phoget-Request": "1", ...options.headers },
+    headers,
     signal: options.signal ?? AbortSignal.timeout(15000),
   });
   if (!response.ok) {

@@ -17,7 +17,7 @@
     "lint": "oxlint src server shared scripts tests .storybook *.ts && stylelint \"src/**/*.css\" \".storybook/*.css\"",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "test": "tsx --env-file=.env.test --test tests/api.test.ts tests/colors.test.ts tests/activity.test.ts tests/icons.test.ts tests/dev.test.ts tests/branding.test.ts tests/undoStore.test.ts tests/browserProjects.test.ts",
+    "test": "tsx --env-file=.env.test --test tests/*.test.ts",
     "test:browser-runner": "node --test tests/browserProjects.test.ts",
     "test:branding": "tsx --test tests/branding.test.ts",
     "test:e2e": "VITE_E2E_FAST_POLL=1 npm run build && node scripts/prepareBrowserDatabases.mjs && node scripts/runBrowserProjects.mjs",
@@ -49,13 +49,13 @@
     "react-aria-components": "1.21.1",
     "react-dom": "19.2.8",
     "sonner": "2.0.8",
-    "zod": "4.5.4"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.63.0",
-    "@storybook/addon-a11y": "10.5.10",
-    "@storybook/react-vite": "10.5.10",
+    "@storybook/addon-a11y": "10.6.6",
+    "@storybook/react-vite": "10.6.6",
     "@types/express": "5.0.6",
     "@types/node": "26.5.0",
     "@types/pg": "8.23.1",
@@ -66,13 +66,13 @@
     "knip": "6.42.1",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
-    "storybook": "10.5.10",
-    "storybook-addon-pseudo-states": "10.5.10",
+    "storybook": "10.6.6",
+    "storybook-addon-pseudo-states": "10.6.6",
     "stylelint": "17.15.0",
     "stylelint-config-standard": "40.0.0",
     "tsx": "4.23.13",
     "typescript": "7.0.2",
-    "vite": "8.2.2"
+    "vite": "8.3.7"
   },
   "engines": {
     "node": ">=24.22.1 <25"

@@ -32,9 +32,11 @@ const databaseItemSchema = itemSchema.extend({ createdAt: databaseTimeSchema }).
 export class NotFoundError extends Error {}
 
 async function requireList(transaction: Transaction, listId: string) {
-  const [parent] = await transaction.select().from(lists).where(eq(lists.id, listId));
+  const [parent] = await transaction
+    .select({ id: lists.id })
+    .from(lists)
+    .where(eq(lists.id, listId));
   if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
-  return parent;
 }
 export async function readState() {
   // A consistent snapshot avoids mismatched lists/items during concurrent deletion.
@@ -82,10 +84,11 @@ function validateOrder(current: string[], change: OrderChange) {
     current.some((id, index) => id !== change.before[index])
   )
     throw new HttpError(409, "Die Reihenfolge wurde geändert. Bitte versuche es erneut.");
+  const currentIds = new Set(current);
   if (
     new Set(change.after).size !== current.length ||
     change.after.length !== current.length ||
-    change.after.some((id) => !current.includes(id))
+    change.after.some((id) => !currentIds.has(id))
   )
     throw new HttpError(400, "Ungültige Reihenfolge.");
 }
@@ -196,7 +199,7 @@ export async function createItem(
           .returning();
       }
       const [photo] = await transaction
-        .select()
+        .select({ itemId: itemPhotos.itemId })
         .from(itemPhotos)
         .where(eq(itemPhotos.itemId, existing.id));
       return {
@@ -394,26 +397,15 @@ export async function restoreRememberedItem(
 export async function readItemHistory(listId: string) {
   return database.transaction(
     async (transaction) => {
-      databaseListSchema.parse(await requireList(transaction, listId));
-      const names = await transaction
+      await requireList(transaction, listId);
+      const history = await transaction
         .select({ name: itemNames.name, completionCount: itemNames.completionCount })
         .from(itemNames)
         .where(eq(itemNames.listId, listId));
-      const current = await transaction
+      const present = await transaction
         .select({ name: items.name, completed: items.completed })
         .from(items)
         .where(eq(items.listId, listId));
-      const history = z
-        .array(
-          z.object({
-            name: z.string(),
-            completionCount: z.number().int().nonnegative(),
-          }),
-        )
-        .parse(names);
-      const present = z
-        .array(z.object({ name: z.string(), completed: z.boolean() }))
-        .parse(current);
       const existingNames = new Set(
         present.filter((row) => !row.completed).map((row) => row.name.toLowerCase()),
       );
