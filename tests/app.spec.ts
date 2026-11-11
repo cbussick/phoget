@@ -44,6 +44,56 @@ async function createList(page: Page, name: string) {
   createdListIds.push(id);
   return id;
 }
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 1280, height: 800 },
+]) {
+  test(`list controls remain usable while scrolling at ${viewport.width}px`, async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize(viewport);
+    const response = await request.post("/api/lists", {
+      data: { name: "Sticky controls " + crypto.randomUUID() },
+    });
+    expect(response.status()).toBe(201);
+    const list = listSchema.parse(await response.json());
+    createdListIds.push(list.id);
+    for (let index = 0; index < 30; index++) {
+      const item = await request.post(`/api/lists/${list.id}/items`, {
+        data: { name: `Scroll item ${index}` },
+      });
+      expect(item.status()).toBe(201);
+    }
+    await page.goto(`/lists/${list.id}`);
+    await expect(page.locator(".active-items > li")).toHaveCount(30);
+    for (const position of [700, 100000]) {
+      await page.evaluate((y) => window.scrollTo(0, y), position);
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+      const controls = page.locator(".list-controls");
+      await expect.poll(async () => (await controls.boundingBox())!.y).toBe(0);
+      for (const control of [
+        page.getByRole("heading", { name: list.name, exact: true }),
+        page.locator(".back-link"),
+        page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
+        page.getByRole("button", { name: "Hinzufügen", exact: true }),
+      ]) {
+        await expect(control).toBeInViewport({ ratio: 1 });
+      }
+    }
+    await page
+      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
+      .fill("Added while scrolled");
+    await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
+    await expect(page.locator(".active-items > li")).toHaveCount(31);
+    await expect(
+      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
+    ).toHaveValue("");
+    await page.locator(".back-link").click();
+    await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
+  });
+}
+
 test("overview hides update activity while list detail retains it", async ({ page, request }) => {
   const response = await request.post("/api/lists", {
     data: { name: "Activity visibility " + crypto.randomUUID(), description: "Shared list" },

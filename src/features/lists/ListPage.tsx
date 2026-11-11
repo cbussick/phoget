@@ -47,45 +47,49 @@ export function ListPage({
   );
   return (
     <>
-      <header className="page-header">
-        <Link className="back-link" href="/">
-          <Icon name="back" />
-          Alle Listen
-        </Link>
-        <ListIcon name={list.icon} color={list.color} />
-        <div className="title-row">
-          <div>
-            <h1>{list.name}</h1>
-            <p className="list-meta">
-              <time
-                dateTime={list.updatedAt}
-                title={new Date(list.updatedAt).toLocaleString("de-DE")}
-              >
-                {listActivityLabel(list.updatedAt, list.updatedBy, now)}
-              </time>
-            </p>
+      <div className="list-controls">
+        <header className="page-header">
+          <Link className="back-link" href="/">
+            <Icon name="back" />
+            Alle Listen
+          </Link>
+          <ListIcon name={list.icon} color={list.color} />
+          <div className="title-row">
+            <div>
+              <h1>{list.name}</h1>
+              <p className="list-meta">
+                <time
+                  dateTime={list.updatedAt}
+                  title={new Date(list.updatedAt).toLocaleString("de-DE")}
+                >
+                  {listActivityLabel(list.updatedAt, list.updatedBy, now)}
+                </time>
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="icon-button"
+              aria-label="Weitere Optionen"
+              onClick={() => setOptions(true)}
+            >
+              <Icon name="more" />
+            </Button>
           </div>
-          <Button
-            variant="secondary"
-            size="icon"
-            className="icon-button"
-            aria-label="Weitere Optionen"
-            onClick={() => setOptions(true)}
-          >
-            <Icon name="more" />
-          </Button>
+        </header>
+        <div className="list-card list-composer">
+          <AddItemForm
+            listId={list.id}
+            color={list.color}
+            onAnnounce={setAnnouncement}
+            suggestionState={suggestions}
+          />
         </div>
-      </header>
-      <section className="list-card" aria-labelledby="list-title">
+      </div>
+      <section className="list-card list-items-card" aria-labelledby="list-title">
         <h2 id="list-title" className="visually-hidden">
           Offene Einträge
         </h2>
-        <AddItemForm
-          listId={list.id}
-          color={list.color}
-          onAnnounce={setAnnouncement}
-          suggestionState={suggestions}
-        />
         <SortableRows
           getLabel={(item) => item.name}
           rows={active}
