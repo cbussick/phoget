@@ -60,12 +60,12 @@ test("completed suggestions can be forgotten and fully restored with Undo", asyn
     await page.screenshot({ path: test.info().outputPath("forget-confirmation.png") });
     await confirm.getByRole("button", { name: "Abbrechen", exact: true }).click();
     await expect(input).toBeFocused();
-    await expect(page.locator(".completed-count")).toHaveText("1 Eintrag");
+    await expect(page.getByRole("tab", { name: "Erledigt 1", exact: true })).toBeVisible();
     await input.fill("Milk");
     await grid.getByRole("button", { name: "Vorschlag vergessen: Milk", exact: true }).click();
     await confirm.getByRole("button", { name: "Eintrag vergessen", exact: true }).click();
     await expect(confirm).toBeHidden();
-    await expect(page.locator(".completed-items")).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "Erledigt 0", exact: true })).toBeVisible();
     await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
       "Eintrag und Vorschlag entfernt.",
     );
@@ -79,7 +79,7 @@ test("completed suggestions can be forgotten and fully restored with Undo", asyn
         .items.some((row) => row.id === milk.id),
     ).toBe(false);
     await page.getByRole("button", { name: "Rückgängig", exact: true }).click();
-    await expect(page.locator(".completed-count")).toHaveText("1 Eintrag");
+    await expect(page.getByRole("tab", { name: "Erledigt 1", exact: true })).toBeVisible();
     const restored = stateSchema
       .parse(await (await request.get("/api/state")).json())
       .items.find((row) => row.id === milk.id);

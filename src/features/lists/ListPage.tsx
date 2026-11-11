@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Tabs, TabList, Tab, TabPanel } from "react-aria-components";
 import type { Item, List } from "../../../shared/contracts";
 import { Link } from "../../app/navigation";
 import { Button } from "../../shared/ui/Button/Button";
+import { accentColorStyle } from "../../shared/ui/accentColor";
 import { EmptyState } from "../../shared/ui/EmptyState/EmptyState";
 import { Icon } from "../../shared/ui/Icon/Icon";
 import { ListIcon } from "../../shared/ui/ListIcon/ListIcon";
@@ -47,90 +49,97 @@ export function ListPage({
   );
   return (
     <>
-      <div className="list-controls">
-        <header className="page-header">
-          <Link className="back-link" href="/">
-            <Icon name="back" />
-            Alle Listen
-          </Link>
-          <ListIcon name={list.icon} color={list.color} />
-          <div className="title-row">
-            <div>
-              <h1 title={list.name}>{list.name}</h1>
-              <p className="list-meta">
-                <time
-                  dateTime={list.updatedAt}
-                  title={new Date(list.updatedAt).toLocaleString("de-DE")}
-                >
-                  {listActivityLabel(list.updatedAt, list.updatedBy, now)}
-                </time>
-              </p>
+      <Tabs key={list.id} className="list-tabs" defaultSelectedKey="open">
+        <div className="list-controls">
+          <header className="page-header">
+            <Link className="back-link" href="/">
+              <Icon name="back" />
+              Alle Listen
+            </Link>
+            <ListIcon name={list.icon} color={list.color} />
+            <div className="title-row">
+              <div>
+                <h1 title={list.name}>{list.name}</h1>
+                <p className="list-meta">
+                  <time
+                    dateTime={list.updatedAt}
+                    title={new Date(list.updatedAt).toLocaleString("de-DE")}
+                  >
+                    {listActivityLabel(list.updatedAt, list.updatedBy, now)}
+                  </time>
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="icon-button"
+                aria-label="Weitere Optionen"
+                onClick={() => setOptions(true)}
+              >
+                <Icon name="more" />
+              </Button>
             </div>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="icon-button"
-              aria-label="Weitere Optionen"
-              onClick={() => setOptions(true)}
-            >
-              <Icon name="more" />
-            </Button>
-          </div>
-        </header>
-        <div className="list-card list-composer">
-          <AddItemForm
-            listId={list.id}
-            color={list.color}
-            onAnnounce={setAnnouncement}
-            suggestionState={suggestions}
-          />
-        </div>
-      </div>
-      <section className="list-card list-items-card" aria-labelledby="list-title">
-        <h2 id="list-title" className="visually-hidden">
-          Offene Einträge
-        </h2>
-        <SortableRows
-          getLabel={(item) => item.name}
-          rows={active}
-          className="items active-items"
-          save={(before, after) => listApi.reorderItems(list.id, "open", { before, after })}
-          renderRow={renderItem}
-        />
-        {!active.length ? (
-          <EmptyState
-            title={completed.length ? "Alles erledigt!" : "Hier ist noch nichts"}
-            description={
-              completed.length
-                ? "Alles auf dieser Liste ist erledigt. Genieße die kleine Pause."
-                : "Füge oben deinen ersten Eintrag hinzu. Gemeinsam behalten wir den Überblick."
-            }
-            icon={completed.length ? "complete" : "emptyList"}
-          />
-        ) : null}
-        {completed.length > 0 ? (
-          <details className="completed-items">
-            <summary>
-              <span className="completed-heading">
-                <Icon name="chevronDown" />
-                Erledigt
-              </span>
-              <span className="completed-count">
-                {completed.length} {completed.length === 1 ? "Eintrag" : "Einträge"}
-              </span>
-            </summary>
-            <SortableRows
-              getLabel={(item) => item.name}
-              rows={completed}
-              className="items"
-              save={(before, after) =>
-                listApi.reorderItems(list.id, "completed", { before, after })
-              }
-              renderRow={renderItem}
+          </header>
+          <div className="list-card list-composer">
+            <AddItemForm
+              listId={list.id}
+              color={list.color}
+              onAnnounce={setAnnouncement}
+              suggestionState={suggestions}
             />
-          </details>
-        ) : null}
-      </section>
+            <TabList
+              className="list-status-tab-list"
+              aria-label="Eintragsstatus"
+              style={accentColorStyle(list.color)}
+            >
+              <Tab id="open" className="list-status-tab">
+                Offen <span className="list-tab-count">{active.length}</span>
+              </Tab>
+              <Tab id="completed" className="list-status-tab">
+                Erledigt <span className="list-tab-count">{completed.length}</span>
+              </Tab>
+            </TabList>
+          </div>
+        </div>
+        <TabPanel id="open" className="list-card list-items-card">
+          <h2 className="visually-hidden">Offene Einträge</h2>
+          <SortableRows
+            getLabel={(item) => item.name}
+            rows={active}
+            className="items active-items"
+            save={(before, after) => listApi.reorderItems(list.id, "open", { before, after })}
+            renderRow={renderItem}
+          />
+          {!active.length ? (
+            <EmptyState
+              title={completed.length ? "Alles erledigt!" : "Hier ist noch nichts"}
+              description={
+                completed.length
+                  ? "Alles auf dieser Liste ist erledigt. Genieße die kleine Pause."
+                  : "Füge oben deinen ersten Eintrag hinzu. Gemeinsam behalten wir den Überblick."
+              }
+              icon={completed.length ? "complete" : "emptyList"}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="completed" className="list-card list-items-card">
+          <h2 className="visually-hidden">Erledigte Einträge</h2>
+          <SortableRows
+            getLabel={(item) => item.name}
+            rows={completed}
+            className="items completed-items"
+            save={(before, after) => listApi.reorderItems(list.id, "completed", { before, after })}
+            renderRow={renderItem}
+          />
+          {!completed.length ? (
+            <EmptyState
+              title="Noch nichts erledigt"
+              description="Abgehakte Einträge erscheinen hier. Du kannst sie jederzeit wieder öffnen."
+              icon="complete"
+            />
+          ) : null}
+        </TabPanel>
+      </Tabs>
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>
