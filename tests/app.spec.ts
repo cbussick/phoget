@@ -120,6 +120,87 @@ for (const viewport of [
   });
 }
 
+test("long lists keep controls fixed in the mobile visual viewport", async ({
+  browser,
+  browserName,
+  baseURL,
+  request,
+}, testInfo) => {
+  const response = await request.post("/api/lists", { data: { name: "Supermarkt" } });
+  expect(response.status()).toBe(201);
+  const list = listSchema.parse(await response.json());
+  createdListIds.push(list.id);
+  for (let index = 0; index < 54; index++) {
+    const response = await request.post(`/api/lists/${list.id}/items`, {
+      data: { name: `Eintrag ${String(index).padStart(2, "0")}` },
+    });
+    expect(response.status()).toBe(201);
+    const item = addItemResultSchema.parse(await response.json());
+    if (index >= 3) {
+      const completed = await request.patch(`/api/items/${item.id}`, {
+        data: { completed: true },
+      });
+      expect(completed.status()).toBe(200);
+    }
+  }
+  const context = await browser.newContext({
+    baseURL,
+    viewport: { width: 390, height: 844 },
+    isMobile: browserName !== "firefox",
+    hasTouch: true,
+    storageState: await request.storageState(),
+    extraHTTPHeaders: { "X-Phoget-Request": "1" },
+  });
+  await installFirefoxNavigation(context, browserName);
+  const page = await context.newPage();
+  try {
+    await page.goto("/");
+    await page.getByRole("link", { name: list.name, exact: true }).click();
+    await page.locator(".completed-items summary").click();
+    await expect(page.locator(".quick-add button")).toHaveCount(3);
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const visiblePositions = () =>
+      page.evaluate(() => {
+        const offset = window.visualViewport?.offsetTop ?? 0;
+        return Array.from(
+          document.querySelectorAll(
+            ".back-link, .list-controls h1, .list-controls .list-icon, .add-item-form, .quick-add, .mobile-nav",
+          ),
+        ).map((element) => ({
+          selector: element.className || element.tagName,
+          top: element.getBoundingClientRect().top - offset,
+        }));
+      });
+    const before = await visiblePositions();
+    await testInfo.attach("before-scroll", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    await page.mouse.move(385, 650);
+    // Mobile WebKit does not expose wheel input through Playwright.
+    const scrollDown = () =>
+      browserName === "webkit"
+        ? page.evaluate(() => window.scrollBy(0, 1400))
+        : page.mouse.wheel(0, 1400);
+    await scrollDown();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+    await scrollDown();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+    await testInfo.attach("after-scroll", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    for (const [index, position] of (await visiblePositions()).entries()) {
+      // Transformed icon bounds may differ by floating-point rounding in WebKit.
+      expect(position.top).toBeCloseTo(before[index]!.top, 2);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  } finally {
+    await context.close();
+  }
+});
+
 test("overview hides update activity while list detail retains it", async ({ page, request }) => {
   const response = await request.post("/api/lists", {
     data: { name: "Activity visibility " + crypto.randomUUID(), description: "Shared list" },

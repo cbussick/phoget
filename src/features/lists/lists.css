@@ -70,6 +70,12 @@
   border-start-end-radius: 0;
 }
 
+/* Rotating a full-height sheet widens long lists beyond the mobile viewport,
+   causing the visual viewport (and visibly the header) to pan when scrolling. */
+.list-items-card.list-card::before {
+  transform: none;
+}
+
 .toggle-button .list-symbol-choice {
   width: var(--space-8);
   height: var(--space-8);
