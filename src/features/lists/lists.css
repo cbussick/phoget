@@ -42,6 +42,7 @@
 
 .list-composer.list-card {
   padding-block: 0 var(--space-2);
+  border-block-end: 0;
   border-end-start-radius: 0;
   border-end-end-radius: 0;
   box-shadow: none;
@@ -52,6 +53,8 @@
 }
 
 .list-items-card.list-card {
+  /* Contain the first item's margin so it cannot open a gap below the composer. */
+  display: flow-root;
   padding-block-start: 0;
   border-block-start: 0;
   border-start-start-radius: 0;

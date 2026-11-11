@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
-import { listSchema, stateSchema } from "../shared/contracts";
+import { itemSchema, listSchema, stateSchema } from "../shared/contracts";
 
 import { testCredentials } from "./testCredentials";
 const createdListIds: string[] = [];
@@ -65,8 +65,22 @@ for (const viewport of [
       });
       expect(item.status()).toBe(201);
     }
+    const suggestionResponse = await request.post(`/api/lists/${list.id}/items`, {
+      data: { name: "Hafermilch" },
+    });
+    expect(suggestionResponse.status()).toBe(201);
+    const suggestion = itemSchema.parse(await suggestionResponse.json());
+    const completed = await request.patch(`/api/items/${suggestion.id}`, {
+      data: { completed: true },
+    });
+    expect(completed.status()).toBe(200);
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".active-items > li")).toHaveCount(30);
+    await expect(page.getByRole("button", { name: "+ Hafermilch", exact: true })).toBeVisible();
+    const composer = await page.locator(".list-composer").boundingBox();
+    const items = await page.locator(".list-items-card").boundingBox();
+    expect(items!.y).toBeCloseTo(composer!.y + composer!.height, 1);
+    await expect(page.locator(".list-composer")).toHaveCSS("border-bottom-width", "0px");
     for (const position of [700, 100000]) {
       await page.evaluate((y) => window.scrollTo(0, y), position);
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
@@ -77,6 +91,7 @@ for (const viewport of [
         page.locator(".back-link"),
         page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
         page.getByRole("button", { name: "Hinzufügen", exact: true }),
+        page.getByRole("button", { name: "+ Hafermilch", exact: true }),
       ]) {
         await expect(control).toBeInViewport({ ratio: 1 });
       }
