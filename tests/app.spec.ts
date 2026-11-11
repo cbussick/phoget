@@ -89,24 +89,30 @@ for (const viewport of [
       page.getByRole("button", { name: "+ Hafermilch", exact: true }),
     ];
     const initialBounds = await Promise.all(controls.map((control) => control.boundingBox()));
-    const firstItem = page.locator(".active-items > li").first();
+    const activeItems = page.locator(".active-items");
+    const firstItem = activeItems.locator("li").first();
     const firstItemBounds = await firstItem.boundingBox();
     for (const position of [1, 12, 700, 100000, 12, 1, 0]) {
-      await page.evaluate((y) => window.scrollTo(0, y), position);
+      await activeItems.evaluate((element, y) => element.scrollTo(0, y), position);
       if (position === 100000) {
-        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(700);
+        await expect
+          .poll(() => activeItems.evaluate((element) => element.scrollTop))
+          .toBeGreaterThan(700);
       } else {
-        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(position);
+        await expect
+          .poll(() => activeItems.evaluate((element) => element.scrollTop))
+          .toBe(position);
       }
       for (const [index, control] of controls.entries()) {
         await expect(control).toBeInViewport({ ratio: 1 });
         expect(await control.boundingBox()).toEqual(initialBounds[index]);
       }
       const scrolledItem = await firstItem.boundingBox();
-      const scrollY = await page.evaluate(() => window.scrollY);
-      expect(scrolledItem!.y).toBeCloseTo(firstItemBounds!.y - scrollY, 1);
+      const scrollTop = await activeItems.evaluate((element) => element.scrollTop);
+      expect(scrolledItem!.y).toBeCloseTo(firstItemBounds!.y - scrollTop, 1);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
     }
-    await page.evaluate(() => window.scrollTo(0, 700));
+    await activeItems.evaluate((element) => element.scrollTo(0, 700));
     await page
       .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Added while scrolled");
@@ -120,7 +126,7 @@ for (const viewport of [
   });
 }
 
-test("long lists keep controls fixed in the mobile visual viewport", async ({
+test("completed entries scroll without moving the header or Erledigt", async ({
   browser,
   browserName,
   baseURL,
@@ -165,7 +171,7 @@ test("long lists keep controls fixed in the mobile visual viewport", async ({
         const offset = window.visualViewport?.offsetTop ?? 0;
         return Array.from(
           document.querySelectorAll(
-            ".back-link, .list-controls h1, .list-controls .list-icon, .add-item-form, .quick-add, .mobile-nav",
+            ".back-link, .list-controls h1, .list-controls .list-icon, .add-item-form, .quick-add, .completed-items summary, .mobile-nav",
           ),
         ).map((element) => ({
           selector: element.className || element.tagName,
@@ -177,16 +183,27 @@ test("long lists keep controls fixed in the mobile visual viewport", async ({
       body: await page.screenshot(),
       contentType: "image/png",
     });
-    await page.mouse.move(385, 650);
+    const completedItems = page.locator(".completed-items > .items");
+    const bounds = await completedItems.boundingBox();
+    await page.mouse.move(
+      bounds!.x + bounds!.width / 2,
+      Math.min(bounds!.y + bounds!.height / 2, 700),
+    );
     // Mobile WebKit does not expose wheel input through Playwright.
     const scrollDown = () =>
       browserName === "webkit"
-        ? page.evaluate(() => window.scrollBy(0, 1400))
+        ? completedItems.evaluate((element) => element.scrollBy(0, 1400))
         : page.mouse.wheel(0, 1400);
-    await scrollDown();
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
-    await scrollDown();
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+    // Firefox limits each wheel event to the small scroll area's page size.
+    await expect
+      .poll(
+        async () => {
+          await scrollDown();
+          return completedItems.evaluate((element) => element.scrollTop);
+        },
+        { intervals: [100] },
+      )
+      .toBeGreaterThan(1000);
     await testInfo.attach("after-scroll", {
       body: await page.screenshot(),
       contentType: "image/png",
@@ -196,6 +213,7 @@ test("long lists keep controls fixed in the mobile visual viewport", async ({
       expect(position.top).toBeCloseTo(before[index]!.top, 2);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
   } finally {
     await context.close();
   }
