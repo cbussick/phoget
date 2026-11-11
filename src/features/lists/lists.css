@@ -2,11 +2,18 @@
   margin-block-end: var(--space-8);
 }
 
+/* Keep the page's top spacing inside the sticky area, not before it. */
+.main-content:has(> .list-controls) {
+  padding-block-start: 0;
+}
+
 .list-controls {
   position: sticky;
   z-index: 4;
   top: 0;
-  padding-block-start: max(var(--space-2), env(safe-area-inset-top));
+  padding-block-start: calc(
+    var(--page-padding-start, 0px) + max(var(--space-2), env(safe-area-inset-top))
+  );
   background: var(--color-canvas);
 }
 

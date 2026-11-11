@@ -81,21 +81,32 @@ for (const viewport of [
     const items = await page.locator(".list-items-card").boundingBox();
     expect(items!.y).toBeCloseTo(composer!.y + composer!.height, 1);
     await expect(page.locator(".list-composer")).toHaveCSS("border-bottom-width", "0px");
-    for (const position of [700, 100000]) {
+    const controls = [
+      page.getByRole("heading", { name: list.name, exact: true }),
+      page.locator(".back-link"),
+      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
+      page.getByRole("button", { name: "Hinzufügen", exact: true }),
+      page.getByRole("button", { name: "+ Hafermilch", exact: true }),
+    ];
+    const initialBounds = await Promise.all(controls.map((control) => control.boundingBox()));
+    const firstItem = page.locator(".active-items > li").first();
+    const firstItemBounds = await firstItem.boundingBox();
+    for (const position of [1, 12, 700, 100000, 12, 1, 0]) {
       await page.evaluate((y) => window.scrollTo(0, y), position);
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
-      const controls = page.locator(".list-controls");
-      await expect.poll(async () => (await controls.boundingBox())!.y).toBe(0);
-      for (const control of [
-        page.getByRole("heading", { name: list.name, exact: true }),
-        page.locator(".back-link"),
-        page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
-        page.getByRole("button", { name: "Hinzufügen", exact: true }),
-        page.getByRole("button", { name: "+ Hafermilch", exact: true }),
-      ]) {
-        await expect(control).toBeInViewport({ ratio: 1 });
+      if (position === 100000) {
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(700);
+      } else {
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(position);
       }
+      for (const [index, control] of controls.entries()) {
+        await expect(control).toBeInViewport({ ratio: 1 });
+        expect(await control.boundingBox()).toEqual(initialBounds[index]);
+      }
+      const scrolledItem = await firstItem.boundingBox();
+      const scrollY = await page.evaluate(() => window.scrollY);
+      expect(scrolledItem!.y).toBeCloseTo(firstItemBounds!.y - scrollY, 1);
     }
+    await page.evaluate(() => window.scrollTo(0, 700));
     await page
       .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Added while scrolled");

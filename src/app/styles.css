@@ -99,10 +99,11 @@
 }
 
 .main-content {
+  --page-padding-start: clamp(var(--space-10), var(--page-padding-fluid), var(--page-padding-max));
+
   width: min(100% - var(--space-8), var(--content-width));
   margin-inline: auto;
-  padding-block: clamp(var(--space-10), var(--page-padding-fluid), var(--page-padding-max))
-    var(--space-24);
+  padding-block: var(--page-padding-start) var(--space-24);
 }
 
 .mobile-nav {
@@ -169,8 +170,10 @@
   }
 
   .main-content {
+    --page-padding-start: var(--space-6);
+
     width: min(100% - var(--space-6), var(--mobile-content-width));
-    padding-block: var(--space-6) var(--mobile-bottom-space);
+    padding-block: var(--page-padding-start) var(--mobile-bottom-space);
   }
 
   .page-message {
