@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
-import { itemSchema, listSchema, stateSchema } from "../shared/contracts";
+import { addItemResultSchema, listSchema, stateSchema } from "../shared/contracts";
 
 import { testCredentials } from "./testCredentials";
 const createdListIds: string[] = [];
@@ -69,7 +69,7 @@ for (const viewport of [
       data: { name: "Hafermilch" },
     });
     expect(suggestionResponse.status()).toBe(201);
-    const suggestion = itemSchema.parse(await suggestionResponse.json());
+    const suggestion = addItemResultSchema.parse(await suggestionResponse.json());
     const completed = await request.patch(`/api/items/${suggestion.id}`, {
       data: { completed: true },
     });
