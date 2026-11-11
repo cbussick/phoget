@@ -339,7 +339,7 @@ test("failed saves retain input, whitespace is rejected, and keyboard dialog foc
     await request.delete("/api/lists/" + id);
   }
 });
-test("selected list icon appears above the detail heading and updates after editing", async ({
+test("selected list icon appears beside the detail heading and updates after editing", async ({
   page,
 }) => {
   await createList(page, "Icon " + crypto.randomUUID());
@@ -366,7 +366,9 @@ test("selected list icon appears above the detail heading and updates after edit
     await page.setViewportSize({ width, height: 900 });
     const iconBounds = await icon.boundingBox();
     const headingBounds = await page.getByRole("heading", { level: 1 }).boundingBox();
-    expect(iconBounds!.y + iconBounds!.height).toBeLessThan(headingBounds!.y);
+    expect(iconBounds!.x + iconBounds!.width).toBeLessThan(headingBounds!.x);
+    expect(headingBounds!.y).toBeLessThan(iconBounds!.y + iconBounds!.height);
+    expect(headingBounds!.y + headingBounds!.height).toBeGreaterThan(iconBounds!.y);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -422,7 +424,14 @@ test("mobile long content, dialog, and pages have no accessibility violations", 
     for (const width of [320, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/lists/" + list.id, { waitUntil: "commit" });
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(list.name);
+      const heading = page.getByRole("heading", { level: 1 });
+      await expect(heading).toHaveText(list.name);
+      await expect(heading).toHaveAttribute("title", list.name);
+      const headingBounds = await heading.boundingBox();
+      expect(headingBounds!.height).toBeLessThan(40);
+      await expect(page.getByRole("button", { name: "Hinzufügen", exact: true })).toBeInViewport({
+        ratio: 1,
+      });
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
       ).toBe(true);

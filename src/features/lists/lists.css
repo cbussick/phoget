@@ -28,8 +28,10 @@
 }
 
 .list-controls h1 {
+  overflow: hidden;
   font-size: var(--font-dialog-title);
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .list-controls .title-row > div {

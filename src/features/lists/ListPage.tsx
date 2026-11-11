@@ -56,7 +56,7 @@ export function ListPage({
           <ListIcon name={list.icon} color={list.color} />
           <div className="title-row">
             <div>
-              <h1>{list.name}</h1>
+              <h1 title={list.name}>{list.name}</h1>
               <p className="list-meta">
                 <time
                   dateTime={list.updatedAt}
