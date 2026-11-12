@@ -40,12 +40,15 @@ test("item press feedback, symbol sizing, deletion section and back navigation",
       await page.mouse.down();
       await expect(row).toHaveCSS("background-color", "rgb(242, 245, 243)");
       await expect(checkbox).toHaveCSS("background-color", pressed);
-      // Release outside the control, without toggling completion.
+      // Cancel before moving away: crossing the drag threshold would suppress
+      // the next click while dnd-kit tears down its document listeners.
+      await page.keyboard.press("Escape");
       await page.mouse.move(0, 0);
       await page.mouse.up();
       await row.locator(".item-details").hover();
       await page.mouse.down();
       await expect(row).toHaveCSS("background-color", pressed);
+      await page.keyboard.press("Escape");
       await page.mouse.move(0, 0);
       await page.mouse.up();
     }
