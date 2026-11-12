@@ -143,10 +143,6 @@
   outline-offset: calc(-1 * var(--focus-width));
 }
 
-.list-tab-count {
-  font-variant-numeric: tabular-nums;
-}
-
 /* An offset decorative sheet would add horizontal overflow to the scroll pane. */
 .list-items-card.list-card::before {
   display: none;

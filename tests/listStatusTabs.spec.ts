@@ -14,7 +14,7 @@ test.afterEach(async ({ request }) => {
   for (const id of createdListIds.splice(0)) await request.delete(`/api/lists/${id}`);
 });
 
-test("status tabs support keyboard selection, empty states, live counts, and drafts", async ({
+test("status tabs support keyboard selection, empty states, count-free labels, and drafts", async ({
   page,
   request,
 }) => {
@@ -26,8 +26,8 @@ test("status tabs support keyboard selection, empty states, live counts, and dra
   const list = listSchema.parse(await response.json());
   createdListIds.push(list.id);
   await page.goto(`/lists/${list.id}`);
-  const open = page.getByRole("tab", { name: /^Offen / });
-  const completed = page.getByRole("tab", { name: /^Erledigt / });
+  const open = page.getByRole("tab", { name: "Offen", exact: true });
+  const completed = page.getByRole("tab", { name: "Erledigt", exact: true });
   await expect(open).toHaveAttribute("aria-selected", "true");
   await expect(open).toHaveCSS("background-color", "rgb(0, 0, 0)");
   await expect(open).toHaveCSS("color", "rgb(255, 255, 255)");
@@ -45,10 +45,10 @@ test("status tabs support keyboard selection, empty states, live counts, and dra
   await expect(input).toHaveValue("Keep my draft");
   await input.fill("Milk");
   await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
-  await expect(open).toHaveAccessibleName("Offen 1");
+  await expect(open).toHaveAccessibleName("Offen");
   await page.getByRole("checkbox", { name: "Milk als erledigt markieren", exact: true }).click();
-  await expect(open).toHaveAccessibleName("Offen 0");
-  await expect(completed).toHaveAccessibleName("Erledigt 1");
+  await expect(open).toHaveAccessibleName("Offen");
+  await expect(completed).toHaveAccessibleName("Erledigt");
   await expect(open).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("heading", { name: "Alles erledigt!" })).toBeVisible();
   await open.focus();
@@ -59,8 +59,8 @@ test("status tabs support keyboard selection, empty states, live counts, and dra
   await page.keyboard.press("Escape");
   await expect(item).toBeFocused();
   await page.getByRole("checkbox", { name: "Milk als offen markieren", exact: true }).click();
-  await expect(open).toHaveAccessibleName("Offen 1");
-  await expect(completed).toHaveAccessibleName("Erledigt 0");
+  await expect(open).toHaveAccessibleName("Offen");
+  await expect(completed).toHaveAccessibleName("Erledigt");
   await expect(completed).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("heading", { name: "Noch nichts erledigt" })).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
@@ -88,7 +88,7 @@ test("reordering completed entries persists without changing the open section", 
   }
   await page.goto(`/lists/${list.id}`);
   await expect(page.locator(".item-name")).toHaveText(["Open A", "Open B"]);
-  await page.getByRole("tab", { name: "Erledigt 3", exact: true }).click();
+  await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
   await expect(page.locator(".item-name")).toHaveText(["Done A", "Done B", "Done C"]);
   const saved = page.waitForResponse(
     (response) =>
@@ -103,6 +103,6 @@ test("reordering completed entries persists without changing the open section", 
   await expect(page.locator(".item-name")).toHaveText(["Done B", "Done A", "Done C"]);
   await page.reload();
   await expect(page.locator(".item-name")).toHaveText(["Open A", "Open B"]);
-  await page.getByRole("tab", { name: "Erledigt 3", exact: true }).click();
+  await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
   await expect(page.locator(".item-name")).toHaveText(["Done B", "Done A", "Done C"]);
 });

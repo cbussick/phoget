@@ -89,7 +89,7 @@ for (const viewport of [
       page.getByRole("button", { name: "+ Hafermilch", exact: true }),
     ];
     const initialBounds = await Promise.all(controls.map((control) => control.boundingBox()));
-    const activeItems = page.getByRole("tabpanel", { name: "Offen 30", exact: true });
+    const activeItems = page.getByRole("tabpanel", { name: "Offen", exact: true });
     const firstItem = activeItems.locator("li").first();
     const firstItemBounds = await firstItem.boundingBox();
     for (const position of [1, 12, 700, 100000, 12, 1, 0]) {
@@ -162,11 +162,11 @@ test("completed tab uses the remaining viewport without moving the header or tab
   try {
     await page.goto("/");
     await page.getByRole("link", { name: list.name, exact: true }).click();
-    await expect(page.getByRole("tab", { name: "Offen 3", exact: true })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "Offen", exact: true })).toHaveAttribute(
       "aria-selected",
       "true",
     );
-    await page.getByRole("tab", { name: "Erledigt 51", exact: true }).click();
+    await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
     await expect(page.locator(".quick-add button")).toHaveCount(3);
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -187,7 +187,7 @@ test("completed tab uses the remaining viewport without moving the header or tab
       body: await page.screenshot(),
       contentType: "image/png",
     });
-    const completedItems = page.getByRole("tabpanel", { name: "Erledigt 51", exact: true });
+    const completedItems = page.getByRole("tabpanel", { name: "Erledigt", exact: true });
     await expect(page.locator(".active-items")).toHaveCount(0);
     await expect(page.locator("details")).toHaveCount(0);
     const bounds = await completedItems.boundingBox();
@@ -319,22 +319,22 @@ test("complete household workflow persists through reload and a second browser",
     await page
       .getByRole("checkbox", { name: "Pack two towels als erledigt markieren", exact: true })
       .click();
-    await expect(page.getByRole("tab", { name: "Erledigt 1", exact: true })).toBeVisible();
-    await page.getByRole("tab", { name: "Erledigt 1", exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Erledigt", exact: true })).toBeVisible();
+    await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
     await expect(
       page.getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true }),
     ).toBeChecked();
-    await expect(second.getByRole("tab", { name: "Erledigt 1", exact: true })).toBeVisible({
+    await expect(second.getByRole("tab", { name: "Erledigt", exact: true })).toBeVisible({
       timeout: 15_000,
     });
-    await second.getByRole("tab", { name: "Erledigt 1", exact: true }).click();
+    await second.getByRole("tab", { name: "Erledigt", exact: true }).click();
     await expect(
       second.getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true }),
     ).toBeChecked();
     await second
       .getByRole("checkbox", { name: "Pack two towels als offen markieren", exact: true })
       .click();
-    await page.getByRole("tab", { name: "Offen 1", exact: true }).click();
+    await page.getByRole("tab", { name: "Offen", exact: true }).click();
     await expect(page.locator(".active-items")).toContainText("Pack two towels", {
       timeout: 15_000,
     });
@@ -348,9 +348,9 @@ test("complete household workflow persists through reload and a second browser",
     await page
       .getByRole("checkbox", { name: "Bananas als erledigt markieren", exact: true })
       .click();
-    await expect(page.getByRole("tab", { name: "Erledigt 1", exact: true })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Erledigt", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "+ Bananas", exact: true })).toBeVisible();
-    await page.getByRole("tab", { name: "Erledigt 1", exact: true }).click();
+    await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
     await page.getByRole("button", { name: "Bananas", exact: true }).click();
     await page.getByRole("button", { name: "Eintrag entfernen", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
@@ -369,7 +369,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(draftInput).not.toBeFocused();
     await expect(draftInput).toHaveAttribute("aria-expanded", "false");
     await expect(draftInput).toHaveValue("Keep my draft");
-    await page.getByRole("tab", { name: "Offen 2", exact: true }).click();
+    await page.getByRole("tab", { name: "Offen", exact: true }).click();
     await page.getByRole("button", { name: "Bananas", exact: true }).click();
     await page.getByRole("button", { name: "Eintrag entfernen", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeHidden();

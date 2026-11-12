@@ -93,10 +93,10 @@ export function ListPage({
               style={accentColorStyle(list.color)}
             >
               <Tab id="open" className="list-status-tab">
-                Offen <span className="list-tab-count">{active.length}</span>
+                Offen
               </Tab>
               <Tab id="completed" className="list-status-tab">
-                Erledigt <span className="list-tab-count">{completed.length}</span>
+                Erledigt
               </Tab>
             </TabList>
           </div>
