@@ -8,6 +8,7 @@ export function useSession() {
     queryKey: sessionKey,
     queryFn: ({ signal }) => request("/session", sessionSchema, { signal }),
     retry: false,
-    refetchInterval: sessionPollMs,
+    // A logged-out page has nothing to keep in sync. Login updates this query directly.
+    refetchInterval: (query) => (query.state.data?.user ? sessionPollMs : false),
   });
 }

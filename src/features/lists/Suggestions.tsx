@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { itemHistorySchema, type Item } from "../../../shared/contracts";
-import { sessionPollMs } from "../../app/pollingIntervals";
 import { householdKey } from "../../shared/api/queryKeys";
 import { request } from "../../shared/api/request";
 import { useAction } from "../../shared/api/useAction";
@@ -34,7 +33,6 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
   const history = useQuery({
     queryKey: [...householdKey, "history", listId],
     queryFn: ({ signal }) => request(`/lists/${listId}/history`, itemHistorySchema, { signal }),
-    refetchInterval: sessionPollMs,
     retry: false,
   });
   const restore = useAction(
@@ -78,7 +76,7 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
   const activeNames = new Set(
     items.filter((item) => !item.completed).map((item) => item.name.toLowerCase()),
   );
-  // State and history poll separately; never offer removal of a known active item.
+  // History refreshes on mount, focus and mutations; never offer removal of a known active item.
   const names = (history.data?.names ?? []).filter((name) => !activeNames.has(name.toLowerCase()));
   function forget(name: string) {
     if (busy || activeNames.has(name.toLowerCase())) return;
