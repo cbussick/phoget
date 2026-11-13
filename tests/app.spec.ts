@@ -77,6 +77,14 @@ for (const viewport of [
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".active-items > li")).toHaveCount(30);
     await expect(page.getByRole("button", { name: "+ Hafermilch", exact: true })).toBeVisible();
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    await expect(input).toHaveCSS("text-overflow", "ellipsis");
+    await expect(page.locator("body")).toHaveCSS("background-image", "none");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 246, 244)");
+    await expect(page.locator(".list-controls")).toHaveCSS(
+      "background-color",
+      "rgb(243, 246, 244)",
+    );
     const back = await page.locator(".back-link").boundingBox();
     expect(back!.y).toBe(8);
     const composer = await page.locator(".list-composer").boundingBox();

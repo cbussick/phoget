@@ -12,13 +12,7 @@ html {
 body {
   margin: var(--space-none);
   color: var(--color-ink);
-  background:
-    radial-gradient(
-      circle at 82% 12%,
-      var(--color-glow) 0 var(--glow-start),
-      transparent var(--glow-end)
-    ),
-    var(--color-canvas);
+  background: var(--color-canvas);
   font-family: var(--font-body);
   font-size: var(--font-base);
   line-height: var(--line-height-1-5);

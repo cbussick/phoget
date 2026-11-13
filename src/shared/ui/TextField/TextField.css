@@ -18,6 +18,10 @@
   font: inherit;
 }
 
+.text-field-control > input {
+  text-overflow: ellipsis;
+}
+
 .text-field-control > textarea {
   min-height: var(--space-24);
   resize: none;
