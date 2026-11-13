@@ -6,7 +6,7 @@ Vector artwork for the selected noodle-lettering identity. This is an asset prop
 
 | File                  | Intended use                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `logo-full.svg`       | Full composition: login, welcome and loading screens. Based on concept 97; the final `t` becomes the noodle-check. |
+| `logo-full.svg`       | Login, welcome and loading: original Little Tangle lettering with concept 97's `t`-check and crescent composition. |
 | `logo-horizontal.svg` | Header/sidebar: compact bowl-check to the left of the noodle lettering, following concept 15.                      |
 | `logo-wordmark.svg`   | Lettering and chopsticks alone.                                                                                    |
 | `logo-mark.svg`       | Compact two-color check-and-bowl.                                                                                  |
@@ -20,11 +20,12 @@ The PNG files are rendered companions of the app icon (180, 192, 512 pixels) and
 
 - Exact colors from `src/app/tokens.css`: sky `#8bcdf1`, deep blue `#176f9f`, ink `#18302b`.
 - Transparent backgrounds on the logos; use on light surfaces. These are not dark-mode/reversed lockups.
-- Filled vector paths, including the custom lettering and `don't`: no embedded raster artwork, fonts, external references, gradients or filters.
+- The visible lettering is **phoget only**; there is no `don't` above it. Accessible SVG titles retain the canonical application name.
+- Vector paths with no embedded raster artwork, fonts, external references, gradients or filters.
 - One shared crescent-bowl path across every bowl-bearing asset. One shared noodle-check path across compact and horizontal variants. The full logo's check is part of its continuous `t` flourish.
-- Each of `p`, `h` and `t` has a hand-built, smooth Bézier front contour wrapping over the upper stick, plus a separate return strand behind it. The `h` return emerges through the gap and crosses in front of the lower stick. Only its identical return contour is repeated across that crossing; there is no mismatched seam. Do not replace this with a word-wide layer swap.
-- The three front contours are not clipped at the chopsticks. Their cap contacts follow the upper stick's edge; traced ascender fragments are removed only in the lettering-body layer. Keep overlaps at the body joins to prevent slivers or squared-off cuts.
-- The horizontal wordmark preserves the full logo's letterforms, with a shortened, rounded `t` terminal instead of the long flourish.
+- The lettering is vectorized directly from the **original Little Tangle reference (8)**, not from the discarded heavier redraw. Preserve its lighter proportions, tall open `h` loop, `p` and `t` drapes, and slim chopsticks.
+- The visible noodle contours preserve the reference's individual front/back crossings. The `h` return emerges through the gap and in front of the lower stick. Solid chopstick paths back the contact areas; there are no clipping polygons across the letter caps.
+- The horizontal and lettering-only variants share exactly the same original wordmark path. The full variant changes only the final `t` terminal into a continuous outlined check-flourish; it does not redraw the other letters.
 - The high-contrast app and favicon treatments intentionally use ink for both shapes, rather than a low-contrast white mark on sky blue.
 
 Use a single appropriate variant per placement. Do not shrink the full lettering into a favicon. Keep the logo stable on loading screens; any progress indicator belongs outside the artwork.

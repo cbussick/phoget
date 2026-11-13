@@ -42,36 +42,33 @@ test("the proposed logo assets are self-contained, accessible vector artwork", a
   }
 });
 
-test("p, h and t wrap individually around the chopsticks", async () => {
-  for (const name of ["logo-full", "logo-horizontal", "logo-wordmark"]) {
-    const svg = await readSvg(name);
-    const returns = svg.indexOf('id="noodle-wrap-returns"');
-    const lettering = svg.indexOf('id="noodle-lettering"');
-    const sticks = svg.indexOf('id="chopsticks"');
-    const foreground = svg.indexOf('id="noodle-front-strands"');
-    assert.ok(
-      returns >= 0 && lettering > returns && sticks > lettering && foreground > sticks,
-      `${name} must draw return strands behind the sticks, then restore the front strands`,
-    );
-    assert.match(svg, /<g id="noodle-front-strands" fill="#8bcdf1">/);
-    assert.doesNotMatch(svg, /noodle-front-strands-clip|noodle-front-contour|front-region/);
-    for (const letter of ["p", "h", "t"]) {
-      assert.equal(svg.match(new RegExp(`id="${letter}-front"`, "g"))?.length, 1);
-      assert.equal(svg.match(new RegExp(`id="${letter}-return"`, "g"))?.length, 1);
-      const contour = svg.match(new RegExp(`<path id="${letter}-front" d="([^"]+)"`))?.[1];
-      assert.ok(
-        contour && (contour.match(/C/g)?.length ?? 0) >= 3,
-        "Use clean curved front contours",
-      );
-    }
-    const backReturn = svg.match(/<path id="h-return"[^>]* d="([^"]+)"/)?.[1];
-    const frontReturn = svg.match(/<path id="h-return-through"[^>]* d="([^"]+)"/)?.[1];
-    assert.ok(backReturn);
-    assert.equal(
-      frontReturn,
-      backReturn,
-      "The h must emerge through the sticks without a mismatched join",
-    );
+test("all lettering layouts preserve the original Little Tangle wordmark", async () => {
+  const wordmark = await readSvg("logo-wordmark");
+  const horizontal = await readSvg("logo-horizontal");
+  const full = await readSvg("logo-full");
+  const lettering = (svg: string) => svg.match(/<path id="noodle-lettering"[^>]* d="([^"]+)"/)?.[1];
+  const source = lettering(wordmark);
+  assert.ok(source);
+  assert.equal(lettering(horizontal), source, "The header must not re-letter the original");
+  const fullLettering = lettering(full);
+  assert.ok(fullLettering);
+
+  let prefix = 0;
+  while (source[prefix] === fullLettering[prefix] && prefix < source.length) prefix++;
+  let suffix = 0;
+  while (
+    suffix < source.length - prefix &&
+    source[source.length - 1 - suffix] === fullLettering[fullLettering.length - 1 - suffix]
+  )
+    suffix++;
+  assert.ok((prefix + suffix) / source.length > 0.94, "Only the final t terminal may change");
+
+  const sticks = wordmark.match(/<g id="chopsticks"[^>]*>[\s\S]*?<\/g>/)?.[0];
+  assert.ok(sticks);
+  for (const svg of [full, horizontal, wordmark]) {
+    assert.ok(svg.includes(sticks), "Keep the same slim chopsticks and wrap alignment");
+    assert.doesNotMatch(svg, /id="dont"|<text\b|<clipPath\b/);
+    assert.ok(svg.indexOf('id="chopsticks"') < svg.indexOf('id="noodle-lettering"'));
   }
 });
 
