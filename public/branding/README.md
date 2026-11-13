@@ -24,12 +24,13 @@ The PNG files are rendered companions of the app icon (180, 192, 512 pixels) and
 - Vector paths with no embedded raster artwork, fonts, external references, gradients or filters.
 - One shared crescent-bowl path across every bowl-bearing asset. One shared noodle-check path across compact and horizontal variants. The full logo's check is part of its continuous `t` flourish.
 - The lettering is vectorized directly from the **original Little Tangle reference (8)**, not from the discarded heavier redraw. Preserve its lighter proportions, tall open `h` loop, `p` and `t` drapes, and slim chopsticks.
-- The visible noodle contours preserve the reference's individual front/back crossings. The `h` return emerges through the gap and in front of the lower stick. Solid chopstick paths back the contact areas; there are no clipping polygons across the letter caps.
+- The visible noodle contours preserve the reference's individual front/back crossings. The `h` return emerges through the gap and in front of the lower stick. Small shared blue contact underlaps behind the chopsticks close the p/h tracing slits without widening the lettering; there are no clipping polygons across the letter caps.
+- The reference bowl obscured the bottom of the `g`. Its shared descender is reconstructed as a rounded curve, rather than preserving the raster reference's cut-off diagonal edge.
 - The horizontal and lettering-only variants share exactly the same original wordmark path. The full variant changes only the final `t` terminal into a continuous outlined check-flourish; it does not redraw the other letters.
 - The high-contrast app and favicon treatments intentionally use ink for both shapes, rather than a low-contrast white mark on sky blue.
 
 Use a single appropriate variant per placement. Do not shrink the full lettering into a favicon. Keep the logo stable on loading screens; any progress indicator belongs outside the artwork.
 
-Check the actual wrap rendering with `node scripts/worktree.mjs run node scripts/verifyBrandingSvg.mjs` from the worktree root (requires the Playwright Chromium browser). This covers front/back occlusion and continuous noodle bands in all three lettering layouts. Enlarged visual inspection is still needed to judge the curve quality.
+Check the actual wrap rendering with `node scripts/worktree.mjs run node scripts/verifyBrandingSvg.mjs` from the worktree root (requires the Playwright Chromium browser). This covers front/back occlusion, continuous noodle bands, opacity throughout the repaired p/h contact areas, and the restored g descender in all three lettering layouts. Enlarged visual inspection is still needed to judge the curve quality.
 
 The SVGs are the editable source of truth. The artwork was vectorized from the selected visual concepts, cleaned into flat paths, and normalized to the app palette. Review the small-size exports before integrating; asset tests validate structure and consistency, not brand recognition or subjective legibility.

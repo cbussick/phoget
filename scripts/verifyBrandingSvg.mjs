@@ -16,7 +16,38 @@ const probes = [
   { name: "t front has no chopstick-sized gap", x: 640, y: 80, color: sky },
   { name: "t cap retains the original drape", x: 667, y: 25, color: sky },
   { name: "upper stick continues behind the t drape", x: 710, y: 35, color: ink },
+  {
+    name: "p cap meets the upper stick without a transparent pinhole",
+    x: 111,
+    y: 73,
+    opaque: true,
+  },
+  {
+    name: "h return meets the upper stick without a transparent slit",
+    x: 237,
+    y: 82,
+    opaque: true,
+  },
+  { name: "h cap meets the upper stick without a transparent slit", x: 255, y: 61, opaque: true },
+  {
+    name: "g descender restores the part hidden by the reference bowl",
+    x: 408,
+    y: 394,
+    color: sky,
+  },
 ];
+
+// Check the full contact regions, not just a single pixel in each pinhole.
+for (const [letter, left, right, top, bottom] of [
+  ["p", 100, 122, 90, 99],
+  ["h", 236, 256, 80, 90],
+]) {
+  for (let x = left; x <= right; x++) {
+    for (let y = top; y <= bottom; y++) {
+      probes.push({ name: `${letter} opaque wrap contact ${x}/${y}`, x, y, opaque: true });
+    }
+  }
+}
 
 const bands = {
   p: [
@@ -82,9 +113,7 @@ try {
         canvas.height = height;
         const context = canvas.getContext("2d");
         context.drawImage(image, 0, 0, width, height);
-        return positions.map(({ x, y }) =>
-          Array.from(context.getImageData(x, y, 1, 1).data).slice(0, 3),
-        );
+        return positions.map(({ x, y }) => Array.from(context.getImageData(x, y, 1, 1).data));
       },
       {
         src: `data:image/svg+xml;base64,${svg.toString("base64")}`,
@@ -94,12 +123,19 @@ try {
       },
     );
     for (let index = 0; index < probes.length; index++) {
-      assert.ok(
-        samples[index].every(
-          (channel, position) => Math.abs(channel - probes[index].color[position]) <= 2,
-        ),
-        `${name}: ${probes[index].name}; got ${samples[index]}, expected ${probes[index].color}`,
-      );
+      if (probes[index].opaque) {
+        assert.ok(
+          samples[index][3] >= 250,
+          `${name}: ${probes[index].name}; alpha=${samples[index][3]}`,
+        );
+      } else {
+        assert.ok(
+          samples[index]
+            .slice(0, 3)
+            .every((channel, position) => Math.abs(channel - probes[index].color[position]) <= 2),
+          `${name}: ${probes[index].name}; got ${samples[index]}, expected ${probes[index].color}`,
+        );
+      }
     }
     console.log(`${name}: ${probes.length} original-lettering wrap checks passed`);
   }
