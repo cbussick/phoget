@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Don't Phoget — SVG logo review</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #f3f6f4;
+        color: #18302b;
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1120px;
+        margin: auto;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      h2 {
+        margin: 0 0 20px;
+        font-size: 18px;
+      }
+      p {
+        max-width: 70ch;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        margin-block: 32px;
+      }
+      section {
+        padding: 24px;
+        background: #fffefa;
+        border-radius: 16px;
+      }
+      .hero {
+        display: flex;
+        min-height: 320px;
+        align-items: center;
+        justify-content: center;
+      }
+      .hero img {
+        display: block;
+        width: 100%;
+        max-height: 420px;
+      }
+      .marks {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .marks img {
+        width: 96px;
+        height: 96px;
+      }
+      .favicons {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        min-height: 80px;
+      }
+      figure {
+        margin: 0;
+        text-align: center;
+      }
+      figcaption {
+        margin-top: 8px;
+        color: #66736f;
+        font-size: 13px;
+      }
+      a {
+        color: #176f9f;
+      }
+      .files {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      @media (max-width: 680px) {
+        body {
+          padding: 16px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          min-height: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Don't Phoget</h1>
+      <p>
+        Actual SVG artwork, not generated mockups. The live application's branding is unchanged.
+      </p>
+      <div class="grid">
+        <section>
+          <h2>Full logo · Login, welcome and loading</h2>
+          <div class="hero">
+            <img
+              src="logo-full.svg"
+              alt="Don't Phoget full noodle logo with the t forming a check over the bowl"
+            />
+          </div>
+        </section>
+        <section>
+          <h2>Horizontal · Header and sidebar</h2>
+          <div class="hero">
+            <img
+              src="logo-horizontal.svg"
+              alt="Check-and-bowl beside the Don't Phoget noodle wordmark"
+            />
+          </div>
+        </section>
+        <section>
+          <h2>Lettering alone</h2>
+          <div class="hero">
+            <img
+              src="logo-wordmark.svg"
+              alt="Don't Phoget noodle lettering supported by chopsticks"
+            />
+          </div>
+        </section>
+        <section>
+          <h2>Compact applications</h2>
+          <div class="marks">
+            <img src="logo-mark.svg" alt="Two-color compact mark" />
+            <img src="logo-mark-mono.svg" alt="Single-color compact mark" />
+            <img src="app-icon.svg" alt="App icon on a sky-blue tile" />
+          </div>
+          <h2>Favicons at their actual pixel sizes</h2>
+          <div class="favicons">
+            <figure>
+              <img src="favicon-16.png" alt="16 pixel favicon" width="16" height="16" />
+              <figcaption>16 px</figcaption>
+            </figure>
+            <figure>
+              <img src="favicon-32.png" alt="32 pixel favicon" width="32" height="32" />
+              <figcaption>32 px</figcaption>
+            </figure>
+          </div>
+          <p>
+            The favicon uses ink on sky blue for stronger contrast. Small-size recognition still
+            needs human review.
+          </p>
+        </section>
+      </div>
+      <nav class="files" aria-label="Download SVG files">
+        <a href="logo-full.svg" download>Full SVG</a>
+        <a href="logo-horizontal.svg" download>Horizontal SVG</a>
+        <a href="logo-wordmark.svg" download>Wordmark SVG</a>
+        <a href="logo-mark.svg" download>Compact SVG</a>
+        <a href="app-icon.svg" download>App icon SVG</a>
+        <a href="favicon.svg" download>Favicon SVG</a>
+      </nav>
+    </main>
+  </body>
+</html>
