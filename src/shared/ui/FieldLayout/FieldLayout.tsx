@@ -4,6 +4,7 @@ import "./FieldLayout.css";
 export type FieldPresentation = {
   id?: string;
   label: string;
+  hideLabel?: boolean;
   hint?: string;
   error?: string;
   "aria-describedby"?: string;
@@ -18,6 +19,7 @@ type ControlAttributes = {
 
 export function FieldLayout({
   label,
+  hideLabel,
   hint,
   error,
   id,
@@ -34,7 +36,11 @@ export function FieldLayout({
 
   return (
     <div className="form-field">
-      <label htmlFor={controlId} id={controlId + "-label"}>
+      <label
+        htmlFor={controlId}
+        id={controlId + "-label"}
+        className={hideLabel ? "visually-hidden" : undefined}
+      >
         {label}
       </label>
       {children({

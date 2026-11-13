@@ -12,6 +12,7 @@ export type TextFieldProps = FieldPresentation & {
 
 export function TextField({
   label,
+  hideLabel,
   hint,
   error,
   endAdornment,
@@ -21,6 +22,7 @@ export function TextField({
   return (
     <FieldLayout
       label={label}
+      hideLabel={hideLabel}
       hint={hint}
       error={error}
       id={props.id}

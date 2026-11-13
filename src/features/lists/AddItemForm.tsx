@@ -86,6 +86,7 @@ export function AddItemForm({
           {(field) => (
             <ComboBox
               label="Eintrag hinzufügen"
+              hideLabel
               required
               name={field.name}
               inputRef={input}
