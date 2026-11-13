@@ -9,7 +9,7 @@ import { Button } from "../shared/ui/Button/Button";
 import "./settingsRoute.css";
 export function SettingsRoute({ user, settings }: { user: User; settings: Settings }) {
   const [section, setSection] = useState<"account" | "household" | "users">("account");
-  const active = user.role !== "admin" ? "account" : section;
+  const active = user.role !== "admin" && section === "users" ? "account" : section;
   return (
     <>
       <header className="lists-header">
@@ -27,31 +27,29 @@ export function SettingsRoute({ user, settings }: { user: User; settings: Settin
           <Icon name="user" />
           Mein Konto
         </Button>
+        <Button
+          variant={active === "household" ? "primary" : "secondary"}
+          aria-current={active === "household" ? "page" : undefined}
+          onClick={() => setSection("household")}
+        >
+          <Icon name="building" />
+          Haushalt
+        </Button>
         {user.role === "admin" ? (
-          <>
-            <Button
-              variant={active === "household" ? "primary" : "secondary"}
-              aria-current={active === "household" ? "page" : undefined}
-              onClick={() => setSection("household")}
-            >
-              <Icon name="building" />
-              Haushalt
-            </Button>
-            <Button
-              variant={active === "users" ? "primary" : "secondary"}
-              aria-current={active === "users" ? "page" : undefined}
-              onClick={() => setSection("users")}
-            >
-              <Icon name="users" />
-              Benutzer
-            </Button>
-          </>
+          <Button
+            variant={active === "users" ? "primary" : "secondary"}
+            aria-current={active === "users" ? "page" : undefined}
+            onClick={() => setSection("users")}
+          >
+            <Icon name="users" />
+            Benutzer
+          </Button>
         ) : null}
       </nav>
       {active === "account" ? (
         <MyAccount user={user} />
       ) : active === "household" ? (
-        <HouseholdSettings settings={settings} />
+        <HouseholdSettings settings={settings} canManage={user.role === "admin"} />
       ) : (
         <UsersPage currentUser={user} />
       )}

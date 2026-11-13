@@ -4,7 +4,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { testCredentials } from "./testCredentials";
 import { userSchema } from "../shared/accounts";
 
-test("administrator creates a user; user changes password and sees only personal settings", async ({
+test("administrator creates a user; user changes password and sees personal and household settings", async ({
   page,
   request,
   browser,
@@ -20,6 +20,9 @@ test("administrator creates a user; user changes password and sees only personal
   await installFirefoxNavigation(other, browserName);
   try {
     await page.goto("/settings");
+    const adminAccount = page.getByRole("region", { name: "Angemeldetes Konto" });
+    await expect(adminAccount.getByRole("img")).toHaveCount(1);
+    await expect(adminAccount).toContainText(`@${testCredentials.username}`);
     await page.getByRole("button", { name: "Benutzer", exact: true }).click();
     await page.getByRole("button", { name: "Benutzer anlegen", exact: true }).click();
     await page.getByLabel("Name", { exact: true }).fill("Jamie Browser");
@@ -52,6 +55,8 @@ test("administrator creates a user; user changes password and sees only personal
       .click();
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByRole("cell", { name: username, exact: true })).toBeVisible();
+    await expect(adminAccount.getByRole("img")).toHaveCount(1);
+    await expect(adminAccount).not.toContainText("Jamie Browser");
     const users = await (await request.get("/api/users")).json();
     userId = userSchema
       .array()
@@ -87,7 +92,25 @@ test("administrator creates a user; user changes password and sees only personal
     });
     await expect(userPage.getByRole("heading", { name: "Mein Profil" })).toBeVisible();
     await expect(userPage.getByRole("button", { name: "Benutzer", exact: true })).toHaveCount(0);
-    await expect(userPage.getByRole("button", { name: "Haushalt", exact: true })).toHaveCount(0);
+    const userAccount = userPage.getByRole("region", { name: "Angemeldetes Konto" });
+    await expect(
+      userAccount.getByRole("img", { name: "Jamie Browser", exact: true }),
+    ).toBeVisible();
+    await expect(userAccount).toContainText(`@${username}`);
+    await expect(userAccount).not.toContainText("Test Admin");
+    await userPage.getByRole("button", { name: "Haushalt", exact: true }).click();
+    const overview = userPage.getByRole("region", { name: "Haushaltsübersicht" });
+    await expect(overview.getByRole("heading", { name: "Unser Haushalt" })).toBeVisible();
+    await expect(overview).toContainText("2 Personen");
+    await expect(overview.getByRole("img")).toHaveCount(2);
+    await expect(userPage.getByLabel("Name des Haushalts")).toHaveCount(0);
+    await expect(userPage.getByRole("button", { name: "Änderungen speichern" })).toHaveCount(0);
+    const denied = await userPage.request.put("/api/settings", {
+      headers: { "X-Phoget-Request": "1" },
+      data: { householdName: "Nicht erlaubt" },
+    });
+    expect(denied.status()).toBe(403);
+    await userPage.getByRole("button", { name: "Mein Konto", exact: true }).click();
     await userPage.getByLabel("Dein Name").fill("Jamie Updated");
     await userPage.getByRole("button", { name: "Namen speichern" }).click();
     await expect(userPage.getByRole("region", { name: "Benachrichtigung" })).toContainText(
@@ -95,6 +118,7 @@ test("administrator creates a user; user changes password and sees only personal
     );
     await userPage.reload({ waitUntil: "commit" });
     await expect(userPage.getByLabel("Dein Name")).toHaveValue("Jamie Updated");
+    await expect(userAccount).toContainText("Jamie Updated");
     await userPage.setViewportSize({ width: 390, height: 844 });
     expect(
       (

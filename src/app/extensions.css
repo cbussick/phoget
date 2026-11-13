@@ -4,8 +4,7 @@
 }
 
 .dialog-heading h2,
-.title-row h1,
-.household strong {
+.title-row h1 {
   overflow-wrap: anywhere;
 }
 

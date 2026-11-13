@@ -545,7 +545,7 @@ test("selected list icon appears beside the detail heading and updates after edi
   }
 });
 
-test("household settings persist and update the sidebar", async ({ page, request }) => {
+test("household settings persist and update the household overview", async ({ page, request }) => {
   const original = stateSchema.parse(await (await request.get("/api/state")).json()).settings;
   const { id: _, ...body } = original;
   try {
@@ -560,7 +560,10 @@ test("household settings persist and update the sidebar", async ({ page, request
       "Einstellungen gespeichert.",
     );
     await page.reload();
-    await expect(page.locator(".household strong")).toHaveText("Our little home");
+    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText(
+      "Our little home",
+    );
   } finally {
     await request.put("/api/settings", { data: body });
   }
