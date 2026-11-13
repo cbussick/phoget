@@ -51,7 +51,12 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
       await page.screenshot({ path: process.env.PHOGET_LAYOUT_SCREENSHOT });
     }
     await expect(page.locator(".list-controls .page-header")).toHaveCSS("row-gap", "4px");
-    await expect(page.locator(".add-item-form .form-field")).toHaveCSS("row-gap", "0px");
+    await expect(page.locator(".add-item-form .form-field")).toHaveCSS("row-gap", "4px");
+    await expect(page.locator(".add-item-form")).toHaveCSS("margin-bottom", "12px");
+    await expect(page.locator(".add-item-form .field-error-space")).toHaveCSS(
+      "min-block-size",
+      "21px",
+    );
     await expect(page.locator(".quick-add")).toHaveCSS("padding-bottom", "12px");
     const icon = await page.locator(".page-header > .list-icon").boundingBox();
     for (const selector of [".title-row > div", ".title-row > button"]) {
@@ -69,6 +74,27 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
     const nav = await page.getByRole("navigation", { name: "Mobile Navigation" }).boundingBox();
     expect(nav!.y - pane!.y - pane!.height).toBeCloseTo(16, 1);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    const composerBeforeError = await page.locator(".add-item-form").boundingBox();
+    await input.fill(" ");
+    await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
+    await expect(page.locator(".add-item-form .field-error")).toHaveText("Gib einen Namen ein.");
+    expect(await page.locator(".add-item-form").boundingBox()).toEqual(composerBeforeError);
+    await expect(input).toHaveAttribute("aria-invalid", "true");
+    await expect(input).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(".add-item-form .field-control")).toHaveCSS(
+      "border-color",
+      "rgb(163, 41, 41)",
+    );
+    const errorBox = await page.locator(".add-item-form .field-error").boundingBox();
+    const suggestionsBox = await page.locator(".quick-add").boundingBox();
+    expect(suggestionsBox!.y - errorBox!.y - errorBox!.height).toBeCloseTo(12, 1);
+    await testInfo.attach("validation-message", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    if (process.env.PHOGET_VALIDATION_SCREENSHOT) {
+      await page.screenshot({ path: process.env.PHOGET_VALIDATION_SCREENSHOT });
+    }
   } finally {
     await request.delete(`/api/lists/${list.id}`);
   }

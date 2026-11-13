@@ -237,11 +237,9 @@
   align-items: start;
   gap: var(--space-3);
   padding-block: var(--space-4) var(--space-none);
-}
 
-/* Tighten the empty gap while retaining space for validation feedback. */
-.add-item-form .form-field {
-  row-gap: 0;
+  /* Reserve a normal error line, with breathing room before frequent suggestions. */
+  margin-block-end: var(--space-3);
 }
 
 .add-item-form > .gather-button {

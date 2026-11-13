@@ -41,15 +41,15 @@ export function ComboBox({
   const [active, setActive] = useState<string>();
   const search = value.trim().toLocaleLowerCase();
   const matches = options.filter((option) => option.toLocaleLowerCase().includes(search));
-  const expanded = open && !disabled && matches.length > 0;
+  const expanded = open && !disabled && !field.error && matches.length > 0;
   const highlighted = active && matches.includes(active) ? active : undefined;
   useAnchoredPopup(expanded, anchor, popup);
   useEffect(() => {
-    if (disabled) {
+    if (disabled || field.error) {
       setOpen(false);
       setActive(undefined);
     }
-  }, [disabled]);
+  }, [disabled, field.error]);
   useEffect(() => {
     if (highlighted && expanded)
       document

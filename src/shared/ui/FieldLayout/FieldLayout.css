@@ -38,7 +38,7 @@
   font: inherit;
 }
 
-.field-control:where([aria-invalid="true"], :has([aria-invalid="true"])) {
+.field-control:is([aria-invalid="true"], :has([aria-invalid="true"])) {
   --control-state-color: var(--color-error);
   border-color: var(--color-error);
 }
