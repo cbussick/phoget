@@ -22,7 +22,7 @@ The PNG files are rendered companions of the app icon (180, 192, 512 pixels) and
 - Transparent backgrounds on the logos; use on light surfaces. These are not dark-mode/reversed lockups.
 - Filled vector paths, including the custom lettering and `don't`: no embedded raster artwork, fonts, external references, gradients or filters.
 - One shared crescent-bowl path across every bowl-bearing asset. One shared noodle-check path across compact and horizontal variants. The full logo's check is part of its continuous `t` flourish.
-- The lettering weaves over the back (upper) chopstick and behind the front (lower) chopstick. Keep that paint order in the full, horizontal and lettering-only assets; putting both sticks behind the letters loses the threaded-noodle effect.
+- Each of `p`, `h` and `t` wraps individually around the chopsticks: the main strand remains in front of both sticks, bends over the upper one, and has a separate return strand behind the sticks. Internal vector clip paths restore the three front strands after painting the chopsticks. Do not replace this with a word-wide layer swap: that cuts gaps into the front strands and loses the loops.
 - The horizontal wordmark preserves the full logo's letterforms, with a shortened, rounded `t` terminal instead of the long flourish.
 - The high-contrast app and favicon treatments intentionally use ink for both shapes, rather than a low-contrast white mark on sky blue.
 
