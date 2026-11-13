@@ -39,6 +39,18 @@ test("the proposed logo assets are self-contained, accessible vector artwork", a
   }
 });
 
+test("the noodle lettering weaves over the back chopstick and behind the front chopstick", async () => {
+  for (const name of ["logo-full", "logo-horizontal", "logo-wordmark"]) {
+    const svg = await readSvg(name);
+    const back = svg.indexOf('id="chopstick-back"');
+    const lettering = svg.indexOf('id="noodle-lettering"');
+    const front = svg.indexOf('id="chopstick-front"');
+    assert.ok(back >= 0 && lettering > back && front > lettering, `${name} lost its weave`);
+    assert.equal(svg.match(/id="chopstick-back"/g)?.length, 1);
+    assert.equal(svg.match(/id="chopstick-front"/g)?.length, 1);
+  }
+});
+
 test("full, horizontal and compact logos share the same crescent bowl path", async () => {
   const full = await readSvg("logo-full");
   const bowl = full.match(/<path id="bowl"[^>]* d="([^"]+)"/)?.[1];
