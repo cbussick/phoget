@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tabs, TabList, Tab, TabPanel } from "react-aria-components";
+import { Tabs, TabList, Tab, TabPanel } from "../../shared/ui/Tabs/Tabs";
 import type { Item, List } from "../../../shared/contracts";
 import { Link } from "../../app/navigation";
 import { Button } from "../../shared/ui/Button/Button";
@@ -92,12 +92,8 @@ export function ListPage({
               aria-label="Eintragsstatus"
               style={accentColorStyle(list.color)}
             >
-              <Tab id="open" className="list-status-tab">
-                Offen
-              </Tab>
-              <Tab id="completed" className="list-status-tab">
-                Erledigt
-              </Tab>
+              <Tab id="open">Offen</Tab>
+              <Tab id="completed">Erledigt</Tab>
             </TabList>
           </div>
         </div>

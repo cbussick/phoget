@@ -1,15 +1,13 @@
-import { useState } from "react";
 import type { Settings } from "../../shared/contracts";
 import type { User } from "../../shared/accounts";
 import { HouseholdSettings } from "../features/settings/HouseholdSettings";
 import { MyAccount } from "../features/accounts/MyAccount";
 import { UsersPage } from "../features/accounts/UsersPage";
 import { Icon } from "../shared/ui/Icon/Icon";
-import { Button } from "../shared/ui/Button/Button";
+import { Tabs, TabList, Tab, TabPanel } from "../shared/ui/Tabs/Tabs";
 import "./settingsRoute.css";
+
 export function SettingsRoute({ user, settings }: { user: User; settings: Settings }) {
-  const [section, setSection] = useState<"account" | "household" | "users">("account");
-  const active = user.role !== "admin" ? "account" : section;
   return (
     <>
       <header className="lists-header">
@@ -18,43 +16,39 @@ export function SettingsRoute({ user, settings }: { user: User; settings: Settin
           <p>Ein kleiner Bereich für dich und deinen Haushalt.</p>
         </div>
       </header>
-      <nav className="settings-nav" aria-label="Einstellungsbereiche">
-        <Button
-          variant={active === "account" ? "primary" : "secondary"}
-          aria-current={active === "account" ? "page" : undefined}
-          onClick={() => setSection("account")}
-        >
-          <Icon name="user" />
-          Mein Konto
-        </Button>
+      <Tabs key={user.role} defaultSelectedKey="account" className="settings-tabs">
+        <TabList className="settings-nav" aria-label="Einstellungsbereiche">
+          <Tab id="account">
+            <Icon name="user" />
+            Mein Konto
+          </Tab>
+          {user.role === "admin" ? (
+            <>
+              <Tab id="household">
+                <Icon name="building" />
+                Haushalt
+              </Tab>
+              <Tab id="users">
+                <Icon name="users" />
+                Benutzer
+              </Tab>
+            </>
+          ) : null}
+        </TabList>
+        <TabPanel id="account">
+          <MyAccount user={user} />
+        </TabPanel>
         {user.role === "admin" ? (
           <>
-            <Button
-              variant={active === "household" ? "primary" : "secondary"}
-              aria-current={active === "household" ? "page" : undefined}
-              onClick={() => setSection("household")}
-            >
-              <Icon name="building" />
-              Haushalt
-            </Button>
-            <Button
-              variant={active === "users" ? "primary" : "secondary"}
-              aria-current={active === "users" ? "page" : undefined}
-              onClick={() => setSection("users")}
-            >
-              <Icon name="users" />
-              Benutzer
-            </Button>
+            <TabPanel id="household">
+              <HouseholdSettings settings={settings} />
+            </TabPanel>
+            <TabPanel id="users">
+              <UsersPage currentUser={user} />
+            </TabPanel>
           </>
         ) : null}
-      </nav>
-      {active === "account" ? (
-        <MyAccount user={user} />
-      ) : active === "household" ? (
-        <HouseholdSettings settings={settings} />
-      ) : (
-        <UsersPage currentUser={user} />
-      )}
+      </Tabs>
     </>
   );
 }

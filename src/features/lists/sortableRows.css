@@ -49,7 +49,7 @@
 .list-overview .sortable-row {
   display: flex;
   align-items: center;
-  border-radius: var(--radius-md);
+  border-radius: 0;
 }
 
 .list-overview .sort-handle {
