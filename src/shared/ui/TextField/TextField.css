@@ -22,6 +22,41 @@
   text-overflow: ellipsis;
 }
 
+/* Browsers may clip native placeholders on focus despite text-overflow. Keep a
+   non-interactive visual copy in the input's grid cell for consistent ellipsis. */
+.text-field-control:has(> .text-field-placeholder) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.text-field-control > input:has(+ .text-field-placeholder),
+.text-field-placeholder {
+  grid-area: 1 / 1;
+}
+
+.text-field-placeholder {
+  align-self: center;
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-3);
+  color: var(--color-placeholder);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.text-field-control > input:has(+ .text-field-placeholder)::placeholder {
+  color: transparent;
+}
+
+.text-field-control > input:not(:placeholder-shown) + .text-field-placeholder {
+  visibility: hidden;
+}
+
+.text-field-placeholder ~ * {
+  grid-area: 1 / 2;
+}
+
 .text-field-control > textarea {
   min-height: var(--space-24);
   resize: none;

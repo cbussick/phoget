@@ -37,7 +37,7 @@
   --color-card-border: rgb(174 188 182 / 75%);
   --color-paper-border: rgb(174 188 182 / 45%);
   --color-paper: #e9eeeb;
-  --color-placeholder: #7a8783;
+  --color-placeholder: var(--color-ink-soft);
   --color-row-hover: #f2f5f3;
   --color-backdrop: rgb(24 48 43 / 28%);
   --color-summary-hover: #f4f6f4;

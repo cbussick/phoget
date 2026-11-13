@@ -36,7 +36,16 @@ export function TextField({
           control = <textarea rows={3} {...inputProps} {...attributes} />;
         } else {
           const { multiline: _, ...inputProps } = props;
-          control = <input ref={inputRef} type="text" {...inputProps} {...attributes} />;
+          control = (
+            <>
+              <input ref={inputRef} type="text" {...inputProps} {...attributes} />
+              {inputProps.placeholder ? (
+                <span className="text-field-placeholder" aria-hidden="true">
+                  {inputProps.placeholder}
+                </span>
+              ) : null}
+            </>
+          );
         }
 
         return (
