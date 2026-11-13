@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { membersSchema } from "../../../shared/accounts";
-import { sessionPollMs } from "../../app/pollingIntervals";
 import { request } from "../../shared/api/request";
 import { Avatar } from "../../shared/ui/Avatar/Avatar";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
@@ -23,7 +22,6 @@ export function HouseholdSettings({
   const members = useQuery({
     queryKey: ["members"],
     queryFn: ({ signal }) => request("/members", membersSchema, { signal }),
-    refetchInterval: sessionPollMs,
   });
   return (
     <div className="household-settings">
