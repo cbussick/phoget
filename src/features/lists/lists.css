@@ -2,12 +2,14 @@
   margin-block-end: var(--space-8);
 }
 
-/* The selected tab panel scrolls; the header and tabs stay in place. */
-.app-shell:has(.list-controls) {
+/* Only the lists/items pane scrolls; headings and controls stay in place. */
+.app-shell:has(.list-controls),
+.app-shell:has(.lists-header) {
   min-block-size: 100dvh;
 }
 
-.main-content:has(> .list-tabs) {
+.main-content:has(> .list-tabs),
+.main-content.lists-page:has(> .lists-header) {
   display: flex;
   flex-direction: column;
   block-size: 100dvh;
@@ -26,9 +28,7 @@
   z-index: 4;
   top: 0;
   flex: none;
-  padding-block-start: calc(
-    var(--page-padding-start, 0px) + max(var(--space-2), env(safe-area-inset-top))
-  );
+  padding-block-start: max(var(--space-2), env(safe-area-inset-top));
   background: var(--color-canvas);
 }
 
@@ -87,6 +87,7 @@
   border-start-end-radius: 0;
 }
 
+.lists-card:focus-visible,
 .list-items-card[data-focus-visible] {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: calc(-1 * var(--focus-width));
@@ -482,6 +483,8 @@
 
 .lists-header {
   display: flex;
+  flex: none;
+  padding-block-start: max(var(--page-padding-start), env(safe-area-inset-top));
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-6);
@@ -494,6 +497,10 @@
 }
 
 .lists-card {
+  flex: 1;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   padding-inline: var(--space-6);
   border: var(--border-width) solid var(--color-card-border);
   border-radius: var(--radius-lg);

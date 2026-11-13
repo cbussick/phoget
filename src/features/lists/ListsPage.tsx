@@ -27,7 +27,7 @@ export function ListsPage({ lists }: { lists: List[] }) {
           Neue Liste
         </Button>
       </header>
-      <section className="lists-card" aria-labelledby="your-lists-title">
+      <section className="lists-card" aria-labelledby="your-lists-title" tabIndex={0}>
         <h2 id="your-lists-title" className="visually-hidden">
           Eure Listen
         </h2>

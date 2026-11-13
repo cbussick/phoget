@@ -77,6 +77,8 @@ for (const viewport of [
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".active-items > li")).toHaveCount(30);
     await expect(page.getByRole("button", { name: "+ Hafermilch", exact: true })).toBeVisible();
+    const back = await page.locator(".back-link").boundingBox();
+    expect(back!.y).toBe(8);
     const composer = await page.locator(".list-composer").boundingBox();
     const items = await page.locator(".list-items-card").boundingBox();
     expect(items!.y).toBeCloseTo(composer!.y + composer!.height, 1);
@@ -123,6 +125,44 @@ for (const viewport of [
     ).toHaveValue("");
     await page.locator(".back-link").click();
     await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
+  });
+}
+
+for (const width of [390, 768, 1280]) {
+  test(`overview controls remain usable while scrolling at ${width}px`, async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (let index = 0; index < 20; index++) {
+      const response = await request.post("/api/lists", {
+        data: { name: `Overview scroll ${index} ${crypto.randomUUID()}` },
+      });
+      expect(response.status()).toBe(201);
+      createdListIds.push(listSchema.parse(await response.json()).id);
+    }
+    await page.goto("/");
+    const pane = page.getByRole("region", { name: "Eure Listen", exact: true });
+    const header = page.locator(".lists-header");
+    const initialBounds = await header.boundingBox();
+    const firstRow = pane.locator("li").first();
+    const initialRowBounds = await firstRow.boundingBox();
+    await pane.evaluate((element) => element.scrollTo(0, 500));
+    await expect.poll(() => pane.evaluate((element) => element.scrollTop)).toBe(500);
+    expect(await header.boundingBox()).toEqual(initialBounds);
+    expect((await firstRow.boundingBox())!.y).toBeCloseTo(initialRowBounds!.y - 500, 1);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeInViewport({
+      ratio: 1,
+    });
+    await page.getByRole("button", { name: "Neue Liste", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.getByRole("button", { name: "Abbrechen", exact: true }).click();
+    await pane.focus();
+    await page.keyboard.press("Home");
+    await page.keyboard.press("Control+Home");
+    await expect.poll(() => pane.evaluate((element) => element.scrollTop)).toBe(0);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
 
