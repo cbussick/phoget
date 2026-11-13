@@ -69,6 +69,9 @@ test("administrator creates a user; user changes password and sees only personal
     await userPage.getByLabel("Passwort", { exact: true }).fill(password);
     await userPage.getByRole("button", { name: "Anmelden", exact: true }).click();
     await expect(
+      userPage.getByRole("heading", { name: "Willkommen, Jamie Browser", exact: true }),
+    ).toBeVisible();
+    await expect(
       userPage.getByRole("heading", { name: "Wähle dein eigenes Passwort" }),
     ).toBeVisible();
     await userPage
@@ -86,6 +89,9 @@ test("administrator creates a user; user changes password and sees only personal
       waitUntil: "commit",
     });
     await expect(userPage.getByRole("heading", { name: "Mein Profil" })).toBeVisible();
+    await expect(userPage.getByText(`Angemeldet als ${username}.`, { exact: false })).toHaveText(
+      `Angemeldet als ${username}. Ein Administrator kann deinen Benutzernamen ändern.`,
+    );
     await expect(userPage.getByRole("button", { name: "Benutzer", exact: true })).toHaveCount(0);
     await expect(userPage.getByRole("button", { name: "Haushalt", exact: true })).toHaveCount(0);
     await userPage.getByLabel("Dein Name").fill("Jamie Updated");
