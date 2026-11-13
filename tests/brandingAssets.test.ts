@@ -33,8 +33,11 @@ test("the proposed logo assets are self-contained, accessible vector artwork", a
       svg,
       /<(?:image|text|script|foreignObject|style|filter|linearGradient|radialGradient)\b|\b(?:href|onload|onclick)=|data:/i,
     );
-    for (const [, color] of svg.matchAll(/fill="([^"]+)"/g)) {
-      assert.ok(palette.has(color), `${name} uses an unapproved fill: ${color}`);
+    for (const [, color] of svg.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
+      assert.ok(
+        color === "none" || palette.has(color),
+        `${name} uses an unapproved color: ${color}`,
+      );
     }
   }
 });
@@ -50,18 +53,24 @@ test("p, h and t wrap individually around the chopsticks", async () => {
       returns >= 0 && lettering > returns && sticks > lettering && foreground > sticks,
       `${name} must draw return strands behind the sticks, then restore the front strands`,
     );
-    assert.match(svg, /clip-path="url\(#noodle-front-strands-clip\)"/);
+    assert.match(svg, /<g id="noodle-front-strands" fill="#8bcdf1">/);
+    assert.doesNotMatch(svg, /noodle-front-strands-clip|noodle-front-contour|front-region/);
     for (const letter of ["p", "h", "t"]) {
-      assert.equal(svg.match(new RegExp(`id="${letter}-front-region"`, "g"))?.length, 1);
+      assert.equal(svg.match(new RegExp(`id="${letter}-front"`, "g"))?.length, 1);
       assert.equal(svg.match(new RegExp(`id="${letter}-return"`, "g"))?.length, 1);
+      const contour = svg.match(new RegExp(`<path id="${letter}-front" d="([^"]+)"`))?.[1];
+      assert.ok(
+        contour && (contour.match(/C/g)?.length ?? 0) >= 3,
+        "Use clean curved front contours",
+      );
     }
-    const contour = svg.match(/<path id="noodle-lettering"[^>]* d="([^"]+)"/)?.[1];
-    const frontContour = svg.match(/<path id="noodle-front-contour"[^>]* d="([^"]+)"/)?.[1];
-    assert.ok(contour);
+    const backReturn = svg.match(/<path id="h-return"[^>]* d="([^"]+)"/)?.[1];
+    const frontReturn = svg.match(/<path id="h-return-through"[^>]* d="([^"]+)"/)?.[1];
+    assert.ok(backReturn);
     assert.equal(
-      frontContour,
-      contour,
-      `${name} must not introduce a gap in a letter's front strand`,
+      frontReturn,
+      backReturn,
+      "The h must emerge through the sticks without a mismatched join",
     );
   }
 });
