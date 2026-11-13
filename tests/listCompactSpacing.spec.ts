@@ -50,6 +50,14 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
     if (process.env.PHOGET_LAYOUT_SCREENSHOT) {
       await page.screenshot({ path: process.env.PHOGET_LAYOUT_SCREENSHOT });
     }
+    await expect(page.locator(".list-controls .page-header")).toHaveCSS("row-gap", "4px");
+    await expect(page.locator(".add-item-form .form-field")).toHaveCSS("row-gap", "0px");
+    await expect(page.locator(".quick-add")).toHaveCSS("padding-bottom", "12px");
+    const icon = await page.locator(".page-header > .list-icon").boundingBox();
+    for (const selector of [".title-row > div", ".title-row > button"]) {
+      const box = await page.locator(selector).boundingBox();
+      expect(box!.y + box!.height / 2).toBeCloseTo(icon!.y + icon!.height / 2, 1);
+    }
     const label = page.locator(".add-item-form label");
     await expect(label).toHaveClass("visually-hidden");
     const inputBox = await page.locator(".add-item-form .field-control").boundingBox();
