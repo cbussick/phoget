@@ -8,6 +8,7 @@ import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { accountApi } from "./accountApi";
 import { replaceSession } from "./replaceSession";
 import "./accounts.css";
+import { BrandLogo } from "../../app/BrandLogo";
 
 export function LoginPage() {
   const client = useQueryClient();
@@ -22,10 +23,7 @@ export function LoginPage() {
   return (
     <main className="auth-page login-page">
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true">
-          <img src="/icon.svg" alt="" width="32" height="32" />
-        </span>
-        Don't Phoget
+        <BrandLogo />
       </div>
       <header>
         <h1>Willkommen zu Hause</h1>

@@ -1,6 +1,6 @@
 # Little Tangle — selected identity
 
-The approved pair is **`logo-full.svg` + `favicon.svg` (logo-p, warm white on sky blue)**. This records the artwork selection and updates defaults within this asset set, not the live application. The earlier check-flourish family remains in the parent directory as an exploration.
+The approved pair is **`logo-full.svg` + `favicon.svg` (logo-p, warm white on sky blue)**. The task branch now uses this pair in the application header/navigation, login, browser favicon and home-screen icons. Production is unchanged until integration/deployment. The earlier check-flourish family remains in the parent directory as an exploration.
 
 - `logo-full.svg`: reference-derived Little Tangle lettering and bowl, with refined crossings that weave cleanly around the chopsticks. The g/rim relationship and bowl proportions are preserved. Visible wording is phoget only.
 - `logo-mark.svg`: the earlier check/bowl compact mark, retained for comparison; not selected.
@@ -23,6 +23,8 @@ The t's outer crown uses one non-inflecting cubic into its hidden span, rather t
 
 The bowl's tilt is part of its source contour, not a separate rotation or an approximation with a new ellipse. The same path is used in compact marks. The g has its original visible relationship with this rim; do not turn it into an isolated floating oval.
 
+Run `node scripts/worktree.mjs run node scripts/renderAppIcons.mjs` to update `/icon.svg` and the opaque RGB home-screen PNGs from the selected favicon after regenerating artwork. The document favicon uses the selected asset URLs directly; manifest and Apple icons retain their stable public paths.
+
 The source crop is retained at `tests/fixtures/branding/little-tangle-reference.png`. Run `node scripts/worktree.mjs run node scripts/verifyLittleTangleReference.mjs` from the worktree root to compare rendered silhouette overlap globally and around p/h/t against that actual source. The comparison ignores the intentional palette/shading difference and requires at least 96% overlap for the tested color silhouettes. Human review of the visual match still matters.
 
-All SVGs are self-contained vector paths, with no embedded raster images or font dependencies. Accessible titles retain the canonical application name, Don't Phoget. The full logo and logo-p favicon are selected. Earlier options remain available only for reference. Application integration, merging and deployment are separate steps; the live app has not been changed by this selection.
+All SVGs are self-contained vector paths, with no embedded raster images or font dependencies. Accessible titles retain the canonical application name, Don't Phoget. The full logo and logo-p favicon are selected. Earlier options remain available only for reference. Application integration is implemented on the task branch. Merging and deployment remain separate steps; production has not been changed.

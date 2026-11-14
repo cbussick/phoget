@@ -16,28 +16,20 @@
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: max-content;
+  display: block;
+  width: min(100%, 11rem);
   margin-inline: var(--space-2);
-  color: var(--color-ink);
-  font-size: var(--font-brand);
-  font-weight: var(--font-weight-800);
   text-decoration: none;
 }
 
-.brand-mark {
-  display: grid;
-  width: var(--title-min);
-  height: var(--title-min);
-  place-items: center;
-}
-
-.brand-mark img {
+.brand-logo {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+}
+
+.mobile-brand-header {
+  display: none;
 }
 
 .nav-links {
@@ -166,6 +158,16 @@
 }
 
 @media (width <= 47.99rem) {
+  .mobile-brand-header {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-3) var(--space-4) 0;
+  }
+
+  .mobile-brand-header .brand {
+    width: 6.5rem;
+  }
+
   .app-shell {
     display: block;
   }

@@ -4,7 +4,7 @@
 
 Use [`little-tangle/logo-full.svg`](little-tangle/logo-full.svg) with [`little-tangle/favicon.svg`](little-tangle/favicon.svg): the approved Little Tangle wordmark/bowl and logo-p favicon in warm white on sky blue. See [the selected asset set](little-tangle/README.md) and [the paired review image](little-tangle/review/selected-identity.png).
 
-This selects artwork only; the existing application logo and UI have not been replaced. Merging and deployment require separate authorization.
+The application now uses this full logo in navigation and login, and logo-p for browser/home-screen icons. These changes are implemented on the task branch; merging and deployment still require separate authorization.
 
 ## Earlier explorations — not selected
 
