@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
@@ -7,6 +7,32 @@ const root = new URL("../", import.meta.url);
 const artwork = "public/branding/little-tangle/logo-full.svg";
 const output = new URL("public/branding/little-tangle/review/", root);
 const current = await readFile(new URL(artwork, root), "utf8");
+// Derive the alternative from the actual connected wordmark, not a new p drawing.
+const lettering = current.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
+const pStart = lettering?.indexOf("C 178.283 190.755") ?? -1;
+const pEnd = lettering?.indexOf(" C 163.932 251.576", pStart) ?? -1;
+const descender = lettering?.match(/M 61\.867 255\.770[\s\S]*?(?= M |$)/)?.[0].trim();
+const rear = current.match(/id="p-rear-ribbon"[^>]*d="([^"]+)"/)?.[1];
+const bowl = current.match(/id="tangle-bowl"[^>]*d="([^"]+)"/)?.[1];
+if (pStart < 0 || pEnd <= pStart || !descender || !rear || !bowl)
+  throw new Error(
+    "The source p contours changed; review the extraction before regenerating the favicon.",
+  );
+// Only close the outgoing p-to-h connector. Keep the p's curves and counter intact.
+const pOutline = `M177.824 202.183 ${lettering.slice(pStart, pEnd)} C163.932 251.576 177 236.2 177.824 202.183Z ${descender}Z`;
+await writeFile(
+  new URL("public/branding/little-tangle/favicon-noodle-p-white-sky.svg", root),
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">Don't Phoget — logo-p favicon alternative</title>
+  <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Warm white on sky blue; not selected as the app default.</desc>
+  <rect width="256" height="256" rx="56" fill="#8bcdf1"/>
+  <g transform="translate(80 -7) scale(.5)" fill="#fffefa"><path id="p-rear-ribbon" d="${rear}"/></g>
+  <path fill="none" stroke="#fffefa" stroke-width="7" stroke-linecap="round" d="M50 41.5L211 28M50 52.5L211 44.5"/>
+  <g transform="translate(80 -7) scale(.5)"><path id="logo-p" fill="#fffefa" fill-rule="evenodd" d="${pOutline}"/></g>
+  <g transform="translate(16 32) scale(.36)"><path id="tangle-bowl" fill="#fffefa" fill-rule="evenodd" d="${bowl}"/></g>
+</svg>
+`,
+);
 const revision = (commit) =>
   execFileSync("git", ["show", `${commit}:${artwork}`], {
     cwd: fileURLToPath(root),
@@ -126,7 +152,7 @@ try {
   await nativeContext.close();
   const choices = [
     ["Current check/bowl", "favicon-white-sky"],
-    ["Noodle-p · recreated study", alternativeName],
+    ["Logo-p alternative", alternativeName],
   ];
   const cards = await Promise.all(
     choices.map(async ([label, name], i) => {

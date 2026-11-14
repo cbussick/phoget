@@ -77,6 +77,25 @@ test("the upper chopstick has a circular cap tangent to its straight edge", asyn
   assert.ok(Math.abs(dot) < 1e-5, "The round cap should join the top edge tangentially");
 });
 
+test("the logo-p favicon keeps the wordmark's p outline, descender loop and rear ribbon", async () => {
+  const full = await readSvg("logo-full");
+  const icon = await readSvg("favicon-noodle-p-white-sky");
+  const lettering = full.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(lettering);
+  const start = lettering.indexOf("C 178.283 190.755");
+  const end = lettering.indexOf(" C 163.932 251.576", start);
+  assert.ok(start >= 0 && end > start);
+  const p = icon.match(/id="logo-p"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(p, "Use the actual wordmark p, not the earlier italic-P study");
+  assert.ok(p.includes(lettering.slice(start, end)));
+  const descender = lettering.match(/M 61\.867 255\.770[\s\S]*?(?= M |$)/)?.[0].trim();
+  assert.ok(descender);
+  assert.ok(p.includes(descender));
+  const rear = full.match(/id="p-rear-ribbon"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(rear);
+  assert.ok(icon.includes(`id="p-rear-ribbon" d="${rear}"`));
+});
+
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
   const assets = await Promise.all(
     [
