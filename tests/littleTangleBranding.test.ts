@@ -13,14 +13,22 @@ test("Little Tangle uses direct reference contours in the original native frame"
   assert.equal(reference.readUInt32BE(16), 765);
   assert.equal(reference.readUInt32BE(20), 560);
   assert.ok(full.includes('viewBox="0 0 765 560"'));
-  assert.equal(full.match(/<path /g)?.length, 3);
   for (const id of ["noodle-lettering", "reference-chopsticks", "tangle-bowl"]) {
     assert.ok(full.includes(`id="${id}"`));
   }
-  assert.doesNotMatch(
-    full,
-    /id="dont"|id="noodle-check"|id="t-flourish"|fold-fronts|fold-backs|clipPath/,
-  );
+  assert.doesNotMatch(full, /id="dont"|id="noodle-check"|id="t-flourish"|fold-fronts|fold-backs/);
+});
+
+test("rear noodle ends are occluded by the same continuous chopstick profile", async () => {
+  const full = await readSvg("logo-full");
+  const backing = full.match(/id="rail-backing"[^>]*d="([^"]+)"/)?.[1];
+  const occlusion = full.match(/id="straight-rail-occlusion"[\s\S]*?<path[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(backing);
+  assert.equal(occlusion, backing);
+  assert.ok(full.includes('clip-path="url(#rear-crossings)"'));
+  assert.ok(full.indexOf('id="rear-noodle-continuations"') < full.indexOf('id="rail-backing"'));
+  assert.ok(full.indexOf('id="rail-backing"') < full.indexOf('id="noodle-lettering"'));
+  assert.ok(full.indexOf('id="noodle-lettering"') < full.indexOf('id="straight-rail-occlusion"'));
 });
 
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {

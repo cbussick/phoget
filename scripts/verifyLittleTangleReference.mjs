@@ -82,14 +82,26 @@ try {
         for (const category of categories)
           result.push({ name, category, iou: intersection[category] / union[category] });
       }
-      return result;
+      const contacts = [
+        [110, 90],
+        [112, 99],
+        [240, 82],
+        [242, 89],
+        [645, 30],
+        [678, 29],
+      ].map(([x, y]) => ({
+        x,
+        y,
+        alpha: output[(y * 765 + x) * 4 + 3],
+      }));
+      return { outlines: result, contacts };
     },
     {
       reference: `data:image/png;base64,${reference.toString("base64")}`,
       candidate: `data:image/svg+xml;base64,${svg.toString("base64")}`,
     },
   );
-  for (const score of scores) {
+  for (const score of scores.outlines) {
     console.log(
       `${score.name}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
     );
@@ -98,6 +110,13 @@ try {
       `${score.name}: the vector contours drifted from the actual reference`,
     );
   }
+  for (const contact of scores.contacts) {
+    assert.ok(
+      contact.alpha >= 250,
+      `White seam at ${contact.x}/${contact.y}: alpha ${contact.alpha}`,
+    );
+  }
+  console.log("Chopstick contacts: opaque shared occlusion boundaries passed");
 } finally {
   await browser.close();
 }
