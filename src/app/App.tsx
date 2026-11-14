@@ -60,7 +60,7 @@ function HouseholdApp({ user }: { user: User }) {
   }, [title]);
   const opening = state.isPending && !state.data;
   useEffect(() => {
-    if (!opening) document.getElementById("main-content")?.focus();
+    if (!opening) document.getElementById("main-content")?.focus({ preventScroll: true });
   }, [path, opening]);
   if (opening) return <LoadingScreen message="Deine Listen werden geladen…" />;
   return (

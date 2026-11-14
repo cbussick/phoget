@@ -12,7 +12,7 @@
 .main-content.lists-page:has(> .lists-header) {
   display: flex;
   flex-direction: column;
-  block-size: 100dvh;
+  block-size: calc(100dvh - var(--app-header-height));
   padding-block-start: 0;
 }
 

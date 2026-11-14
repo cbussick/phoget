@@ -93,6 +93,13 @@ test(
             if (name === "chromium")
               await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });
             await page.setViewportSize({ width: 320, height: 844 });
+            await page.reload();
+            await page.getByRole("heading", { name: "Alle Listen", exact: true }).waitFor();
+            assert.equal(await page.evaluate(() => window.scrollY), 0);
+            assert.equal(
+              await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight),
+              true,
+            );
             assert.equal(await page.locator(".mobile-brand-header .brand-logo").isVisible(), true);
             assert.equal(await desktop.isVisible(), false);
             assert.equal(
