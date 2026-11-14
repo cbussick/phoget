@@ -69,6 +69,15 @@ test("all lettering layouts preserve the original Little Tangle wordmark", async
   assert.ok(sticks);
   assert.ok(backs);
   assert.ok(fronts);
+  const pFront = fronts.match(/id="p-fold-front" d="([^"]+)"/)?.[1];
+  const pBack = backs.match(/id="p-fold-back" d="([^"]+)"/)?.[1];
+  assert.ok(pFront && pBack);
+  const pContact = pFront.split("L96 75.5");
+  assert.equal(pContact.length, 2);
+  assert.ok(
+    pBack.startsWith(pContact[0]) && pBack.endsWith(pContact[1]),
+    "The returning p strand must share the front fold's cap and body contours",
+  );
   assert.doesNotMatch(source, /391 385\.019|417\.997 390\.515/, "Reconstruct the bowl-cut g edge");
   for (const svg of [full, horizontal, wordmark]) {
     assert.ok(svg.includes(sticks), "Keep the same slim chopsticks and wrap alignment");

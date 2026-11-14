@@ -39,7 +39,7 @@ const probes = [
 
 // Check the full contact regions, not just a single pixel in each pinhole.
 for (const [letter, left, right, top, bottom] of [
-  ["p", 101, 120, 90, 99],
+  ["p", 98, 109, 90, 99],
   ["h", 236, 256, 80, 90],
 ]) {
   for (let x = left; x <= right; x++) {
@@ -50,6 +50,12 @@ for (const [letter, left, right, top, bottom] of [
 }
 
 probes.push(
+  {
+    name: "p return stays under the fold instead of extending right",
+    x: 117,
+    y: 95,
+    transparent: true,
+  },
   {
     name: "full check sits inside the bowl opening",
     x: 620,
@@ -135,7 +141,12 @@ try {
       },
     );
     for (let index = 0; index < checks.length; index++) {
-      if (checks[index].opaque) {
+      if (checks[index].transparent) {
+        assert.ok(
+          samples[index][3] <= 5,
+          `${name}: ${checks[index].name}; alpha=${samples[index][3]}`,
+        );
+      } else if (checks[index].opaque) {
         assert.ok(
           samples[index][3] >= 250,
           `${name}: ${checks[index].name}; alpha=${samples[index][3]}`,
