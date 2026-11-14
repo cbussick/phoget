@@ -1,0 +1,30 @@
+.main-content {
+  --page-padding-start: clamp(var(--space-10), var(--page-padding-fluid), var(--page-padding-max));
+
+  width: min(100% - var(--space-8), var(--content-width));
+  margin-inline: auto;
+  padding-block: var(--page-padding-start) var(--space-24);
+}
+
+/* Overview headers own their top spacing; do not apply it a second time here. */
+.main-content.page-container-overview {
+  width: min(100% - var(--space-8), var(--overview-width));
+  padding-block-start: 0;
+}
+
+@media (width <= 47.99rem) {
+  .main-content,
+  .main-content.page-container-overview {
+    --page-padding-start: var(--space-6);
+
+    width: min(100% - var(--space-6), var(--mobile-content-width));
+    padding-block-end: var(--mobile-bottom-space);
+  }
+}
+
+@media (width <= 30rem) {
+  .main-content,
+  .main-content.page-container-overview {
+    width: min(100% - var(--space-4), var(--mobile-content-width));
+  }
+}

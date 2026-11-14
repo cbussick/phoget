@@ -5,10 +5,10 @@ import { inflateSync } from "node:zlib";
 
 const read = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Don't Phoget has consistent document and home-screen branding", async () => {
+test("phoget has consistent document and home-screen branding", async () => {
   const html = await read("index.html");
   const manifest = JSON.parse(await read("public/site.webmanifest"));
-  assert.match(html, /<title>Don't Phoget<\/title>/);
+  assert.match(html, /<title>phoget<\/title>/);
   assert.match(
     html,
     /<link rel="icon" href="\/branding\/little-tangle\/favicon-32.png" type="image\/png" sizes="32x32" \/>/,
@@ -25,8 +25,8 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
     html,
     /<link rel="manifest" href="\/site.webmanifest" crossorigin="use-credentials" \/>/,
   );
-  assert.equal(manifest.name, "Don't Phoget");
-  assert.equal(manifest.short_name, "Don't Phoget");
+  assert.equal(manifest.name, "phoget");
+  assert.equal(manifest.short_name, "phoget");
   for (const icon of manifest.icons) {
     await readFile(new URL(`../public${icon.src}`, import.meta.url));
   }

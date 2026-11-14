@@ -10,7 +10,7 @@ export function BrandLogo({ variant = "full" }: { variant?: "full" | "wordmark" 
           ? "/branding/little-tangle/logo-wordmark.svg"
           : "/branding/little-tangle/logo-full.svg"
       }
-      alt="Don't Phoget"
+      alt="phoget"
       width="765"
       height={wordmark ? 410 : 560}
     />

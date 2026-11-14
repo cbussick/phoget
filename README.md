@@ -1,4 +1,4 @@
-# Don't Phoget
+# phoget
 
 A shared household list app with German UI, user accounts, customizable lists, and synced updates.
 Built with React, TypeScript, Express, and PostgreSQL.

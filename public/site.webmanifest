@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Don't Phoget",
-  "short_name": "Don't Phoget",
-  "description": "Don't Phoget – gemeinsame Listen für alles, woran ihr denken möchtet.",
+  "name": "phoget",
+  "short_name": "phoget",
+  "description": "phoget – gemeinsame Listen für alles, woran ihr denken möchtet.",
   "lang": "de",
   "start_url": "/",
   "display": "standalone",

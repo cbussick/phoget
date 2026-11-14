@@ -41,7 +41,7 @@ if (pStart < 0 || pEnd <= pStart || !descender || !rear || !bowl)
 // Only close the outgoing p-to-h connector. Keep the p's curves and counter intact.
 const pOutline = `M177.824 202.183 ${lettering.slice(pStart, pEnd)} C163.932 251.576 177 236.2 177.824 202.183Z ${descender}Z`;
 const logoPIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
-  <title id="title">Don't Phoget — selected logo-p favicon</title>
+  <title id="title">phoget — selected logo-p favicon</title>
   <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Selected identity in warm white on sky blue; application integration is a separate step.</desc>
   <rect width="256" height="256" rx="56" fill="#8bcdf1"/>
   <g transform="translate(80 -7) scale(.5)" fill="#fffefa"><path id="p-rear-ribbon" d="${rear}"/></g>

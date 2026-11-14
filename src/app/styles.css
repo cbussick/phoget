@@ -91,14 +91,6 @@
   font-size: var(--font-caption);
 }
 
-.main-content {
-  --page-padding-start: clamp(var(--space-10), var(--page-padding-fluid), var(--page-padding-max));
-
-  width: min(100% - var(--space-8), var(--content-width));
-  margin-inline: auto;
-  padding-block: var(--page-padding-start) var(--space-24);
-}
-
 .mobile-nav {
   display: none;
 }
@@ -175,13 +167,6 @@
     display: none;
   }
 
-  .main-content {
-    --page-padding-start: var(--space-6);
-
-    width: min(100% - var(--space-6), var(--mobile-content-width));
-    padding-block: var(--page-padding-start) var(--mobile-bottom-space);
-  }
-
   .page-message {
     min-block-size: calc(
       100svh - var(--app-header-height) - var(--space-6) - var(--mobile-bottom-space)
@@ -230,12 +215,6 @@
 
   .mobile-nav svg {
     width: var(--space-5);
-  }
-}
-
-@media (width <= 30rem) {
-  .main-content {
-    width: min(100% - var(--space-4), var(--mobile-content-width));
   }
 }
 

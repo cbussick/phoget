@@ -437,10 +437,6 @@
   --button-pressed-fill: transparent;
 }
 
-.lists-page {
-  width: min(100% - var(--space-8), var(--overview-width));
-}
-
 .lists-header {
   display: flex;
   flex: none;
@@ -493,10 +489,6 @@
     padding-inline: var(--space-5);
   }
 
-  .lists-page {
-    width: min(100% - var(--space-6), var(--mobile-content-width));
-  }
-
   .lists-header {
     align-items: flex-start;
     margin-block-end: var(--space-6);
@@ -518,10 +510,6 @@
 
   .list-card {
     padding-inline: var(--space-4);
-  }
-
-  .lists-page {
-    width: min(100% - var(--space-4), var(--mobile-content-width));
   }
 
   .lists-header {

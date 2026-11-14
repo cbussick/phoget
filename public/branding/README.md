@@ -1,4 +1,4 @@
-# Don't Phoget logo assets
+# phoget logo assets
 
 ## Selected identity
 

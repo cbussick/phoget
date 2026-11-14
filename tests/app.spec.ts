@@ -27,7 +27,7 @@ async function createList(page: Page, name: string) {
   await page.goto("/", { waitUntil: "commit" });
   await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
-  await expect(page).toHaveTitle("Alle Listen | Don't Phoget");
+  await expect(page).toHaveTitle("Alle Listen | phoget");
   await page.getByRole("button", { name: "Neue Liste", exact: true }).click();
   await page.getByLabel("Listenname", { exact: true }).fill(" ");
   await page.getByLabel("Beschreibung", { exact: true }).focus();

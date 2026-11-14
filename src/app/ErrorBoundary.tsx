@@ -15,7 +15,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
             Deine gespeicherten Listen sind sicher. Lade die Seite neu, um es erneut zu versuchen.
           </p>
           <Button variant="primary" size="large" onClick={() => location.reload()}>
-            Don't Phoget neu laden
+            phoget neu laden
           </Button>
         </main>
       );

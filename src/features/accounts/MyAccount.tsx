@@ -57,7 +57,7 @@ export function MyAccount({ user }: { user: User }) {
         <header className="section-heading">
           <div>
             <h2>Sitzung</h2>
-            <p className="field-hint">Melde dich auf diesem Gerät von Don't Phoget ab.</p>
+            <p className="field-hint">Melde dich auf diesem Gerät von phoget ab.</p>
           </div>
           <SignOutButton />
         </header>

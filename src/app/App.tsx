@@ -56,7 +56,7 @@ function HouseholdApp({ user }: { user: User }) {
   const list = state.data?.lists.find((value) => value.id === listId);
   const title = path === "/settings" ? "Einstellungen" : (list?.name ?? "Alle Listen");
   useEffect(() => {
-    document.title = title + " | Don't Phoget";
+    document.title = title + " | phoget";
   }, [title]);
   const opening = state.isPending && !state.data;
   useEffect(() => {

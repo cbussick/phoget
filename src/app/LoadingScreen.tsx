@@ -5,7 +5,7 @@ export function LoadingScreen({ message = "Wird geladen…" }: { message?: strin
   return (
     <main className="loading-screen">
       <div className="loading-brand">
-        <h1 className="visually-hidden">Don't Phoget</h1>
+        <h1 className="visually-hidden">phoget</h1>
         <div className="loading-mark" aria-hidden="true">
           <BrandLogo />
         </div>

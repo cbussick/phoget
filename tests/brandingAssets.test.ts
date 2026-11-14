@@ -26,7 +26,7 @@ test("the proposed logo assets are self-contained, accessible vector artwork", a
     assert.match(svg, /xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
     assert.match(svg, /viewBox="[\d .]+"/);
     assert.match(svg, /role="img" aria-labelledby="title description"/);
-    assert.match(svg, /<title id="title">Don't Phoget/);
+    assert.match(svg, /<title id="title">phoget/);
     assert.match(svg, /<desc id="description">.+<\/desc>/);
     assert.match(svg, /<path\b/);
     assert.doesNotMatch(

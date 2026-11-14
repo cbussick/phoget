@@ -4,6 +4,7 @@ import { Avatar } from "../shared/ui/Avatar/Avatar";
 import { Icon } from "../shared/ui/Icon/Icon";
 import { Link } from "./navigation";
 import { BrandLogo } from "./BrandLogo";
+import { PageContainer } from "../shared/ui/PageContainer/PageContainer";
 
 export function AppShell({
   children,
@@ -43,12 +44,12 @@ export function AppShell({
       </a>
       <div className="app-shell">
         <header className="mobile-brand-header">
-          <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
+          <Link className="brand" href="/" aria-label="phoget-Startseite">
             <BrandLogo variant="wordmark" />
           </Link>
         </header>
         <aside className="sidebar" aria-label="App-Navigation">
-          <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
+          <Link className="brand" href="/" aria-label="phoget-Startseite">
             <BrandLogo variant="wordmark" />
           </Link>
           <nav className="nav-links" aria-label="Hauptnavigation">
@@ -62,13 +63,12 @@ export function AppShell({
             </div>
           </section>
         </aside>
-        <main
-          id="main-content"
-          className={"main-content" + (allLists ? " lists-page" : "")}
-          tabIndex={-1}
+        <PageContainer
+          overview={allLists || isSettings}
+          className={allLists ? "lists-page" : undefined}
         >
           {children}
-        </main>
+        </PageContainer>
       </div>
       <nav className="mobile-nav" aria-label="Mobile Navigation">
         {links(true)}
