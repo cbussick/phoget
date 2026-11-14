@@ -74,7 +74,7 @@ test(
             assert.equal(await desktop.isVisible(), true);
             assert.equal(
               await desktop.getAttribute("src"),
-              "/branding/little-tangle/logo-full.svg",
+              "/branding/little-tangle/logo-wordmark.svg",
             );
             await page.waitForFunction(() =>
               Array.from(document.images)
@@ -85,6 +85,8 @@ test(
               await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute("href"),
               "/branding/little-tangle/favicon.svg",
             );
+            const markBox = await desktop.boundingBox();
+            assert.ok(markBox && markBox.height < 100 && markBox.width > 150);
             if (name === "chromium")
               await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });
             await page.setViewportSize({ width: 320, height: 844 });
@@ -101,6 +103,10 @@ test(
             await page.getByRole("heading", { name: "Willkommen zu Hause", exact: true }).waitFor();
             assert.equal(await page.locator(".login-page .brand-logo").isVisible(), true);
             assert.equal(
+              await page.locator(".login-page .brand-logo").getAttribute("src"),
+              "/branding/little-tangle/logo-full.svg",
+            );
+            assert.equal(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,
             );
@@ -111,6 +117,10 @@ test(
             await page.emulateMedia({ reducedMotion: "no-preference" });
             await page.reload();
             await page.locator(".loading-screen").waitFor();
+            assert.equal(
+              await page.locator(".loading-mark .brand-logo").getAttribute("src"),
+              "/branding/little-tangle/logo-full.svg",
+            );
             assert.equal(
               await page.locator(".loading-screen [role=status]").textContent(),
               "Wird geladen…",

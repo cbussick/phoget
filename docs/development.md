@@ -2,7 +2,7 @@
 
 ## Branding and startup review
 
-The app header/login use `BrandLogo`; browser and home-screen icons use the selected logo-p identity in `public/branding/little-tangle/`. Regenerate opaque home-screen PNGs with `node scripts/worktree.mjs run node scripts/renderAppIcons.mjs` after regenerating branding assets.
+Navigation uses `BrandLogo`'s compact `wordmark` variant (no bowl); login and startup keep its default full variant. Browser and home-screen icons use the selected logo-p identity in `public/branding/little-tangle/`. Regenerate opaque home-screen PNGs with `node scripts/worktree.mjs run node scripts/renderAppIcons.mjs` after regenerating branding assets.
 
 The initial session/household requests show `LoadingScreen`, inspired by Shelf's restrained startup motion. It exits as soon as data or an error settles, never waits for a minimum display time, and does not replace cached content on background refresh. Read-only startup requests attempt a connection even when offline rather than pausing indefinitely behind the loader. Reduced motion keeps the full mark and status readable without movement.
 

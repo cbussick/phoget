@@ -44,12 +44,12 @@ export function AppShell({
       <div className="app-shell">
         <header className="mobile-brand-header">
           <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
-            <BrandLogo />
+            <BrandLogo variant="wordmark" />
           </Link>
         </header>
         <aside className="sidebar" aria-label="App-Navigation">
           <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
-            <BrandLogo />
+            <BrandLogo variant="wordmark" />
           </Link>
           <nav className="nav-links" aria-label="Hauptnavigation">
             {links(false)}

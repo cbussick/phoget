@@ -7,6 +7,26 @@ const root = new URL("../", import.meta.url);
 const artwork = "public/branding/little-tangle/logo-full.svg";
 const output = new URL("public/branding/little-tangle/review/", root);
 const current = await readFile(new URL(artwork, root), "utf8");
+// Navigation keeps the approved wraps, without the bowl or its occluded g cutoff.
+const clippedG =
+  "C 372.064 381.133, 372.061 381.131, 400.500 386.950 C 414.250 389.763, 426.407 392.258, 427.516 392.493 C 430.523 393.131, 443.005 385.814, 450.117 379.244";
+const roundedG = "C 372.064 381.133, 388 397, 406 397 C 422 397, 437 390, 450.117 379.244";
+if (!current.includes(clippedG))
+  throw new Error("Review the exposed g terminal before regenerating the navigation wordmark.");
+const wordmark = current
+  .replace('viewBox="0 0 765 560"', 'viewBox="0 0 765 410"')
+  .replace(
+    /<title id="title">[^<]+<\/title>/,
+    '<title id="title">Don\'t Phoget — navigation wordmark</title>',
+  )
+  .replace(
+    /<desc id="description">[^<]+<\/desc>/,
+    '<desc id="description">The approved noodle lettering and chopstick wraps without the bowl, cropped for navigation. The exposed g terminal is rounded where the bowl previously occluded it.</desc>',
+  )
+  .replace(/<path id="tangle-bowl"[^>]*\/>/, "")
+  .replace(clippedG, roundedG);
+await writeFile(new URL("public/branding/little-tangle/logo-wordmark.svg", root), wordmark);
+
 // Derive the selected favicon from the actual connected wordmark, not a new p drawing.
 const lettering = current.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
 const pStart = lettering?.indexOf("C 178.283 190.755") ?? -1;
@@ -131,6 +151,13 @@ try {
     765,
     560,
     "svg{width:765px;height:560px}",
+  );
+  await capture(
+    "navigation-wordmark.png",
+    scoped(wordmark, "navigation"),
+    765,
+    410,
+    "svg{width:765px;height:410px}",
   );
   const alternativeName = "favicon-noodle-p-white-sky";
   const alternative = await readFile(

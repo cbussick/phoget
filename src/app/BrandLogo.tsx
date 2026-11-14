@@ -1,13 +1,18 @@
 import "./brandLogo.css";
 
-export function BrandLogo() {
+export function BrandLogo({ variant = "full" }: { variant?: "full" | "wordmark" }) {
+  const wordmark = variant === "wordmark";
   return (
     <img
       className="brand-logo"
-      src="/branding/little-tangle/logo-full.svg"
+      src={
+        wordmark
+          ? "/branding/little-tangle/logo-wordmark.svg"
+          : "/branding/little-tangle/logo-full.svg"
+      }
       alt="Don't Phoget"
       width="765"
-      height="560"
+      height={wordmark ? 410 : 560}
     />
   );
 }

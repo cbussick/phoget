@@ -32,13 +32,15 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
   }
 });
 
-test("navigation and login use the selected full logo, and app icons use logo-p", async () => {
+test("navigation uses the compact wordmark, login keeps the full logo, and app icons use logo-p", async () => {
   const shell = await read("src/app/AppShell.tsx");
   const login = await read("src/features/accounts/LoginPage.tsx");
   const logo = await read("src/app/BrandLogo.tsx");
-  assert.match(shell, /<BrandLogo \/>/);
+  assert.match(shell, /<BrandLogo variant="wordmark" \/>/);
   assert.match(login, /<BrandLogo \/>/);
-  assert.match(logo, /src="\/branding\/little-tangle\/logo-full.svg"/);
+  assert.ok(logo.includes('variant = "full"'));
+  assert.ok(logo.includes('"/branding/little-tangle/logo-wordmark.svg"'));
+  assert.ok(logo.includes('"/branding/little-tangle/logo-full.svg"'));
   const svg = await read("public/icon.svg");
   assert.equal(svg, await read("public/branding/little-tangle/favicon.svg"));
   const tokens = await read("src/app/tokens.css");

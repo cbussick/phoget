@@ -136,6 +136,26 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
   }
 });
 
+test("the navigation wordmark keeps the approved wraps but omits the bowl", async () => {
+  const full = await readSvg("logo-full");
+  const wordmark = await readSvg("logo-wordmark");
+  assert.ok(wordmark.includes('viewBox="0 0 765 410"'));
+  assert.doesNotMatch(wordmark, /id="tangle-bowl"/);
+  const fullRails = full.match(/id="rail-backing"[^>]*d="([^"]+)"/)?.[1];
+  const markRails = wordmark.match(/id="rail-backing"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(fullRails);
+  assert.equal(markRails, fullRails);
+  const original = full.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
+  const compact = wordmark.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(original && compact);
+  const cutStart = original.indexOf("C 372.064 381.133");
+  const cutEnd = original.indexOf(" C 471.803 359.212", cutStart);
+  assert.ok(cutStart > 0 && cutEnd > cutStart);
+  assert.ok(compact.startsWith(original.slice(0, cutStart)));
+  assert.ok(compact.endsWith(original.slice(cutEnd)));
+  assert.ok(compact.includes("388 397, 406 397"));
+});
+
 test("the full-logo review export retains two-times pixel resolution", async () => {
   const png = await readFile(new URL("little-tangle/review/logo-full-2x.png", root));
   assert.equal(png.subarray(1, 4).toString(), "PNG");
