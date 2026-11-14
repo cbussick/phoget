@@ -87,6 +87,9 @@ test(
             );
             const markBox = await desktop.boundingBox();
             assert.ok(markBox && markBox.height < 100 && markBox.width > 150);
+            const navBox = await page.locator(".sidebar .nav-links").boundingBox();
+            assert.ok(navBox);
+            assert.equal(Math.round(navBox.y - markBox.y - markBox.height), 24);
             if (name === "chromium")
               await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });
             await page.setViewportSize({ width: 320, height: 844 });
