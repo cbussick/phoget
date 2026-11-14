@@ -103,7 +103,9 @@ try {
         }
         throw new Error(`Missing p return at y=${y}`);
       };
-      return { outlines: result, contacts, pReturnSlant: rearLeft(97) - rearLeft(92) };
+      const tFoldAlpha =
+        enlarged[(Math.floor(25.875 * 4) * 765 * 4 + Math.floor(686.875 * 4)) * 4 + 3];
+      return { outlines: result, contacts, pReturnSlant: rearLeft(97) - rearLeft(92), tFoldAlpha };
     },
     {
       reference: `data:image/png;base64,${reference.toString("base64")}`,
@@ -131,6 +133,8 @@ try {
     `p return is a vertical patch, not a slanted ribbon: ${scores.pReturnSlant}px`,
   );
   console.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
+  assert.ok(scores.tFoldAlpha >= 250, `Triangular gap at the t fold: alpha ${scores.tFoldAlpha}`);
+  console.log("t fold: no triangular gap at the upper stick");
 } finally {
   await browser.close();
 }

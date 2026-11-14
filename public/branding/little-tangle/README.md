@@ -13,7 +13,9 @@ The p return is a curved, slanted ribbon, not a rectangular bridge. The h return
 
 The rendered verifier checks contact opacity, the p return's actual slant and reference silhouette overlap. These checks supplement human visual review; opaque pixels alone do not establish a convincing weave.
 
-Committed before/after review images are in `review/full-before-after.png` and `review/crossings-before-after.png`, so those comparisons do not depend on surviving `/tmp` files. Their before state is commit `2aa7792`.
+Committed before/after review images are in `review/full-before-after.png` and `review/crossings-before-after.png`, so those comparisons do not depend on surviving `/tmp` files. Their before state is commit `2aa7792`. The small triangular t gap is closed by a curved underlap behind the upper stick, without moving the visible crown. `review/t-seam-before-after.png` compares that repair with commit `23d303f`.
+
+Review PNGs now render inline SVG directly through Chromium's compositor at 2× pixel density. The previous canvas-raster-then-shrink pipeline undersampled antialiasing and made shallow chopstick diagonals look jagged. There is no raster resizing in the new export path. `review/logo-full-2x.png` is the standalone 1530 × 1120 full logo. Regenerate these files with `node scripts/worktree.mjs run node scripts/renderLittleTangleReview.mjs` from the worktree root; the comparison generator needs the two recorded baseline commits in local Git history.
 
 The bowl's tilt is part of its source contour, not a separate rotation or an approximation with a new ellipse. The same path is used in compact marks. The g has its original visible relationship with this rim; do not turn it into an isolated floating oval.
 

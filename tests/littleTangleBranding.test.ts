@@ -25,6 +25,8 @@ test("curved rear noodles are occluded by the same continuous chopstick profile"
   assert.ok(rear);
   assert.match(rear, /C/);
   assert.doesNotMatch(rear, /[HV]/);
+  assert.ok(full.includes('id="t-hidden-turn"'));
+  assert.ok(full.indexOf('id="t-hidden-turn"') < full.indexOf('id="rail-backing"'));
   const backing = full.match(/id="rail-backing"[^>]*d="([^"]+)"/)?.[1];
   const occlusion = full.match(/id="straight-rail-occlusion"[\s\S]*?<path[^>]*d="([^"]+)"/)?.[1];
   assert.ok(backing);
@@ -55,6 +57,13 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
       assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b", "#fffefa"].includes(color));
     }
   }
+});
+
+test("the full-logo review export retains two-times pixel resolution", async () => {
+  const png = await readFile(new URL("little-tangle/review/logo-full-2x.png", root));
+  assert.equal(png.subarray(1, 4).toString(), "PNG");
+  assert.equal(png.readUInt32BE(16), 765 * 2);
+  assert.equal(png.readUInt32BE(20), 560 * 2);
 });
 
 test("Little Tangle favicons have actual 16 and 32 pixel exports", async () => {
