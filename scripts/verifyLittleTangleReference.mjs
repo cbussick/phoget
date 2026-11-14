@@ -15,16 +15,16 @@ try {
   const page = await browser.newPage();
   const scores = await page.evaluate(
     async ({ reference, candidate }) => {
-      const raster = async (src) => {
+      const raster = async (src, scale = 1) => {
         const image = new Image();
         image.src = src;
         await image.decode();
         const canvas = document.createElement("canvas");
-        canvas.width = 765;
-        canvas.height = 560;
+        canvas.width = 765 * scale;
+        canvas.height = 560 * scale;
         const context = canvas.getContext("2d");
-        context.drawImage(image, 0, 0, 765, 560);
-        return context.getImageData(0, 0, 765, 560).data;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        return context.getImageData(0, 0, canvas.width, canvas.height).data;
       };
       const source = await raster(reference);
       const output = await raster(candidate);
@@ -94,7 +94,16 @@ try {
         y,
         alpha: output[(y * 765 + x) * 4 + 3],
       }));
-      return { outlines: result, contacts };
+      const enlarged = await raster(candidate, 4);
+      const rearLeft = (y) => {
+        for (let x = 90 * 4; x < 115 * 4; x++) {
+          const i = (Math.round(y * 4) * 765 * 4 + x) * 4;
+          if (enlarged[i + 3] >= 200 && enlarged[i + 1] > 150 && enlarged[i + 2] > 200)
+            return x / 4;
+        }
+        throw new Error(`Missing p return at y=${y}`);
+      };
+      return { outlines: result, contacts, pReturnSlant: rearLeft(97) - rearLeft(92) };
     },
     {
       reference: `data:image/png;base64,${reference.toString("base64")}`,
@@ -117,6 +126,11 @@ try {
     );
   }
   console.log("Chopstick contacts: opaque shared occlusion boundaries passed");
+  assert.ok(
+    scores.pReturnSlant >= 1.25,
+    `p return is a vertical patch, not a slanted ribbon: ${scores.pReturnSlant}px`,
+  );
+  console.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
 } finally {
   await browser.close();
 }

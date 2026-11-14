@@ -19,8 +19,12 @@ test("Little Tangle uses direct reference contours in the original native frame"
   assert.doesNotMatch(full, /id="dont"|id="noodle-check"|id="t-flourish"|fold-fronts|fold-backs/);
 });
 
-test("rear noodle ends are occluded by the same continuous chopstick profile", async () => {
+test("curved rear noodles are occluded by the same continuous chopstick profile", async () => {
   const full = await readSvg("logo-full");
+  const rear = full.match(/id="p-rear-ribbon"[^>]*d="([^"]+)"/)?.[1];
+  assert.ok(rear);
+  assert.match(rear, /C/);
+  assert.doesNotMatch(rear, /[HV]/);
   const backing = full.match(/id="rail-backing"[^>]*d="([^"]+)"/)?.[1];
   const occlusion = full.match(/id="straight-rail-occlusion"[\s\S]*?<path[^>]*d="([^"]+)"/)?.[1];
   assert.ok(backing);
@@ -45,7 +49,9 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
       svg,
       /<(?:image|text|script|foreignObject|linearGradient|radialGradient)\b|data:/i,
     );
-    for (const [, color] of svg.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
+    // Luminance-mask white/black are technical coverage values, not painted colors.
+    const painted = svg.replace(/<mask\b[\s\S]*?<\/mask>/g, "");
+    for (const [, color] of painted.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
       assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b", "#fffefa"].includes(color));
     }
   }
