@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">Don't Phoget — noodle-p favicon study</title>
+  <desc id="description">Recreated alternative: a noodle p lifted by two chopsticks above the reference bowl, in warm white on sky blue. This is a study of the earlier concept, not the original concept image or the selected app favicon.</desc>
+  <rect width="256" height="256" rx="56" fill="#8bcdf1"/>
+  <path id="noodle-p" fill="#fffefa" fill-rule="evenodd" d="M106 197C103 186 106 170 112 149L137 65C143 45 154 34 170 34C188 34 200 46 201 65C203 93 185 116 159 122C150 124 140 124 133 122L120 181C118 195 119 203 114 205C110 207 107 204 106 197Z M143 101C154 105 168 99 176 90C185 79 186 61 180 55C176 51 169 52 165 57C160 65 154 83 143 101Z"/>
+  <path fill="none" stroke="#fffefa" stroke-width="7" stroke-linecap="round" d="M71 65L215 51M71 78L215 64"/>
+  <g transform="translate(16 17) scale(.36)"><path id="tangle-bowl" fill="#fffefa" fill-rule="evenodd" d="M 113.198 331.668 C 108.111 335.852, 106.468 360.841, 109.944 381.172 C 115.862 415.791, 134.133 449.962, 161.896 478.337 C 194.136 511.288, 232.129 531.108, 278.045 538.929 C 355.663 552.151, 429.906 530.139, 479 479.350 C 492.802 465.071, 501.895 452.561, 509.984 436.718 C 516.178 424.588, 517.067 421.131, 514.535 419.029 C 513.012 417.765, 478.449 410.235, 418.500 398.106 C 336.188 381.454, 276.586 368.506, 211 353.031 C 190.375 348.164, 171.925 343.869, 170 343.485 C 168.075 343.101, 156.150 340.075, 143.500 336.761 C 114.881 329.263, 115.911 329.436, 113.198 331.668 Z"/></g>
+</svg>

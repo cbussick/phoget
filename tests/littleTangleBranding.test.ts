@@ -79,7 +79,14 @@ test("the upper chopstick has a circular cap tangent to its straight edge", asyn
 
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
   const assets = await Promise.all(
-    ["logo-full", "logo-mark", "favicon", "favicon-white-sky", "favicon-white-deep"].map(readSvg),
+    [
+      "logo-full",
+      "logo-mark",
+      "favicon",
+      "favicon-white-sky",
+      "favicon-white-deep",
+      "favicon-noodle-p-white-sky",
+    ].map(readSvg),
   );
   const bowl = assets[0].match(/id="tangle-bowl"[^>]*d="([^"]+)"/)?.[1];
   assert.ok(bowl);
@@ -107,7 +114,12 @@ test("the full-logo review export retains two-times pixel resolution", async () 
 });
 
 test("Little Tangle favicons have actual 16 and 32 pixel exports", async () => {
-  for (const variant of ["favicon", "favicon-white-sky", "favicon-white-deep"]) {
+  for (const variant of [
+    "favicon",
+    "favicon-white-sky",
+    "favicon-white-deep",
+    "favicon-noodle-p-white-sky",
+  ]) {
     for (const size of [16, 32]) {
       const png = await readFile(new URL(`little-tangle/${variant}-${size}.png`, root));
       assert.equal(png.subarray(1, 4).toString(), "PNG");

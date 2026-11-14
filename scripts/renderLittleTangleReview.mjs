@@ -104,6 +104,54 @@ try {
     560,
     "svg{width:765px;height:560px}",
   );
+  const alternativeName = "favicon-noodle-p-white-sky";
+  const alternative = await readFile(
+    new URL(`public/branding/little-tangle/${alternativeName}.svg`, root),
+    "utf8",
+  );
+  const nativeContext = await browser.newContext({ deviceScaleFactor: 1 });
+  const nativePage = await nativeContext.newPage();
+  for (const size of [16, 32]) {
+    await nativePage.setViewportSize({ width: size, height: size });
+    await nativePage.setContent(
+      `<style>body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${alternative}`,
+    );
+    await nativePage.screenshot({
+      path: fileURLToPath(
+        new URL(`public/branding/little-tangle/${alternativeName}-${size}.png`, root),
+      ),
+      omitBackground: true,
+    });
+  }
+  await nativeContext.close();
+  const choices = [
+    ["Current check/bowl", "favicon-white-sky"],
+    ["Noodle-p · recreated study", alternativeName],
+  ];
+  const cards = await Promise.all(
+    choices.map(async ([label, name], i) => {
+      const icon = await readFile(
+        new URL(`public/branding/little-tangle/${name}.svg`, root),
+        "utf8",
+      );
+      const sizes = await Promise.all(
+        [16, 32].map(async (size) => {
+          const png = await readFile(
+            new URL(`public/branding/little-tangle/${name}-${size}.png`, root),
+          );
+          return `<div><img src="data:image/png;base64,${png.toString("base64")}" width="${size}" height="${size}">${size} px</div>`;
+        }),
+      );
+      return `<figure class="card"><h2>${label}</h2>${scoped(icon, `choice-${i}`)}<section>${sizes.join("")}</section></figure>`;
+    }),
+  );
+  await capture(
+    "favicon-options.png",
+    `<main><figure class="full"><h2>Full logo</h2>${scoped(current, "combo-logo")}</figure><aside class="options">${cards.join("")}</aside></main>`,
+    1300,
+    660,
+    "main{gap:40px}.full svg{width:765px;height:560px}.options{display:flex;gap:24px;padding-top:90px}.card{width:200px}.card h2{font-size:16px;white-space:nowrap}.card svg{width:168px;height:168px;margin:0 auto 28px}section{display:flex;align-items:flex-end;justify-content:center;gap:25px}section div{text-align:center;font-size:12px;color:#667870}section img{display:block;margin:0 auto 9px}",
+  );
   console.log(`Rendered direct-SVG 2× review images in ${fileURLToPath(output)}`);
 } finally {
   await browser.close();

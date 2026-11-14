@@ -5,6 +5,7 @@ This is a separate proposal, not an application branding switch. The earlier che
 - `logo-full.svg`: reference-derived Little Tangle lettering and bowl, with refined crossings that weave cleanly around the chopsticks. The g/rim relationship and bowl proportions are preserved. Visible wording is phoget only.
 - `logo-mark.svg`: a noodle-check above the same reference bowl, scaled for a compact mark.
 - `favicon.svg`: the compact check/bowl in ink on sky blue.
+- `favicon-noodle-p-white-sky.svg`: a recreated noodle-p/chopsticks alternative inspired by the earlier concept, whose temporary preview was lost in the reboot. This is a new vector study, not the original image or a finalized favicon. It has native 16/32 pixel PNG companions. `review/favicon-options.png` compares it with the current check/bowl beside the full logo.
 - `favicon-white-sky.svg` and `favicon-white-deep.svg`: warm-white versions on the two app blues. Each favicon colorway has actual 16/32 pixel PNG exports. No default colorway is changed by adding these options.
 
 The artwork uses the reference's native 765 × 560 coordinate frame and exact app palette. Lettering away from the crossings and the bowl contour are preserved. The p/h/t folds are extended smoothly into their hidden spans instead of ending as rounded fragments above the sticks.
@@ -23,4 +24,4 @@ The bowl's tilt is part of its source contour, not a separate rotation or an app
 
 The source crop is retained at `tests/fixtures/branding/little-tangle-reference.png`. Run `node scripts/worktree.mjs run node scripts/verifyLittleTangleReference.mjs` from the worktree root to compare rendered silhouette overlap globally and around p/h/t against that actual source. The comparison ignores the intentional palette/shading difference and requires at least 96% overlap for the tested color silhouettes. Human review of the visual match still matters.
 
-All SVGs are self-contained vector paths, with no embedded raster images or font dependencies. Accessible titles retain the canonical application name, Don't Phoget. The earlier noodle-p favicon remains a contender, shown separately as its original concept image. It has not silently replaced the check/bowl SVG options here; no favicon direction has been finalized.
+All SVGs are self-contained vector paths, with no embedded raster images or font dependencies. Accessible titles retain the canonical application name, Don't Phoget. The noodle-p remains a contender as a clearly labeled recreated SVG study. It has not replaced the check/bowl options or the app's current favicon; no direction has been finalized.
