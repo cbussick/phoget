@@ -43,7 +43,7 @@ export function App() {
   if (user.mustChangePassword)
     return (
       <main className="auth-page">
-        <h1>Welcome, {user.name}</h1>
+        <h1>Willkommen, {user.name}</h1>
         <PasswordForm required />
         <SignOutButton />
       </main>
