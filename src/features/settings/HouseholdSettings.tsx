@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { membersSchema } from "../../../shared/accounts";
+import { membersSchema, type User } from "../../../shared/accounts";
+import { UsersPage } from "../accounts/UsersPage";
 import { request } from "../../shared/api/request";
 import { Avatar } from "../../shared/ui/Avatar/Avatar";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
@@ -14,19 +15,21 @@ import { useAction } from "../../shared/api/useAction";
 import "./settings.css";
 export function HouseholdSettings({
   settings,
-  canManage,
+  currentUser,
 }: {
   settings: Settings;
-  canManage: boolean;
+  currentUser: User;
 }) {
+  const canManage = currentUser.role === "admin";
   const members = useQuery({
     queryKey: ["members"],
     queryFn: ({ signal }) => request("/members", membersSchema, { signal }),
   });
   return (
-    <div className="household-settings">
-      <section className="account-card household-overview" aria-label="Haushaltsübersicht">
-        <h2>{settings.householdName}</h2>
+    <section className="account-card household-settings" aria-label="Unser Haushalt">
+      <h2>Unser Haushalt</h2>
+      <div className="household-overview" role="region" aria-label="Haushaltsübersicht">
+        {!canManage ? <p>{settings.householdName}</p> : null}
         {members.data ? (
           <div className="household-summary">
             <div className="avatar-stack">
@@ -51,9 +54,14 @@ export function HouseholdSettings({
             </Button>
           </div>
         ) : null}
-      </section>
-      {canManage ? <HouseholdNameForm settings={settings} /> : null}
-    </div>
+      </div>
+      {canManage ? (
+        <>
+          <HouseholdNameForm settings={settings} />
+          <UsersPage currentUser={currentUser} />
+        </>
+      ) : null}
+    </section>
   );
 }
 
@@ -70,8 +78,7 @@ function HouseholdNameForm({ settings }: { settings: Settings }) {
   );
   useErrorSnackbar(error);
   return (
-    <form noValidate className="account-card settings-form" onSubmit={submit}>
-      <h2>Haushalt</h2>
+    <form noValidate className="settings-form" onSubmit={submit}>
       <form.Field name="householdName">
         {(field) => (
           <TextField

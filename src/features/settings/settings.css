@@ -3,8 +3,20 @@
   gap: var(--space-6);
 }
 
-.household-overview h2 {
+.household-overview {
+  display: grid;
+  gap: var(--space-3);
   overflow-wrap: anywhere;
+}
+
+.household-settings > section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.household-settings h3 {
+  margin: var(--space-none);
+  font-size: var(--font-small);
 }
 
 .household-summary,
@@ -31,6 +43,5 @@
 
 .settings-form {
   display: grid;
-  gap: var(--space-5);
-  padding-block: var(--space-6);
+  gap: var(--space-3);
 }

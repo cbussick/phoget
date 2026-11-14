@@ -21,7 +21,7 @@ for (const width of [390, 1280]) {
     await expect(account).not.toContainText("Unser Haushalt");
     await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     const overview = page.getByRole("region", { name: "Haushaltsübersicht" });
-    await expect(overview.getByRole("heading", { name: "Unser Haushalt" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Unser Haushalt", exact: true })).toBeVisible();
     await expect(overview).toContainText("1 Person");
     await expect(overview.getByRole("img", { name: "Test Admin" })).toBeVisible();
     await expect(page.getByLabel("Name des Haushalts")).toBeVisible();

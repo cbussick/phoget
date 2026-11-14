@@ -114,7 +114,7 @@ test("settings success uses a dismissible snackbar without shifting the form", a
   await context.addCookies((await request.storageState()).cookies);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/settings");
-  for (const name of ["Mein Konto", "Haushalt", "Benutzer"]) {
+  for (const name of ["Mein Konto", "Haushalt"]) {
     await expect(
       page
         .getByRole("tablist", { name: "Einstellungsbereiche" })

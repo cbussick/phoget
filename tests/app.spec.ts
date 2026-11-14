@@ -561,9 +561,7 @@ test("household settings persist and update the household overview", async ({ pa
     );
     await page.reload();
     await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
-    await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText(
-      "Our little home",
-    );
+    await expect(page.getByLabel("Name des Haushalts")).toHaveValue("Our little home");
   } finally {
     await request.put("/api/settings", { data: body });
   }

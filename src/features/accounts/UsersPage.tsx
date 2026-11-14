@@ -16,10 +16,10 @@ export function UsersPage({ currentUser }: { currentUser: User }) {
     retry: false,
   });
   return (
-    <section className="account-card">
+    <section>
       <div className="section-heading">
         <div>
-          <h2>Benutzer im Haushalt</h2>
+          <h3>Benutzer im Haushalt</h3>
           <p className="field-hint">Alle hier teilen dieselben Listen.</p>
         </div>
         <Button variant="primary" onClick={() => setAction({ kind: "create" })}>

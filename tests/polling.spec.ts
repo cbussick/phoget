@@ -41,7 +41,6 @@ test("idle list sync does not repeatedly fetch members or suggestion history", a
     await expect.poll(() => counts.get("/api/members")).toBe(1);
     await page.clock.runFor(3_500);
     expect(counts.get("/api/members")).toBe(1);
-    await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Benutzer im Haushalt" })).toBeVisible();
     await expect.poll(() => counts.get("/api/users")).toBe(1);
     await page.clock.runFor(3_500);

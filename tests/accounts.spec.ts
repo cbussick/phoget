@@ -23,7 +23,7 @@ test("administrator creates a user; user changes password and sees personal and 
     const adminAccount = page.getByRole("region", { name: "Angemeldetes Konto" });
     await expect(adminAccount.getByRole("img")).toHaveCount(1);
     await expect(adminAccount).toContainText(`@${testCredentials.username}`);
-    await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await page.getByRole("button", { name: "Benutzer anlegen", exact: true }).click();
     await page.getByLabel("Name", { exact: true }).fill("Jamie Browser");
     await page.getByLabel("Benutzername", { exact: true }).fill(testCredentials.username);
@@ -106,7 +106,13 @@ test("administrator creates a user; user changes password and sees personal and 
     await expect(userAccount).not.toContainText("Test Admin");
     await userPage.getByRole("tab", { name: "Haushalt", exact: true }).click();
     const overview = userPage.getByRole("region", { name: "Haushaltsübersicht" });
-    await expect(overview.getByRole("heading", { name: "Unser Haushalt" })).toBeVisible();
+    await expect(
+      userPage.getByRole("heading", { name: "Unser Haushalt", exact: true }),
+    ).toBeVisible();
+    await expect(userPage.getByRole("table", { name: "Benutzer im Haushalt" })).toHaveCount(0);
+    await expect(
+      userPage.getByRole("button", { name: "Benutzer anlegen", exact: true }),
+    ).toHaveCount(0);
     await expect(overview).toContainText("2 Personen");
     await expect(overview.getByRole("img")).toHaveCount(2);
     await expect(userPage.getByLabel("Name des Haushalts")).toHaveCount(0);
@@ -135,7 +141,10 @@ test("administrator creates a user; user changes password and sees personal and 
     ).toEqual([]);
     await page.getByRole("button", { name: username + " bearbeiten", exact: true }).click();
     await page.getByLabel("Name", { exact: true }).fill("Jamie Renamed");
-    await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Änderungen speichern", exact: true })
+      .click();
     await expect(page.getByRole("dialog")).toBeHidden();
     await page.getByRole("button", { name: username + " löschen", exact: true }).click();
     await page.getByRole("button", { name: "Benutzer löschen", exact: true }).click();
@@ -218,7 +227,7 @@ test("administrator sees why self-deletion, last-admin demotion and self-reset a
   await request.post("/api/session", { data: testCredentials });
   await page.context().addCookies((await request.storageState()).cookies);
   await page.goto("/settings", { waitUntil: "commit" });
-  await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
+  await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
   await page
     .getByRole("button", { name: testCredentials.username + " löschen", exact: true })
     .click();
@@ -244,12 +253,12 @@ test("administrator sees why self-deletion, last-admin demotion and self-reset a
   await page.getByRole("option", { name: "Benutzer", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("benötigt mindestens einen Administrator");
   await expect(
-    page.getByRole("button", { name: "Änderungen speichern", exact: true }),
+    page.getByRole("dialog").getByRole("button", { name: "Änderungen speichern", exact: true }),
   ).toBeDisabled();
   await page.getByRole("combobox", { name: "Rolle" }).click();
   await page.getByRole("option", { name: "Administrator", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Änderungen speichern", exact: true }),
+    page.getByRole("dialog").getByRole("button", { name: "Änderungen speichern", exact: true }),
   ).toBeEnabled();
 });
