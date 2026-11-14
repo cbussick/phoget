@@ -5,15 +5,22 @@ import test from "node:test";
 const root = new URL("../public/branding/", import.meta.url);
 const readSvg = (name: string) => readFile(new URL(`little-tangle/${name}.svg`, root), "utf8");
 
-test("Little Tangle's full logo retains the repaired lettering without a check-flourish", async () => {
+test("Little Tangle uses direct reference contours in the original native frame", async () => {
   const full = await readSvg("logo-full");
-  const wordmark = await readFile(new URL("logo-wordmark.svg", root), "utf8");
-  const lettering = (svg: string) => svg.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
-  assert.ok(lettering(full));
-  assert.equal(lettering(full), lettering(wordmark));
-  assert.doesNotMatch(full, /id="dont"|id="noodle-check"|id="t-flourish"/);
-  assert.match(full, /id="noodles-behind-bowl" clip-path="url\(#bowl-rim-occlusion\)"/);
-  assert.ok(full.includes('transform="translate(56 110) scale(2)"'));
+  const reference = await readFile(
+    new URL("../tests/fixtures/branding/little-tangle-reference.png", import.meta.url),
+  );
+  assert.equal(reference.readUInt32BE(16), 765);
+  assert.equal(reference.readUInt32BE(20), 560);
+  assert.ok(full.includes('viewBox="0 0 765 560"'));
+  assert.equal(full.match(/<path /g)?.length, 3);
+  for (const id of ["noodle-lettering", "reference-chopsticks", "tangle-bowl"]) {
+    assert.ok(full.includes(`id="${id}"`));
+  }
+  assert.doesNotMatch(
+    full,
+    /id="dont"|id="noodle-check"|id="t-flourish"|fold-fronts|fold-backs|clipPath/,
+  );
 });
 
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
@@ -24,7 +31,7 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
   assert.ok(bowl);
   for (const svg of assets) {
     assert.ok(svg.includes(`d="${bowl}"`));
-    assert.ok(svg.includes('transform="rotate(12 128 132)"'));
+    // The reference bowl already includes its tilt; compact versions scale that same path.
     assert.match(svg, /role="img" aria-labelledby="title description"/);
     assert.doesNotMatch(
       svg,

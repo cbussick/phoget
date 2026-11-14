@@ -173,9 +173,9 @@ try {
       await image.decode();
       const canvas = document.createElement("canvas");
       canvas.width = 765;
-      canvas.height = 565;
+      canvas.height = 560;
       const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0, 765, 565);
+      context.drawImage(image, 0, 0, 765, 560);
       return [385, 390, 400].map((y) => Array.from(context.getImageData(405, y, 1, 1).data));
     },
     `data:image/svg+xml;base64,${tangle.toString("base64")}`,

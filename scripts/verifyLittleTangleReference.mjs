@@ -1,0 +1,103 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { chromium } from "playwright";
+
+const candidate = process.argv[2]
+  ? resolve(process.argv[2])
+  : new URL("../public/branding/little-tangle/logo-full.svg", import.meta.url);
+const reference = await readFile(
+  new URL("../tests/fixtures/branding/little-tangle-reference.png", import.meta.url),
+);
+const svg = await readFile(candidate);
+const browser = await chromium.launch({ headless: true });
+try {
+  const page = await browser.newPage();
+  const scores = await page.evaluate(
+    async ({ reference, candidate }) => {
+      const raster = async (src) => {
+        const image = new Image();
+        image.src = src;
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = 765;
+        canvas.height = 560;
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, 765, 560);
+        return context.getImageData(0, 0, 765, 560).data;
+      };
+      const source = await raster(reference);
+      const output = await raster(candidate);
+      const sourceColors = [
+        [253, 253, 251],
+        [114, 199, 243],
+        [12, 44, 36],
+        [0, 116, 177],
+      ];
+      const outputColors = [
+        [255, 254, 250],
+        [139, 205, 241],
+        [24, 48, 43],
+        [23, 111, 159],
+      ];
+      const classify = (pixels, index, colors) => {
+        if (pixels[index + 3] < 128) return 0;
+        let best = Infinity;
+        let category = 0;
+        for (let i = 0; i < colors.length; i++) {
+          const distance = colors[i].reduce(
+            (sum, channel, position) => sum + (channel - pixels[index + position]) ** 2,
+            0,
+          );
+          if (distance < best) {
+            best = distance;
+            category = i;
+          }
+        }
+        return category;
+      };
+      const regions = [
+        ["full", 0, 0, 765, 560, [1, 2, 3]],
+        ["p-wrap", 45, 55, 95, 155, [1, 2]],
+        ["h-wrap", 180, 25, 100, 185, [1, 2]],
+        ["t-wrap", 595, 0, 120, 185, [1, 2]],
+      ];
+      const result = [];
+      for (const [name, left, top, width, height, categories] of regions) {
+        const intersection = [0, 0, 0, 0];
+        const union = [0, 0, 0, 0];
+        for (let y = top; y < top + height; y++) {
+          for (let x = left; x < left + width; x++) {
+            const index = (y * 765 + x) * 4;
+            let expected = classify(source, index, sourceColors);
+            // The source is shaded; blue antialiasing below the rim belongs to the bowl.
+            if (expected === 1 && x > 100 && y > 329 + (x - 105) * 0.217) expected = 3;
+            const actual = classify(output, index, outputColors);
+            for (const category of categories) {
+              if (expected === category || actual === category) union[category]++;
+              if (expected === category && actual === category) intersection[category]++;
+            }
+          }
+        }
+        for (const category of categories)
+          result.push({ name, category, iou: intersection[category] / union[category] });
+      }
+      return result;
+    },
+    {
+      reference: `data:image/png;base64,${reference.toString("base64")}`,
+      candidate: `data:image/svg+xml;base64,${svg.toString("base64")}`,
+    },
+  );
+  for (const score of scores) {
+    console.log(
+      `${score.name}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
+    );
+    assert.ok(
+      score.iou >= 0.96,
+      `${score.name}: the vector contours drifted from the actual reference`,
+    );
+  }
+} finally {
+  await browser.close();
+}
