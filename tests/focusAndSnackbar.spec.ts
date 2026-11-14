@@ -117,12 +117,12 @@ test("settings success uses a dismissible snackbar without shifting the form", a
   for (const name of ["Mein Konto", "Haushalt", "Benutzer"]) {
     await expect(
       page
-        .getByRole("navigation", { name: "Einstellungsbereiche" })
-        .getByRole("button", { name, exact: true })
+        .getByRole("tablist", { name: "Einstellungsbereiche" })
+        .getByRole("tab", { name, exact: true })
         .locator("svg"),
     ).toBeVisible();
   }
-  await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+  await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
   await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText("1 Person");
   await page.evaluate(() => document.fonts.ready);
   const save = page.getByRole("button", { name: "Änderungen speichern", exact: true });

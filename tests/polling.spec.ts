@@ -34,14 +34,14 @@ test("idle list sync does not repeatedly fetch members or suggestion history", a
     expect(counts.get(`/api/lists/${list.id}/history`)).toBe(1);
 
     await page.getByRole("link", { name: "Einstellungen" }).click();
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText(
       "1 Person",
     );
     await expect.poll(() => counts.get("/api/members")).toBe(1);
     await page.clock.runFor(3_500);
     expect(counts.get("/api/members")).toBe(1);
-    await page.getByRole("button", { name: "Benutzer", exact: true }).click();
+    await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Benutzer im Haushalt" })).toBeVisible();
     await expect.poll(() => counts.get("/api/users")).toBe(1);
     await page.clock.runFor(3_500);

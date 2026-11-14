@@ -23,7 +23,7 @@ test("administrator creates a user; user changes password and sees personal and 
     const adminAccount = page.getByRole("region", { name: "Angemeldetes Konto" });
     await expect(adminAccount.getByRole("img")).toHaveCount(1);
     await expect(adminAccount).toContainText(`@${testCredentials.username}`);
-    await page.getByRole("button", { name: "Benutzer", exact: true }).click();
+    await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
     await page.getByRole("button", { name: "Benutzer anlegen", exact: true }).click();
     await page.getByLabel("Name", { exact: true }).fill("Jamie Browser");
     await page.getByLabel("Benutzername", { exact: true }).fill(testCredentials.username);
@@ -74,6 +74,9 @@ test("administrator creates a user; user changes password and sees personal and 
     await userPage.getByLabel("Passwort", { exact: true }).fill(password);
     await userPage.getByRole("button", { name: "Anmelden", exact: true }).click();
     await expect(
+      userPage.getByRole("heading", { name: "Willkommen, Jamie Browser", exact: true }),
+    ).toBeVisible();
+    await expect(
       userPage.getByRole("heading", { name: "Wähle dein eigenes Passwort" }),
     ).toBeVisible();
     await userPage
@@ -91,14 +94,17 @@ test("administrator creates a user; user changes password and sees personal and 
       waitUntil: "commit",
     });
     await expect(userPage.getByRole("heading", { name: "Mein Profil" })).toBeVisible();
-    await expect(userPage.getByRole("button", { name: "Benutzer", exact: true })).toHaveCount(0);
+    await expect(userPage.getByText(`Angemeldet als ${username}.`, { exact: false })).toHaveText(
+      `Angemeldet als ${username}. Ein Administrator kann deinen Benutzernamen ändern.`,
+    );
+    await expect(userPage.getByRole("tab", { name: "Benutzer", exact: true })).toHaveCount(0);
     const userAccount = userPage.getByRole("region", { name: "Angemeldetes Konto" });
     await expect(
       userAccount.getByRole("img", { name: "Jamie Browser", exact: true }),
     ).toBeVisible();
     await expect(userAccount).toContainText(`@${username}`);
     await expect(userAccount).not.toContainText("Test Admin");
-    await userPage.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await userPage.getByRole("tab", { name: "Haushalt", exact: true }).click();
     const overview = userPage.getByRole("region", { name: "Haushaltsübersicht" });
     await expect(overview.getByRole("heading", { name: "Unser Haushalt" })).toBeVisible();
     await expect(overview).toContainText("2 Personen");
@@ -110,7 +116,7 @@ test("administrator creates a user; user changes password and sees personal and 
       data: { householdName: "Nicht erlaubt" },
     });
     expect(denied.status()).toBe(403);
-    await userPage.getByRole("button", { name: "Mein Konto", exact: true }).click();
+    await userPage.getByRole("tab", { name: "Mein Konto", exact: true }).click();
     await userPage.getByLabel("Dein Name").fill("Jamie Updated");
     await userPage.getByRole("button", { name: "Namen speichern" }).click();
     await expect(userPage.getByRole("region", { name: "Benachrichtigung" })).toContainText(
@@ -212,7 +218,7 @@ test("administrator sees why self-deletion, last-admin demotion and self-reset a
   await request.post("/api/session", { data: testCredentials });
   await page.context().addCookies((await request.storageState()).cookies);
   await page.goto("/settings", { waitUntil: "commit" });
-  await page.getByRole("button", { name: "Benutzer", exact: true }).click();
+  await page.getByRole("tab", { name: "Benutzer", exact: true }).click();
   await page
     .getByRole("button", { name: testCredentials.username + " löschen", exact: true })
     .click();

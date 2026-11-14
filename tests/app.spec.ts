@@ -550,7 +550,7 @@ test("household settings persist and update the household overview", async ({ pa
   const { id: _, ...body } = original;
   try {
     await page.goto("/settings");
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await page
       .getByRole("textbox", { name: "Name des Haushalts", exact: true })
       .fill("Our little home");
@@ -560,7 +560,7 @@ test("household settings persist and update the household overview", async ({ pa
       "Einstellungen gespeichert.",
     );
     await page.reload();
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText(
       "Our little home",
     );
@@ -615,7 +615,7 @@ test("mobile long content, dialog, and pages have no accessibility violations", 
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.getByRole("button", { name: "Dialog schließen" }).click();
     await page.goto("/settings", { waitUntil: "commit" });
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.goto("/", { waitUntil: "commit" });
     await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();

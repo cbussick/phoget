@@ -19,7 +19,7 @@ for (const width of [390, 1280]) {
     await expect(account).toContainText(`@${testCredentials.username}`);
     await expect(account.locator(".avatar")).toHaveCount(1);
     await expect(account).not.toContainText("Unser Haushalt");
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     const overview = page.getByRole("region", { name: "Haushaltsübersicht" });
     await expect(overview.getByRole("heading", { name: "Unser Haushalt" })).toBeVisible();
     await expect(overview).toContainText("1 Person");
@@ -52,7 +52,7 @@ test("household member errors can be retried without showing an incorrect count"
   await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
   expect(memberRequests).toBe(0);
   await page.goto("/settings");
-  await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+  await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
   const overview = page.getByRole("region", { name: "Haushaltsübersicht" });
   await expect(overview.getByRole("status")).toHaveText("Mitglieder werden geladen…");
   await expect(overview.getByRole("button", { name: "Erneut versuchen" })).toBeVisible({

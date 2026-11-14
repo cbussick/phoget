@@ -31,7 +31,7 @@ export function MyAccount({ user }: { user: User }) {
           <div>
             <h2>Mein Profil</h2>
             <p className="field-hint">
-              Signed in as {user.username}. An administrator can change your username.
+              Angemeldet als {user.username}. Ein Administrator kann deinen Benutzernamen ändern.
             </p>
           </div>
         </header>

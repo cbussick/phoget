@@ -49,7 +49,7 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       await expect(row).toHaveCSS("background-color", hoverFill);
       await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
       await expect(handle).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-      await expect(row).not.toHaveCSS("border-radius", "0px");
+      await expect(row).toHaveCSS("border-radius", "0px");
       await expect(handle).toHaveCSS("color", idleDots);
       await page.mouse.down();
       await expect(row).toHaveCSS("background-color", pressedFill);
