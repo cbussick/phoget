@@ -72,7 +72,7 @@
   width: var(--space-5);
 }
 
-.household {
+.sidebar-user {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -80,22 +80,27 @@
   padding: var(--space-3) var(--space-2);
 }
 
-.household > div:last-child strong,
-.household > div:last-child span {
+.sidebar-user > .avatar {
+  flex: none;
+}
+
+.sidebar-user > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-user strong,
+.sidebar-user > div > span {
   display: block;
 }
 
-.household strong {
+.sidebar-user strong {
   font-size: var(--font-small);
 }
 
-.household > div:last-child span {
+.sidebar-user > div > span {
   color: var(--color-ink-soft);
   font-size: var(--font-caption);
-}
-
-.avatar-stack {
-  display: flex;
 }
 
 .main-content {

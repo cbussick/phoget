@@ -112,6 +112,7 @@ test("settings success uses a dismissible snackbar without shifting the form", a
 }) => {
   expect((await request.post("/api/session", { data: testCredentials })).status()).toBe(200);
   await context.addCookies((await request.storageState()).cookies);
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/settings");
   for (const name of ["Mein Konto", "Haushalt", "Benutzer"]) {
     await expect(
@@ -122,6 +123,8 @@ test("settings success uses a dismissible snackbar without shifting the form", a
     ).toBeVisible();
   }
   await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText("1 Person");
+  await page.evaluate(() => document.fonts.ready);
   const save = page.getByRole("button", { name: "Änderungen speichern", exact: true });
   const before = await page.locator(".settings-form").boundingBox();
   await save.click();

@@ -1,20 +1,17 @@
 import type { ReactNode } from "react";
-import type { Member } from "../../shared/accounts";
+import type { User } from "../../shared/accounts";
 import { Avatar } from "../shared/ui/Avatar/Avatar";
-import type { Settings } from "../../shared/contracts";
 import { Icon } from "../shared/ui/Icon/Icon";
 import { Link } from "./navigation";
 
 export function AppShell({
   children,
   path,
-  settings,
-  members = [],
+  user,
 }: {
   children: ReactNode;
   path: string;
-  settings?: Settings;
-  members?: Member[];
+  user: User;
 }) {
   const allLists = path === "/" || path === "/all-lists.html";
   const isSettings = path === "/settings";
@@ -54,19 +51,13 @@ export function AppShell({
           <nav className="nav-links" aria-label="Hauptnavigation">
             {links(false)}
           </nav>
-          <div className="household">
-            <div className="avatar-stack">
-              {members.slice(0, 3).map((member, index) => (
-                <Avatar key={member.id} name={member.name} tone={index % 2 ? "cool" : "warm"} />
-              ))}
-            </div>
+          <section className="sidebar-user" aria-label="Angemeldetes Konto">
+            <Avatar name={user.name} />
             <div>
-              <strong>{settings?.householdName ?? "Unser Haushalt"}</strong>
-              <span>
-                {members.length} {members.length === 1 ? "Person" : "Personen"}
-              </span>
+              <strong>{user.name}</strong>
+              <span>@{user.username}</span>
             </div>
-          </div>
+          </section>
         </aside>
         <main
           id="main-content"

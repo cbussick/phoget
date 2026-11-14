@@ -1,4 +1,3 @@
-import { sessionPollMs } from "./pollingIntervals";
 import { useEffect } from "react";
 import { useHousehold } from "./useHousehold";
 import { ListsPage } from "../features/lists/ListsPage";
@@ -8,9 +7,8 @@ import { useSession } from "../features/accounts/useSession";
 import { LoginPage } from "../features/accounts/LoginPage";
 import { PasswordForm } from "../features/accounts/PasswordForm";
 import { SignOutButton } from "../features/accounts/SignOutButton";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { membersSchema, type User } from "../../shared/accounts";
-import { request } from "../shared/api/request";
+import { useQueryClient } from "@tanstack/react-query";
+import type { User } from "../../shared/accounts";
 import { Feedback } from "../shared/ui/Feedback/Feedback";
 import { Button } from "../shared/ui/Button/Button";
 import { AppShell } from "./AppShell";
@@ -55,11 +53,6 @@ export function App() {
 function HouseholdApp({ user }: { user: User }) {
   const path = usePath();
   const state = useHousehold();
-  const members = useQuery({
-    queryKey: ["members"],
-    queryFn: ({ signal }) => request("/members", membersSchema, { signal }),
-    refetchInterval: sessionPollMs,
-  });
   const listId = path.startsWith("/lists/")
     ? path.slice("/lists/".length)
     : path === "/index.html"
@@ -74,7 +67,7 @@ function HouseholdApp({ user }: { user: User }) {
     document.getElementById("main-content")?.focus();
   }, [path]);
   return (
-    <AppShell path={path} settings={state.data?.settings} members={members.data}>
+    <AppShell path={path} user={user}>
       {!state.data ? (
         state.isPending ? (
           <div role="status" aria-busy="true">

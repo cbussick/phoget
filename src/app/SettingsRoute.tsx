@@ -22,12 +22,12 @@ export function SettingsRoute({ user, settings }: { user: User; settings: Settin
             <Icon name="user" />
             Mein Konto
           </Tab>
+          <Tab id="household">
+            <Icon name="building" />
+            Haushalt
+          </Tab>
           {user.role === "admin" ? (
             <>
-              <Tab id="household">
-                <Icon name="building" />
-                Haushalt
-              </Tab>
               <Tab id="users">
                 <Icon name="users" />
                 Benutzer
@@ -38,11 +38,11 @@ export function SettingsRoute({ user, settings }: { user: User; settings: Settin
         <TabPanel id="account">
           <MyAccount user={user} />
         </TabPanel>
+        <TabPanel id="household">
+          <HouseholdSettings settings={settings} canManage={user.role === "admin"} />
+        </TabPanel>
         {user.role === "admin" ? (
           <>
-            <TabPanel id="household">
-              <HouseholdSettings settings={settings} />
-            </TabPanel>
             <TabPanel id="users">
               <UsersPage currentUser={user} />
             </TabPanel>
