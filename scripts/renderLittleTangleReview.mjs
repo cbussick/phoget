@@ -14,6 +14,7 @@ const revision = (commit) =>
   });
 const before = revision("2aa7792");
 const beforeSeamFix = revision("23d303f");
+const beforeCurveFix = revision("d5eee78");
 await mkdir(output, { recursive: true });
 
 // Render vectors through the browser compositor at the final pixel density.
@@ -78,6 +79,24 @@ try {
     446,
     "svg{width:560px;height:350px}",
   );
+  for (const [name, box, width, height] of [
+    ["t-curve-before-after.png", "660 17 40 25", 560, 350],
+    ["stick-end-before-after.png", "718 16 36 38", 360, 380],
+  ]) {
+    await capture(
+      name,
+      panels(
+        [
+          ["Before", beforeCurveFix],
+          ["After", current],
+        ],
+        box,
+      ),
+      width * 2 + 72,
+      height + 96,
+      `svg{width:${width}px;height:${height}px}`,
+    );
+  }
   await capture(
     "logo-full-2x.png",
     scoped(current, "single"),

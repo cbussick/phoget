@@ -37,6 +37,46 @@ test("curved rear noodles are occluded by the same continuous chopstick profile"
   assert.ok(full.indexOf('id="noodle-lettering"') < full.indexOf('id="straight-rail-occlusion"'));
 });
 
+test("the t crown does not reverse curvature as it turns behind the stick", async () => {
+  const full = await readSvg("logo-full");
+  const turn = full.match(/L 700 33 (.*?) C 679\.134/)?.[1];
+  assert.ok(turn);
+  let start = [700, 33];
+  const signs = new Set<number>();
+  for (const [, coordinates] of turn.matchAll(/C\s*([^C]+)/g)) {
+    const values = coordinates.match(/-?\d+(?:\.\d+)?/g)?.map(Number);
+    assert.equal(values?.length, 6);
+    const [x1, y1, x2, y2, x3, y3] = values!;
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+      const u = 1 - t;
+      const dx = 3 * u * u * (x1 - start[0]) + 6 * u * t * (x2 - x1) + 3 * t * t * (x3 - x2);
+      const dy = 3 * u * u * (y1 - start[1]) + 6 * u * t * (y2 - y1) + 3 * t * t * (y3 - y2);
+      const ddx = 6 * u * (x2 - 2 * x1 + start[0]) + 6 * t * (x3 - 2 * x2 + x1);
+      const ddy = 6 * u * (y2 - 2 * y1 + start[1]) + 6 * t * (y3 - 2 * y2 + y1);
+      const cross = dx * ddy - dy * ddx;
+      if (Math.abs(cross) > 1e-7) signs.add(Math.sign(cross));
+    }
+    start = [x3, y3];
+  }
+  assert.equal(signs.size, 1, "The t tip has an S-shaped kink instead of one smooth turn");
+});
+
+test("the upper chopstick has a circular cap tangent to its straight edge", async () => {
+  const full = await readSvg("logo-full");
+  const cap = full.match(
+    /id="rail-backing"[^>]*d="M27\.75 81\.7L([\d.]+) ([\d.]+)A13 13 0 0 1 ([\d.]+) ([\d.]+)/,
+  );
+  assert.ok(cap, "The upper stick should end in one clean semicircle");
+  const [x0, y0, x1, y1] = cap.slice(1).map(Number);
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  assert.ok(Math.abs(Math.hypot(dx, dy) - 26) < 1e-4);
+  const axisX = x0 - 27.75;
+  const axisY = y0 - 81.7;
+  const dot = (axisX * dx + axisY * dy) / (Math.hypot(axisX, axisY) * 26);
+  assert.ok(Math.abs(dot) < 1e-5, "The round cap should join the top edge tangentially");
+});
+
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
   const assets = await Promise.all(
     ["logo-full", "logo-mark", "favicon", "favicon-white-sky", "favicon-white-deep"].map(readSvg),
