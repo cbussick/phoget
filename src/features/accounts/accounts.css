@@ -12,6 +12,7 @@
 }
 
 .login-page > .brand {
+  width: 8.5rem;
   margin-inline: var(--space-none);
 }
 
@@ -57,6 +58,10 @@
   min-width: var(--user-actions-width);
 }
 @media (width <= 30rem) {
+  .login-page > .brand {
+    width: 6.5rem;
+  }
+
   .account-card {
     padding: var(--space-4);
   }

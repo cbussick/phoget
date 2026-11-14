@@ -94,6 +94,8 @@
   --opacity-disabled: 0.6;
   --duration-control: 150ms;
   --duration-spinner: 800ms;
+  --duration-loading-loop: 3200ms;
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --control-emphasis-width: 2px;
   --color-control-pressed: var(--color-ink);
   --color-fill-hover: var(--color-row-hover);

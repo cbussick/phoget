@@ -11,10 +11,13 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
   assert.match(html, /<title>Don't Phoget<\/title>/);
   assert.match(
     html,
-    /<link rel="icon" href="\/icon-192.png" type="image\/png" sizes="192x192" \/>/,
+    /<link rel="icon" href="\/branding\/little-tangle\/favicon-32.png" type="image\/png" sizes="32x32" \/>/,
   );
   // Safari uses the SVG favicon for Favorites on the Start Page (not just the tab).
-  assert.match(html, /<link rel="icon" href="\/icon.svg" type="image\/svg\+xml" \/>/);
+  assert.match(
+    html,
+    /<link rel="icon" href="\/branding\/little-tangle\/favicon.svg" type="image\/svg\+xml" \/>/,
+  );
   await readFile(new URL("../public/icon.svg", import.meta.url));
   assert.match(html, /href="\/apple-touch-icon.png"/);
   // Cloudflare Access protects the manifest; Chrome must send its Access cookie.
@@ -29,12 +32,19 @@ test("Don't Phoget has consistent document and home-screen branding", async () =
   }
 });
 
-test("navigation uses the canonical icon and the app's blue palette", async () => {
+test("navigation uses the compact wordmark, login keeps the full logo, and app icons use logo-p", async () => {
   const shell = await read("src/app/AppShell.tsx");
+  const login = await read("src/features/accounts/LoginPage.tsx");
+  const logo = await read("src/app/BrandLogo.tsx");
+  assert.match(shell, /<BrandLogo variant="wordmark" \/>/);
+  assert.match(login, /<BrandLogo \/>/);
+  assert.ok(logo.includes('variant = "full"'));
+  assert.ok(logo.includes('"/branding/little-tangle/logo-wordmark.svg"'));
+  assert.ok(logo.includes('"/branding/little-tangle/logo-full.svg"'));
   const svg = await read("public/icon.svg");
+  assert.equal(svg, await read("public/branding/little-tangle/favicon.svg"));
   const tokens = await read("src/app/tokens.css");
-  assert.match(shell, /<img src="\/icon.svg" alt=""/);
-  for (const color of ["#176f9f", "#8bcdf1"]) {
+  for (const color of ["#fffefa", "#8bcdf1"]) {
     assert.ok(svg.includes(color));
     assert.ok(tokens.includes(color));
   }

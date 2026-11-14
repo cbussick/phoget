@@ -86,7 +86,8 @@ for (const viewport of [
       "rgb(243, 246, 244)",
     );
     const back = await page.locator(".back-link").boundingBox();
-    expect(back!.y).toBe(8);
+    const brandHeader = await page.locator(".mobile-brand-header").boundingBox();
+    expect(back!.y).toBe((brandHeader?.height ?? 0) + 8);
     const composer = await page.locator(".list-composer").boundingBox();
     const items = await page.locator(".list-items-card").boundingBox();
     expect(items!.y).toBeCloseTo(composer!.y + composer!.height, 1);

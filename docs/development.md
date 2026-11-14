@@ -1,5 +1,16 @@
 # Development and testing
 
+## Branding and startup review
+
+Navigation uses `BrandLogo`'s compact `wordmark` variant (no bowl); login and startup keep its default full variant. Browser and home-screen icons use the selected logo-p identity in `public/branding/little-tangle/`. Regenerate opaque home-screen PNGs with `node scripts/worktree.mjs run node scripts/renderAppIcons.mjs` after regenerating branding assets.
+
+The initial session/household requests show `LoadingScreen`, inspired by Shelf's restrained startup motion. It exits as soon as data or an error settles, never waits for a minimum display time, and does not replace cached content on background refresh. Read-only startup requests attempt a connection even when offline rather than pausing indefinitely behind the loader. Reduced motion keeps the full mark and status readable without movement.
+
+- Storybook: **App / Loading screen**, Startup and Lists stories.
+- Focused integration checks: `node scripts/worktree.mjs run node --import tsx --test tests/branding.test.ts tests/appBranding.test.ts`.
+- These checks use the actual Vite app with intercepted API responses in Chromium, Firefox and WebKit. They cover desktop/mobile/login branding, both startup phases, reduced motion, accessible loading status, cached refresh, connection failures and retries; they do not modify a database.
+- Screenshots are regenerated under `.runtime/branding-review/` for desktop/mobile headers and loading screens.
+
 ## Worktree runtime
 
 Use Node 24+, PostgreSQL (the local `db` service in `compose.yaml`), Python 3 and Playwright browsers. Start PostgreSQL once from the primary checkout with `docker compose up -d db`. Each worktree uses the same PostgreSQL server but has **two distinct databases**, named `phoget_dev_<worktree hash>` and `phoget_test_<worktree hash>`. Neither database is the production/deployment database. Set `PHOGET_DATABASE_URL` to a loopback PostgreSQL connection URL if the local database credentials/port differ from `.env.example` (or put that URL in this worktree's `.env` before bootstrap). Bootstrap generates `.env` and `.env.test` for this worktree from that URL; do not put production credentials there.

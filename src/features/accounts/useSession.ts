@@ -5,6 +5,8 @@ import { request } from "../../shared/api/request";
 export const sessionKey = ["session"] as const;
 export function useSession() {
   return useQuery({
+    // Startup must settle offline rather than pausing behind the loading screen.
+    networkMode: "always",
     queryKey: sessionKey,
     queryFn: ({ signal }) => request("/session", sessionSchema, { signal }),
     retry: false,
