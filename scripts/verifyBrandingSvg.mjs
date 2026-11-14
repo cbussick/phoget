@@ -162,6 +162,28 @@ try {
     }
     console.log(`${name}: ${checks.length} lettering and check-placement checks passed`);
   }
+
+  const tangle = await readFile(
+    new URL("../public/branding/little-tangle/logo-full.svg", import.meta.url),
+  );
+  const rimSamples = await page.evaluate(
+    async (src) => {
+      const image = new Image();
+      image.src = src;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = 765;
+      canvas.height = 565;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, 765, 565);
+      return [385, 390, 400].map((y) => Array.from(context.getImageData(405, y, 1, 1).data));
+    },
+    `data:image/svg+xml;base64,${tangle.toString("base64")}`,
+  );
+  assert.deepEqual(rimSamples[0], [...sky, 255], "The g approaches the rim");
+  assert.equal(rimSamples[1][3], 0, "The g recedes at the rim, not as a floating rounded oval");
+  assert.deepEqual(rimSamples[2], [23, 111, 159, 255], "The bowl sits directly below the g");
+  console.log("Little Tangle: original g/rim interaction checks passed");
 } finally {
   await browser.close();
 }

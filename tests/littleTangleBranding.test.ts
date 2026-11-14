@@ -12,10 +12,14 @@ test("Little Tangle's full logo retains the repaired lettering without a check-f
   assert.ok(lettering(full));
   assert.equal(lettering(full), lettering(wordmark));
   assert.doesNotMatch(full, /id="dont"|id="noodle-check"|id="t-flourish"/);
+  assert.match(full, /id="noodles-behind-bowl" clip-path="url\(#bowl-rim-occlusion\)"/);
+  assert.ok(full.includes('transform="translate(56 110) scale(2)"'));
 });
 
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
-  const assets = await Promise.all(["logo-full", "logo-mark", "favicon"].map(readSvg));
+  const assets = await Promise.all(
+    ["logo-full", "logo-mark", "favicon", "favicon-white-sky", "favicon-white-deep"].map(readSvg),
+  );
   const bowl = assets[0].match(/id="tangle-bowl"[^>]*d="([^"]+)"/)?.[1];
   assert.ok(bowl);
   for (const svg of assets) {
@@ -27,16 +31,18 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
       /<(?:image|text|script|foreignObject|linearGradient|radialGradient)\b|data:/i,
     );
     for (const [, color] of svg.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
-      assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b"].includes(color));
+      assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b", "#fffefa"].includes(color));
     }
   }
 });
 
 test("Little Tangle favicons have actual 16 and 32 pixel exports", async () => {
-  for (const size of [16, 32]) {
-    const png = await readFile(new URL(`little-tangle/favicon-${size}.png`, root));
-    assert.equal(png.subarray(1, 4).toString(), "PNG");
-    assert.equal(png.readUInt32BE(16), size);
-    assert.equal(png.readUInt32BE(20), size);
+  for (const variant of ["favicon", "favicon-white-sky", "favicon-white-deep"]) {
+    for (const size of [16, 32]) {
+      const png = await readFile(new URL(`little-tangle/${variant}-${size}.png`, root));
+      assert.equal(png.subarray(1, 4).toString(), "PNG");
+      assert.equal(png.readUInt32BE(16), size);
+      assert.equal(png.readUInt32BE(20), size);
+    }
   }
 });
