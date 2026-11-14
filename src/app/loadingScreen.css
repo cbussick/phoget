@@ -1,0 +1,76 @@
+.loading-screen {
+  display: grid;
+  min-block-size: 100svh;
+  place-items: center;
+  padding: var(--space-8);
+  background: var(--color-canvas);
+}
+
+.loading-brand {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  width: min(100%, var(--content-min));
+  text-align: center;
+}
+
+.loading-mark {
+  width: 100%;
+  margin-block-end: var(--space-2);
+}
+
+.loading-brand p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: var(--font-small);
+}
+
+.loading-track {
+  width: 8rem;
+  height: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-line);
+}
+
+.loading-track span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent-control);
+  transform: translateX(75%);
+}
+
+@keyframes loading-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes loading-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  80%,
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+/* Only initial startup moves. Reduced-motion keeps a readable, static mark/track. */
+@media (prefers-reduced-motion: no-preference) {
+  .loading-mark {
+    animation: loading-float var(--duration-loading-loop) var(--ease-in-out) infinite;
+  }
+
+  .loading-track span {
+    animation: loading-sweep var(--duration-loading-loop) linear infinite;
+  }
+}

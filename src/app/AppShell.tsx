@@ -3,6 +3,7 @@ import type { User } from "../../shared/accounts";
 import { Avatar } from "../shared/ui/Avatar/Avatar";
 import { Icon } from "../shared/ui/Icon/Icon";
 import { Link } from "./navigation";
+import { BrandLogo } from "./BrandLogo";
 
 export function AppShell({
   children,
@@ -41,12 +42,14 @@ export function AppShell({
         {allLists ? "Zu den Listen springen" : "Zum Hauptinhalt springen"}
       </a>
       <div className="app-shell">
+        <header className="mobile-brand-header">
+          <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
+            <BrandLogo variant="wordmark" />
+          </Link>
+        </header>
         <aside className="sidebar" aria-label="App-Navigation">
           <Link className="brand" href="/" aria-label="Don't Phoget-Startseite">
-            <span className="brand-mark" aria-hidden="true">
-              <img src="/icon.svg" alt="" width="32" height="32" />
-            </span>
-            <span>Don't Phoget</span>
+            <BrandLogo variant="wordmark" />
           </Link>
           <nav className="nav-links" aria-label="Hauptnavigation">
             {links(false)}
