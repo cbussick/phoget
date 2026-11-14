@@ -560,7 +560,7 @@ test("household settings persist and update the household overview", async ({ pa
       "Einstellungen gespeichert.",
     );
     await page.reload();
-    await page.getByRole("button", { name: "Haushalt", exact: true }).click();
+    await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await expect(page.getByRole("region", { name: "Haushaltsübersicht" })).toContainText(
       "Our little home",
     );
