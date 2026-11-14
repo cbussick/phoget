@@ -64,16 +64,20 @@ test("all lettering layouts preserve the original Little Tangle wordmark", async
   assert.ok((prefix + suffix) / source.length > 0.94, "Only the final t terminal may change");
 
   const sticks = wordmark.match(/<g id="chopsticks"[^>]*>[\s\S]*?<\/g>/)?.[0];
-  const contacts = wordmark.match(/<g id="wrap-contact-guards"[^>]*>[\s\S]*?<\/g>/)?.[0];
+  const backs = wordmark.match(/<g id="fold-backs"[^>]*>[\s\S]*?<\/g>/)?.[0];
+  const fronts = wordmark.match(/<g id="fold-fronts"[^>]*>[\s\S]*?<\/g>/)?.[0];
   assert.ok(sticks);
-  assert.ok(contacts);
+  assert.ok(backs);
+  assert.ok(fronts);
   assert.doesNotMatch(source, /391 385\.019|417\.997 390\.515/, "Reconstruct the bowl-cut g edge");
   for (const svg of [full, horizontal, wordmark]) {
     assert.ok(svg.includes(sticks), "Keep the same slim chopsticks and wrap alignment");
-    assert.ok(svg.includes(contacts), "Share the same contact repairs across lettering variants");
-    assert.ok(svg.indexOf('id="wrap-contact-guards"') < svg.indexOf('id="chopsticks"'));
-    assert.doesNotMatch(svg, /id="dont"|<text\b|<clipPath\b/);
+    assert.ok(svg.includes(backs) && svg.includes(fronts), "Share the same clean fold contours");
+    assert.ok(svg.indexOf('id="fold-backs"') < svg.indexOf('id="chopsticks"'));
+    assert.doesNotMatch(svg, /id="dont"|<text\b|contact-guard/);
     assert.ok(svg.indexOf('id="chopsticks"') < svg.indexOf('id="noodle-lettering"'));
+    assert.ok(svg.indexOf('id="noodle-lettering"') < svg.indexOf('id="fold-fronts"'));
+    assert.match(svg, /id="lettering-body" clip-path="url\(#lettering-body-clip\)"/);
   }
 });
 

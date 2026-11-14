@@ -24,9 +24,11 @@ The PNG files are rendered companions of the app icon (180, 192, 512 pixels) and
 - Vector paths with no embedded raster artwork, fonts, external references, gradients or filters.
 - One shared crescent-bowl path across every bowl-bearing asset. One shared noodle-check path across compact and horizontal variants. The full logo's check is part of its continuous `t` flourish.
 - The lettering is vectorized directly from the **original Little Tangle reference (8)**, not from the discarded heavier redraw. Preserve its lighter proportions, tall open `h` loop, `p` and `t` drapes, and slim chopsticks.
-- The visible noodle contours preserve the reference's individual front/back crossings. The `h` return emerges through the gap and in front of the lower stick. Small shared blue contact underlaps behind the chopsticks close the p/h tracing slits without widening the lettering; there are no clipping polygons across the letter caps.
+- The `p` and `h` caps are continuous curved ribbon contours, replacing the earlier contact patches. Their front and back contours are shared across all lettering layouts. Only the old traced cap fragments are hidden in the lettering-body layer; the new front curves are not clipped at the rail contacts. Internal back-face underlaps prevent antialias slivers without altering the visible outline.
+- The `h` return emerges through the gap and in front of the lower stick. Its shared return contour is revealed below a boundary inside the open rail gap, not at a visible curve edge.
 - The reference bowl obscured the bottom of the `g`. Its shared descender is reconstructed as a rounded curve, rather than preserving the raster reference's cut-off diagonal edge.
-- The horizontal and lettering-only variants share exactly the same original wordmark path. The full variant changes only the final `t` terminal into a continuous outlined check-flourish; it does not redraw the other letters.
+- The horizontal and lettering-only variants share exactly the same wordmark body path and cap contours. The full variant changes only the final `t` terminal into a continuous outlined check-flourish; it does not redraw the other letter bodies.
+- The full composition uses a thicker check with its elbow centred inside the crescent's opening, rather than a thin check floating above the bowl.
 - The high-contrast app and favicon treatments intentionally use ink for both shapes, rather than a low-contrast white mark on sky blue.
 
 Use a single appropriate variant per placement. Do not shrink the full lettering into a favicon. Keep the logo stable on loading screens; any progress indicator belongs outside the artwork.

@@ -18,8 +18,8 @@ const probes = [
   { name: "upper stick continues behind the t drape", x: 710, y: 35, color: ink },
   {
     name: "p cap meets the upper stick without a transparent pinhole",
-    x: 111,
-    y: 73,
+    x: 107,
+    y: 74,
     opaque: true,
   },
   {
@@ -39,7 +39,7 @@ const probes = [
 
 // Check the full contact regions, not just a single pixel in each pinhole.
 for (const [letter, left, right, top, bottom] of [
-  ["p", 100, 122, 90, 99],
+  ["p", 101, 120, 90, 99],
   ["h", 236, 256, 80, 90],
 ]) {
   for (let x = left; x <= right; x++) {
@@ -48,6 +48,17 @@ for (const [letter, left, right, top, bottom] of [
     }
   }
 }
+
+probes.push(
+  {
+    name: "full check sits inside the bowl opening",
+    x: 620,
+    y: 445,
+    color: sky,
+    only: "logo-full",
+  },
+  { name: "full check has a substantial short arm", x: 574, y: 397, color: sky, only: "logo-full" },
+);
 
 const bands = {
   p: [
@@ -103,6 +114,7 @@ try {
     ["logo-horizontal", 1080, 430, 300],
   ]) {
     const svg = await readFile(new URL(`../public/branding/${name}.svg`, import.meta.url));
+    const checks = probes.filter((probe) => !probe.only || probe.only === name);
     const samples = await page.evaluate(
       async ({ src, width, height, positions }) => {
         const image = new Image();
@@ -119,25 +131,25 @@ try {
         src: `data:image/svg+xml;base64,${svg.toString("base64")}`,
         width,
         height,
-        positions: probes.map(({ x, y }) => ({ x: x + offsetX, y })),
+        positions: checks.map(({ x, y }) => ({ x: x + offsetX, y })),
       },
     );
-    for (let index = 0; index < probes.length; index++) {
-      if (probes[index].opaque) {
+    for (let index = 0; index < checks.length; index++) {
+      if (checks[index].opaque) {
         assert.ok(
           samples[index][3] >= 250,
-          `${name}: ${probes[index].name}; alpha=${samples[index][3]}`,
+          `${name}: ${checks[index].name}; alpha=${samples[index][3]}`,
         );
       } else {
         assert.ok(
           samples[index]
             .slice(0, 3)
-            .every((channel, position) => Math.abs(channel - probes[index].color[position]) <= 2),
-          `${name}: ${probes[index].name}; got ${samples[index]}, expected ${probes[index].color}`,
+            .every((channel, position) => Math.abs(channel - checks[index].color[position]) <= 2),
+          `${name}: ${checks[index].name}; got ${samples[index]}, expected ${checks[index].color}`,
         );
       }
     }
-    console.log(`${name}: ${probes.length} original-lettering wrap checks passed`);
+    console.log(`${name}: ${checks.length} lettering and check-placement checks passed`);
   }
 } finally {
   await browser.close();
