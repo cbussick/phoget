@@ -7,7 +7,7 @@ const root = new URL("../", import.meta.url);
 const artwork = "public/branding/little-tangle/logo-full.svg";
 const output = new URL("public/branding/little-tangle/review/", root);
 const current = await readFile(new URL(artwork, root), "utf8");
-// Derive the alternative from the actual connected wordmark, not a new p drawing.
+// Derive the selected favicon from the actual connected wordmark, not a new p drawing.
 const lettering = current.match(/id="noodle-lettering"[^>]*d="([^"]+)"/)?.[1];
 const pStart = lettering?.indexOf("C 178.283 190.755") ?? -1;
 const pEnd = lettering?.indexOf(" C 163.932 251.576", pStart) ?? -1;
@@ -20,18 +20,20 @@ if (pStart < 0 || pEnd <= pStart || !descender || !rear || !bowl)
   );
 // Only close the outgoing p-to-h connector. Keep the p's curves and counter intact.
 const pOutline = `M177.824 202.183 ${lettering.slice(pStart, pEnd)} C163.932 251.576 177 236.2 177.824 202.183Z ${descender}Z`;
-await writeFile(
-  new URL("public/branding/little-tangle/favicon-noodle-p-white-sky.svg", root),
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
-  <title id="title">Don't Phoget — logo-p favicon alternative</title>
-  <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Warm white on sky blue; not selected as the app default.</desc>
+const logoPIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">Don't Phoget — selected logo-p favicon</title>
+  <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Selected identity in warm white on sky blue; application integration is a separate step.</desc>
   <rect width="256" height="256" rx="56" fill="#8bcdf1"/>
   <g transform="translate(80 -7) scale(.5)" fill="#fffefa"><path id="p-rear-ribbon" d="${rear}"/></g>
   <path fill="none" stroke="#fffefa" stroke-width="7" stroke-linecap="round" d="M50 41.5L211 28M50 52.5L211 44.5"/>
   <g transform="translate(80 -7) scale(.5)"><path id="logo-p" fill="#fffefa" fill-rule="evenodd" d="${pOutline}"/></g>
   <g transform="translate(16 32) scale(.36)"><path id="tangle-bowl" fill="#fffefa" fill-rule="evenodd" d="${bowl}"/></g>
 </svg>
-`,
+`;
+await Promise.all(
+  ["favicon-noodle-p-white-sky", "favicon"].map((name) =>
+    writeFile(new URL(`public/branding/little-tangle/${name}.svg`, root), logoPIcon),
+  ),
 );
 const revision = (commit) =>
   execFileSync("git", ["show", `${commit}:${artwork}`], {
@@ -142,17 +144,18 @@ try {
     await nativePage.setContent(
       `<style>body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${alternative}`,
     );
-    await nativePage.screenshot({
+    const png = await nativePage.screenshot({
       path: fileURLToPath(
         new URL(`public/branding/little-tangle/${alternativeName}-${size}.png`, root),
       ),
       omitBackground: true,
     });
+    await writeFile(new URL(`public/branding/little-tangle/favicon-${size}.png`, root), png);
   }
   await nativeContext.close();
   const choices = [
-    ["Current check/bowl", "favicon-white-sky"],
-    ["Logo-p alternative", alternativeName],
+    ["Previous check/bowl", "favicon-white-sky"],
+    ["Logo-p · selected", alternativeName],
   ];
   const cards = await Promise.all(
     choices.map(async ([label, name], i) => {
@@ -171,12 +174,21 @@ try {
       return `<figure class="card"><h2>${label}</h2>${scoped(icon, `choice-${i}`)}<section>${sizes.join("")}</section></figure>`;
     }),
   );
+  const optionStyles =
+    "main{gap:40px}.full svg{width:765px;height:560px}.options{display:flex;gap:24px;padding-top:90px}.card{width:200px}.card h2{font-size:16px;white-space:nowrap}.card svg{width:168px;height:168px;margin:0 auto 28px}section{display:flex;align-items:flex-end;justify-content:center;gap:25px}section div{text-align:center;font-size:12px;color:#667870}section img{display:block;margin:0 auto 9px}";
   await capture(
     "favicon-options.png",
     `<main><figure class="full"><h2>Full logo</h2>${scoped(current, "combo-logo")}</figure><aside class="options">${cards.join("")}</aside></main>`,
     1300,
     660,
-    "main{gap:40px}.full svg{width:765px;height:560px}.options{display:flex;gap:24px;padding-top:90px}.card{width:200px}.card h2{font-size:16px;white-space:nowrap}.card svg{width:168px;height:168px;margin:0 auto 28px}section{display:flex;align-items:flex-end;justify-content:center;gap:25px}section div{text-align:center;font-size:12px;color:#667870}section img{display:block;margin:0 auto 9px}",
+    optionStyles,
+  );
+  await capture(
+    "selected-identity.png",
+    `<main><figure class="full"><h2>Selected full logo</h2>${scoped(current, "selected-logo")}</figure><aside class="options">${cards[1]}</aside></main>`,
+    1080,
+    660,
+    optionStyles,
   );
   console.log(`Rendered direct-SVG 2× review images in ${fileURLToPath(output)}`);
 } finally {

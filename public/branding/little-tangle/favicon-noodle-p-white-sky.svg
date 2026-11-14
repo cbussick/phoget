@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
-  <title id="title">Don't Phoget — logo-p favicon alternative</title>
-  <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Warm white on sky blue; not selected as the app default.</desc>
+  <title id="title">Don't Phoget — selected logo-p favicon</title>
+  <desc id="description">The full wordmark's lowercase p, including its looped descender and rear noodle strand, lifted by chopsticks above the shared tilted bowl. The outgoing connection to h is closed for standalone use. Selected identity in warm white on sky blue; application integration is a separate step.</desc>
   <rect width="256" height="256" rx="56" fill="#8bcdf1"/>
   <g transform="translate(80 -7) scale(.5)" fill="#fffefa"><path id="p-rear-ribbon" d="M91 77C93 85 96 94 101 109L128 107C124 94 120 84 114 76Z"/></g>
   <path fill="none" stroke="#fffefa" stroke-width="7" stroke-linecap="round" d="M50 41.5L211 28M50 52.5L211 44.5"/>

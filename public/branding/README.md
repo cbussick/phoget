@@ -1,8 +1,16 @@
 # Don't Phoget logo assets
 
-Vector artwork for the selected noodle-lettering identity. This is an asset proposal; the existing application logo and UI have not been replaced.
+## Selected identity
 
-## Variants
+Use [`little-tangle/logo-full.svg`](little-tangle/logo-full.svg) with [`little-tangle/favicon.svg`](little-tangle/favicon.svg): the approved Little Tangle wordmark/bowl and logo-p favicon in warm white on sky blue. See [the selected asset set](little-tangle/README.md) and [the paired review image](little-tangle/review/selected-identity.png).
+
+This selects artwork only; the existing application logo and UI have not been replaced. Merging and deployment require separate authorization.
+
+## Earlier explorations — not selected
+
+The root-level files below are retained for reference. Do not mix their check-flourish/crescent artwork into the selected Little Tangle identity.
+
+### Variants
 
 | File                  | Intended use                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -16,7 +24,7 @@ Vector artwork for the selected noodle-lettering identity. This is an asset prop
 
 The PNG files are rendered companions of the app icon (180, 192, 512 pixels) and favicon (16, 32 pixels). Home-screen PNGs are opaque, including their corners.
 
-## Design constraints
+### Constraints of the earlier exploration
 
 - Exact colors from `src/app/tokens.css`: sky `#8bcdf1`, deep blue `#176f9f`, ink `#18302b`.
 - Transparent backgrounds on the logos; use on light surfaces. These are not dark-mode/reversed lockups.

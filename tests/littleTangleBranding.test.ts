@@ -96,6 +96,17 @@ test("the logo-p favicon keeps the wordmark's p outline, descender loop and rear
   assert.ok(icon.includes(`id="p-rear-ribbon" d="${rear}"`));
 });
 
+test("the selected asset-set favicon defaults to logo-p, not the earlier check mark", async () => {
+  assert.equal(await readSvg("favicon"), await readSvg("favicon-noodle-p-white-sky"));
+  for (const size of [16, 32]) {
+    const selected = await readFile(new URL(`little-tangle/favicon-${size}.png`, root));
+    const logoP = await readFile(
+      new URL(`little-tangle/favicon-noodle-p-white-sky-${size}.png`, root),
+    );
+    assert.deepEqual(selected, logoP);
+  }
+});
+
 test("the Little Tangle full logo and compact applications share the tilted bowl", async () => {
   const assets = await Promise.all(
     [
