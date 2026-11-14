@@ -14,6 +14,7 @@ import { Button } from "../shared/ui/Button/Button";
 import { AppShell } from "./AppShell";
 import { navigate, usePath } from "./navigation";
 import { Icon } from "../shared/ui/Icon/Icon";
+import { LoadingScreen } from "./LoadingScreen";
 
 export function App() {
   const session = useSession();
@@ -22,13 +23,7 @@ export function App() {
   useEffect(() => {
     if (!user) client.removeQueries({ predicate: (query) => query.queryKey[0] !== "session" });
   }, [user?.id, client]);
-  if (session.isPending)
-    return (
-      <main className="error-page">
-        <h1>Don't Phoget</h1>
-        <p role="status">Wird geladen…</p>
-      </main>
-    );
+  if (session.isPending) return <LoadingScreen />;
   if (session.isError && !session.data)
     return (
       <main className="error-page">
@@ -63,26 +58,21 @@ function HouseholdApp({ user }: { user: User }) {
   useEffect(() => {
     document.title = title + " | Don't Phoget";
   }, [title]);
+  const opening = state.isPending && !state.data;
   useEffect(() => {
-    document.getElementById("main-content")?.focus();
-  }, [path]);
+    if (!opening) document.getElementById("main-content")?.focus();
+  }, [path, opening]);
+  if (opening) return <LoadingScreen message="Deine Listen werden geladen…" />;
   return (
     <AppShell path={path} user={user}>
       {!state.data ? (
-        state.isPending ? (
-          <div role="status" aria-busy="true">
-            <h1>Don't Phoget</h1>
-            <p>Deine Listen werden geladen…</p>
-          </div>
-        ) : (
-          <PageMessage
-            icon="error"
-            title="Deine Listen konnten nicht geladen werden"
-            description="Wir konnten gerade keine Verbindung herstellen. Deine Listen sind weiterhin sicher."
-            action="Erneut versuchen"
-            onAction={() => void state.refetch()}
-          />
-        )
+        <PageMessage
+          icon="error"
+          title="Deine Listen konnten nicht geladen werden"
+          description="Wir konnten gerade keine Verbindung herstellen. Deine Listen sind weiterhin sicher."
+          action="Erneut versuchen"
+          onAction={() => void state.refetch()}
+        />
       ) : path === "/" || path === "/all-lists.html" ? (
         <>
           <ListsPage lists={state.data.lists} />

@@ -1,3 +1,5 @@
+import "./brandLogo.css";
+
 export function BrandLogo() {
   return (
     <img

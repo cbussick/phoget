@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 import { createServer } from "vite";
 import { chromium, firefox, webkit } from "playwright";
+import AxeBuilder from "@axe-core/playwright";
 
 const user = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -14,9 +15,16 @@ const user = {
   mustChangePassword: false,
 };
 const state = { lists: [], items: [], settings: { id: 1, householdName: "Test" } };
+function deferred() {
+  let release = () => {};
+  const promise = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { promise, release };
+}
 
 test(
-  "selected branding renders on desktop, mobile and login in all browser engines",
+  "branding and startup loading work across browsers, motion preferences and failures",
   { timeout: 120_000 },
   async (t) => {
     const cacheDir = await mkdtemp(resolve(tmpdir(), "phoget-branding-vite-"));
@@ -34,10 +42,23 @@ test(
         await t.test(name, async () => {
           const browser = await engine.launch();
           try {
-            const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+            const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+            const page = await context.newPage();
             let signedIn = true;
-            await page.route(`${origin}/api/**`, (route) => {
+            let sessionHold: ReturnType<typeof deferred> | undefined;
+            let stateHold: ReturnType<typeof deferred> | undefined;
+            let sessionFail = false;
+            let stateFail = false;
+            await page.route(`${origin}/api/**`, async (route) => {
               const path = new URL(route.request().url()).pathname;
+              if (path === "/api/session") {
+                await sessionHold?.promise;
+                if (sessionFail) return route.abort("failed");
+              }
+              if (path === "/api/state") {
+                await stateHold?.promise;
+                if (stateFail) return route.fulfill({ status: 503, json: { error: "Offline" } });
+              }
               return route.fulfill({
                 json:
                   path === "/api/session"
@@ -83,6 +104,115 @@ test(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,
             );
+
+            signedIn = true;
+            sessionHold = deferred();
+            stateHold = deferred();
+            await page.emulateMedia({ reducedMotion: "no-preference" });
+            await page.reload();
+            await page.locator(".loading-screen").waitFor();
+            assert.equal(
+              await page.locator(".loading-screen [role=status]").textContent(),
+              "Wird geladen…",
+            );
+            assert.equal(
+              await page
+                .locator(".loading-mark")
+                .evaluate((node) => getComputedStyle(node).animationName),
+              "loading-float",
+            );
+            assert.equal(
+              await page
+                .locator(".loading-track span")
+                .evaluate((node) => getComputedStyle(node).animationName),
+              "loading-sweep",
+            );
+            assert.equal(
+              await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+              true,
+            );
+            if (name === "chromium") {
+              await page.screenshot({ path: ".runtime/branding-review/loading-mobile.png" });
+              await page.setViewportSize({ width: 1280, height: 900 });
+              await page.screenshot({ path: ".runtime/branding-review/loading-desktop.png" });
+            }
+            await page.emulateMedia({ reducedMotion: "reduce" });
+            assert.equal(
+              await page
+                .locator(".loading-mark")
+                .evaluate((node) => getComputedStyle(node).animationName),
+              "none",
+            );
+            assert.equal(
+              await page
+                .locator(".loading-track span")
+                .evaluate((node) => getComputedStyle(node).animationName),
+              "none",
+            );
+            assert.deepEqual(
+              (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
+                .violations,
+              [],
+            );
+            sessionHold.release();
+            await page.getByText("Deine Listen werden geladen…", { exact: true }).waitFor();
+            stateHold.release();
+            await page
+              .getByRole("heading", { name: "Alle Listen", exact: true })
+              .waitFor({ timeout: 2000 });
+            assert.equal(await page.locator(".loading-screen").count(), 0);
+            assert.equal(
+              await page
+                .locator("#main-content")
+                .evaluate((node) => node === document.activeElement),
+              true,
+            );
+
+            // Background refresh must keep the usable screen, not replay startup motion.
+            stateHold = deferred();
+            const refreshed = page.waitForRequest(
+              (request) => new URL(request.url()).pathname === "/api/state",
+              { timeout: 5000 },
+            );
+            await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+            await refreshed;
+            assert.equal(await page.locator(".loading-screen").count(), 0);
+            assert.equal(
+              await page.getByRole("heading", { name: "Alle Listen", exact: true }).isVisible(),
+              true,
+            );
+            stateHold.release();
+
+            // An offline-like startup failure must settle into an actionable error.
+            sessionHold = undefined;
+            stateHold = undefined;
+            sessionFail = true;
+            await page.addInitScript(() =>
+              Object.defineProperty(navigator, "onLine", { get: () => false }),
+            );
+            await page.reload();
+            await page
+              .getByRole("heading", { name: "Keine Verbindung möglich", exact: true })
+              .waitFor();
+            assert.equal(await page.locator(".loading-screen").count(), 0);
+            sessionFail = false;
+            signedIn = false;
+            await page.getByRole("button", { name: "Erneut versuchen", exact: true }).click();
+            await page.getByRole("heading", { name: "Willkommen zu Hause", exact: true }).waitFor();
+
+            signedIn = true;
+            stateFail = true;
+            await page.reload();
+            await page
+              .getByRole("heading", {
+                name: "Deine Listen konnten nicht geladen werden",
+                exact: true,
+              })
+              .waitFor();
+            assert.equal(await page.locator(".loading-screen").count(), 0);
+            stateFail = false;
+            await page.getByRole("button", { name: "Erneut versuchen", exact: true }).click();
+            await page.getByRole("heading", { name: "Alle Listen", exact: true }).waitFor();
           } finally {
             await browser.close();
           }
