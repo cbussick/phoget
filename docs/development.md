@@ -11,6 +11,24 @@ The initial session/household requests show `LoadingScreen`, inspired by Shelf's
 - These checks use the actual Vite app with intercepted API responses in Chromium, Firefox and WebKit. They cover desktop/mobile/login branding, both startup phases, reduced motion, accessible loading status, cached refresh, connection failures and retries; they do not modify a database.
 - Screenshots are regenerated under `.runtime/branding-review/` for desktop/mobile headers and loading screens.
 
+## Type-aware linting
+
+`npm run lint` runs Oxlint with the `tsrs` backend, followed by Stylelint. The root
+`.oxlintrc.json` enables type-aware checks and promotes promise handling,
+awaiting non-promises, and implied eval to errors while retaining Oxlint's default
+plugins and rules. The only known-safe promise call is `test` from `node:test`:
+the Node test runner tracks test completion and reports failures itself. Other
+floating promises in tests are still checked.
+
+`server/tsconfig.json` inherits the existing server configuration so automatic
+project discovery uses NodeNext semantics. `.storybook/tsconfig.json` inherits
+the client configuration, including Vite's CSS types. The root config covers
+client, shared code, scripts, tests, and root TypeScript configuration files.
+
+Keep `npm run typecheck` and the TypeScript compilation in `npm run build`.
+Optional Oxlint `--type-check` diagnostics cover only linted files, not whole
+TypeScript projects, so they do not replace either `tsc` check.
+
 ## Worktree runtime
 
 Use Node 24+, PostgreSQL (the local `db` service in `compose.yaml`), Python 3 and Playwright browsers. Start PostgreSQL once from the primary checkout with `docker compose up -d db`. Each worktree uses the same PostgreSQL server but has **two distinct databases**, named `phoget_dev_<worktree hash>` and `phoget_test_<worktree hash>`. Neither database is the production/deployment database. Set `PHOGET_DATABASE_URL` to a loopback PostgreSQL connection URL if the local database credentials/port differ from `.env.example` (or put that URL in this worktree's `.env` before bootstrap). Bootstrap generates `.env` and `.env.test` for this worktree from that URL; do not put production credentials there.

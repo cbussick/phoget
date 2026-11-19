@@ -133,7 +133,7 @@ export function ItemPhoto({
             >
               Abbrechen
             </Button>
-            <Button variant="danger" disabled={busy} onClick={remove}>
+            <Button variant="danger" disabled={busy} onClick={() => void remove()}>
               Foto entfernen
             </Button>
           </div>
@@ -178,7 +178,7 @@ export function ItemPhoto({
               capture="environment"
               aria-describedby={hintId}
               disabled={busy}
-              onChange={upload}
+              onChange={(event) => void upload(event)}
             />
           </label>
           <label className="item-photo-picker">
@@ -188,7 +188,7 @@ export function ItemPhoto({
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
               aria-describedby={hintId}
               disabled={busy}
-              onChange={upload}
+              onChange={(event) => void upload(event)}
             />
           </label>
         </div>

@@ -162,7 +162,13 @@ export function SortableRows<T extends { id: string }>({
           : "Die Reihenfolge konnte nicht gespeichert werden.",
       );
     } finally {
-      await client.invalidateQueries({ queryKey: householdKey });
+      await client.invalidateQueries({ queryKey: householdKey }).catch((failure: unknown) => {
+        setError(
+          failure instanceof Error
+            ? failure.message
+            : "Die Reihenfolge konnte nicht aktualisiert werden.",
+        );
+      });
       setBusy(false);
     }
   }
@@ -175,7 +181,7 @@ export function SortableRows<T extends { id: string }>({
         if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart")
           suppressClick.current = true;
       }}
-      onDragEnd={finish}
+      onDragEnd={(event) => void finish(event)}
       accessibility={{
         screenReaderInstructions: {
           draggable:
