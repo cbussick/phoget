@@ -73,7 +73,6 @@ export default defineConfig({
         "quality/no-unknown-returns": "off",
         "unicorn/consistent-function-scoping": "off",
         "no-console": "off",
-        "unicorn/prefer-string-replace-all": "off",
         "react-hooks/exhaustive-deps": "off",
         "quality/no-array-filter-map": "off",
         "no-promise-executor-return": "off",

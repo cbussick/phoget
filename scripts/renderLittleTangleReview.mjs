@@ -75,8 +75,8 @@ try {
   const scoped = (svg, prefix, viewBox = "0 0 765 560") =>
     svg
       .replace('viewBox="0 0 765 560"', `viewBox="${viewBox}"`)
-      .replace(/id="([^"]+)"/g, (_, id) => `id="${prefix}-${id}"`)
-      .replace(/url\(#([^)]+)\)/g, (_, id) => `url(#${prefix}-${id})`)
+      .replaceAll(/id="([^"]+)"/g, (_, id) => `id="${prefix}-${id}"`)
+      .replaceAll(/url\(#([^)]+)\)/g, (_, id) => `url(#${prefix}-${id})`)
       .replace(
         'aria-labelledby="title description"',
         `aria-labelledby="${prefix}-title ${prefix}-description"`,

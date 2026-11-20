@@ -129,7 +129,7 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
       /<(?:image|text|script|foreignObject|linearGradient|radialGradient)\b|data:/i,
     );
     // Luminance-mask white/black are technical coverage values, not painted colors.
-    const painted = svg.replace(/<mask\b[\s\S]*?<\/mask>/g, "");
+    const painted = svg.replaceAll(/<mask\b[\s\S]*?<\/mask>/g, "");
     for (const [, color] of painted.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
       assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b", "#fffefa"].includes(color));
     }
