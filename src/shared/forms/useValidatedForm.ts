@@ -18,19 +18,19 @@ export function useValidatedForm<T extends Record<string, string>>(
       setError(null);
       try {
         await save(value);
-      } catch (failure) {
+      } catch (error_) {
         if (
-          failure instanceof ApiError &&
-          failure.field &&
-          Object.hasOwn(defaultValues, failure.field)
+          error_ instanceof ApiError &&
+          error_.field &&
+          Object.hasOwn(defaultValues, error_.field)
         ) {
           // The server field was validated above against this form's own keys.
-          const fields = { [failure.field]: failure.message } as Partial<
+          const fields = { [error_.field]: error_.message } as Partial<
             Record<DeepKeys<T>, string>
           >;
           formApi.setErrorMap({ onSubmit: { fields } });
         } else
-          setError(failure instanceof Error ? failure : new Error("Bitte versuche es erneut."));
+          setError(error_ instanceof Error ? error_ : new Error("Bitte versuche es erneut."));
       }
     },
   });

@@ -61,10 +61,10 @@ export function ItemPhoto({
       setHasPhoto(true);
       setVersion((current) => current + 1);
       await client.invalidateQueries({ queryKey: householdKey });
-    } catch (cause) {
+    } catch (error_) {
       setError(
-        cause instanceof ApiError
-          ? cause.message
+        error_ instanceof ApiError
+          ? error_.message
           : "Das Foto konnte nicht hochgeladen werden. Bitte versuche es erneut.",
       );
     } finally {
@@ -85,9 +85,9 @@ export function ItemPhoto({
       setConfirmDelete(false);
       await client.invalidateQueries({ queryKey: householdKey });
       removed = true;
-    } catch (cause) {
+    } catch (error_) {
       setError(
-        cause instanceof ApiError ? cause.message : "Das Foto konnte nicht entfernt werden.",
+        error_ instanceof ApiError ? error_.message : "Das Foto konnte nicht entfernt werden.",
       );
     } finally {
       setBusy(false);

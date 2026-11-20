@@ -146,18 +146,18 @@ export function SortableRows<T extends { id: string }>({
     setError(null);
     try {
       await save(before, after);
-    } catch (failure) {
+    } catch (error_) {
       setOrder(before);
       setError(
-        failure instanceof Error
-          ? failure.message
+        error_ instanceof Error
+          ? error_.message
           : "Die Reihenfolge konnte nicht gespeichert werden.",
       );
     } finally {
-      await client.invalidateQueries({ queryKey: householdKey }).catch((failure: unknown) => {
+      await client.invalidateQueries({ queryKey: householdKey }).catch((error_: unknown) => {
         setError(
-          failure instanceof Error
-            ? failure.message
+          error_ instanceof Error
+            ? error_.message
             : "Die Reihenfolge konnte nicht aktualisiert werden.",
         );
       });
