@@ -62,7 +62,7 @@ test(
         if (origin) {
           try {
             if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok)
-              break;
+              {break;}
           } catch {
             /* Wait for the API watcher to start. */
           }

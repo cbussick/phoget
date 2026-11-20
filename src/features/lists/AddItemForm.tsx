@@ -29,7 +29,7 @@ export function AddItemForm({
   useEffect(() => {
     if (!suggestionState.busy && focusAfterForget.current) {
       focusAfterForget.current = false;
-      if (document.activeElement === document.body) input.current?.focus();
+      if (document.activeElement === document.body) {input.current?.focus();}
     }
   }, [suggestionState.busy]);
   const add = useAction(async (name: string) => {
@@ -130,7 +130,7 @@ export function AddItemForm({
               key={name}
               disabled={busy}
               onClick={() => {
-                if (busy) return;
+                if (busy) {return;}
                 add.mutate(name);
               }}
             >

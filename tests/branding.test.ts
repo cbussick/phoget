@@ -58,7 +58,7 @@ test("iOS home-screen icon has an opaque light-blue background", async () => {
   for (let offset = 8; offset < png.length;) {
     const length = png.readUInt32BE(offset);
     const type = png.toString("ascii", offset + 4, offset + 8);
-    if (type === "IDAT") chunks.push(png.subarray(offset + 8, offset + 8 + length));
+    if (type === "IDAT") {chunks.push(png.subarray(offset + 8, offset + 8 + length));}
     offset += 12 + length;
   }
   // PNG's first pixel has no left or upper neighbor, regardless of its row filter.

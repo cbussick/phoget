@@ -6,7 +6,7 @@ export function useErrorSnackbar(error: Error | string | null) {
   const notify = useSnackbar();
 
   useEffect(() => {
-    if (!error) return;
+    if (!error) {return;}
     const message =
       typeof error === "string"
         ? error

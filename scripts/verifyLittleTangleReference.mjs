@@ -41,7 +41,7 @@ try {
         [23, 111, 159],
       ];
       const classify = (pixels, index, colors) => {
-        if (pixels[index + 3] < 128) return 0;
+        if (pixels[index + 3] < 128) {return 0;}
         let best = Infinity;
         let category = 0;
         for (let i = 0; i < colors.length; i++) {
@@ -71,16 +71,16 @@ try {
             const index = (y * 765 + x) * 4;
             let expected = classify(source, index, sourceColors);
             // The source is shaded; blue antialiasing below the rim belongs to the bowl.
-            if (expected === 1 && x > 100 && y > 329 + (x - 105) * 0.217) expected = 3;
+            if (expected === 1 && x > 100 && y > 329 + (x - 105) * 0.217) {expected = 3;}
             const actual = classify(output, index, outputColors);
             for (const category of categories) {
-              if (expected === category || actual === category) union[category]++;
-              if (expected === category && actual === category) intersection[category]++;
+              if (expected === category || actual === category) {union[category]++;}
+              if (expected === category && actual === category) {intersection[category]++;}
             }
           }
         }
         for (const category of categories)
-          result.push({ name, category, iou: intersection[category] / union[category] });
+          {result.push({ name, category, iou: intersection[category] / union[category] });}
       }
       const contacts = [
         [110, 90],
@@ -99,7 +99,7 @@ try {
         for (let x = 90 * 4; x < 115 * 4; x++) {
           const i = (Math.round(y * 4) * 765 * 4 + x) * 4;
           if (enlarged[i + 3] >= 200 && enlarged[i + 1] > 150 && enlarged[i + 2] > 200)
-            return x / 4;
+            {return x / 4;}
         }
         throw new Error(`Missing p return at y=${y}`);
       };

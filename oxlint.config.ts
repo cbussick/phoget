@@ -4,7 +4,7 @@ import { defineConfig } from "oxlint";
 export default defineConfig({
   ...cloudflare,
   ignorePatterns: [
-    ...cloudflare.ignorePatterns,
+    ...(cloudflare.ignorePatterns ?? []),
     "**/.runtime/**",
     "**/.worktrees/**",
     "**/dist/**",
@@ -47,7 +47,7 @@ export default defineConfig({
     ],
   },
   overrides: [
-    ...cloudflare.overrides,
+    ...(cloudflare.overrides ?? []),
     {
       files: ["**/*.{ts,tsx,mts,cts}"],
       rules: {
@@ -63,7 +63,6 @@ export default defineConfig({
       files: ["**/*"],
       rules: {
         // Temporary migration baseline; remove each entry with its fixes.
-        curly: "off",
         "typescript/no-non-null-assertion": "off",
         "react/immutability": "off",
         "@nkzw/no-instanceof": "off",

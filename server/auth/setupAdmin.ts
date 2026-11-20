@@ -11,7 +11,7 @@ async function readPassword() {
     let value = "";
     for await (const chunk of process.stdin) {
       value += chunk;
-      if (value.length > 1024) throw new Error("Password input is too long.");
+      if (value.length > 1024) {throw new Error("Password input is too long.");}
     }
     return value.replace(/\r?\n$/, "");
   }
@@ -33,8 +33,8 @@ async function readPassword() {
             resolve(value);
             return;
           }
-          if (char === "\u007f") value = value.slice(0, -1);
-          else if (value.length < 128) value += char;
+          if (char === "\u007f") {value = value.slice(0, -1);}
+          else if (value.length < 128) {value += char;}
         }
       };
       process.stdin.on("data", onData);
@@ -49,9 +49,9 @@ try {
   let [username, name] = process.argv.slice(2);
   if (!username || !name) {
     if (!process.stdin.isTTY)
-      throw new Error(
+      {throw new Error(
         'Usage: npm run account:setup -- username "Display name" (password on stdin)',
-      );
+      );}
     const prompt = createInterface({ input: process.stdin, output: process.stdout });
     username = await prompt.question("Username: ");
     name = await prompt.question("Display name: ");

@@ -37,7 +37,7 @@ const vite = await createServer({
 let api: ChildProcess | undefined;
 let stopping = false;
 async function stop(code = 0) {
-  if (stopping) return;
+  if (stopping) {return;}
   stopping = true;
   process.exitCode = code;
   api?.kill("SIGTERM");
@@ -48,7 +48,7 @@ process.once("SIGTERM", () => void stop());
 try {
   await vite.listen();
   const address = vite.httpServer?.address();
-  if (!address || typeof address === "string") throw new Error("Vite did not open a TCP port.");
+  if (!address || typeof address === "string") {throw new Error("Vite did not open a TCP port.");}
   const origin = `http://127.0.0.1:${address.port}`;
   api = spawn(process.execPath, ["node_modules/tsx/dist/cli.mjs", "watch", "server/index.ts"], {
     stdio: "inherit",

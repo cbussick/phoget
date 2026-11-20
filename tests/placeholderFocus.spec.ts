@@ -64,7 +64,7 @@ test("overflowing placeholder looks identical before focus, during suggestions a
                   const luminance = (data: Uint8ClampedArray, offset: number) =>
                     (data[offset]! + data[offset + 1]! + data[offset + 2]!) / 3;
                   if (Math.abs(luminance(first.data, i) - luminance(second.data, j)) > 55)
-                    changed++;
+                    {changed++;}
                 }
               }
               smallest = Math.min(smallest, changed / ((first.width - 2) * (first.height - 2)));

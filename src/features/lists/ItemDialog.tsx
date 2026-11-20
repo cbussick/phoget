@@ -48,8 +48,8 @@ export function ItemDialog({
       onClose={onClose}
       busy={busy}
       onSubmit={(event) => {
-        if (remove.isPending || photoBusy) event.preventDefault();
-        else submit(event);
+        if (remove.isPending || photoBusy) {event.preventDefault();}
+        else {submit(event);}
       }}
     >
       <form.Field name="name">

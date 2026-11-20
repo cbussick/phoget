@@ -12,7 +12,7 @@ const clippedG =
   "C 372.064 381.133, 372.061 381.131, 400.500 386.950 C 414.250 389.763, 426.407 392.258, 427.516 392.493 C 430.523 393.131, 443.005 385.814, 450.117 379.244";
 const roundedG = "C 372.064 381.133, 388 397, 406 397 C 422 397, 437 390, 450.117 379.244";
 if (!current.includes(clippedG))
-  throw new Error("Review the exposed g terminal before regenerating the navigation wordmark.");
+  {throw new Error("Review the exposed g terminal before regenerating the navigation wordmark.");}
 const wordmark = current
   .replace('viewBox="0 0 765 560"', 'viewBox="0 0 765 410"')
   .replace(
@@ -35,9 +35,9 @@ const descender = lettering?.match(/M 61\.867 255\.770[\s\S]*?(?= M |$)/)?.[0].t
 const rear = current.match(/id="p-rear-ribbon"[^>]*d="([^"]+)"/)?.[1];
 const bowl = current.match(/id="tangle-bowl"[^>]*d="([^"]+)"/)?.[1];
 if (pStart < 0 || pEnd <= pStart || !descender || !rear || !bowl)
-  throw new Error(
+  {throw new Error(
     "The source p contours changed; review the extraction before regenerating the favicon.",
-  );
+  );}
 // Only close the outgoing p-to-h connector. Keep the p's curves and counter intact.
 const pOutline = `M177.824 202.183 ${lettering.slice(pStart, pEnd)} C163.932 251.576 177 236.2 177.824 202.183Z ${descender}Z`;
 const logoPIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title description">

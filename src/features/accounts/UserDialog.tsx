@@ -55,7 +55,7 @@ export function UserDialog({
           role,
         )
       )
-        return;
+        {return;}
       switch (action.kind) {
         case "create":
           await accountApi.create({ name, username, role, password });
@@ -99,8 +99,8 @@ export function UserDialog({
       spacious
       onClose={onClose}
       onSubmit={(event) => {
-        if (blocked) event.preventDefault();
-        else submit(event);
+        if (blocked) {event.preventDefault();}
+        else {submit(event);}
       }}
     >
       {blocked && action.kind !== "edit" ? null : action.kind === "delete" ? (

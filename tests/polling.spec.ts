@@ -18,7 +18,7 @@ test("idle list sync does not repeatedly fetch members or suggestion history", a
   const counts = new Map<string, number>();
   page.on("request", (request) => {
     const path = new URL(request.url()).pathname;
-    if (path.startsWith("/api/")) counts.set(path, (counts.get(path) ?? 0) + 1);
+    if (path.startsWith("/api/")) {counts.set(path, (counts.get(path) ?? 0) + 1);}
   });
   try {
     await page.clock.install();
@@ -53,7 +53,7 @@ test("idle list sync does not repeatedly fetch members or suggestion history", a
 test("the login page does not poll for a session", async ({ page }) => {
   let sessions = 0;
   page.on("request", (request) => {
-    if (new URL(request.url()).pathname === "/api/session") sessions++;
+    if (new URL(request.url()).pathname === "/api/session") {sessions++;}
   });
   await page.clock.install();
   await page.goto("/");

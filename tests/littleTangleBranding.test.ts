@@ -54,7 +54,7 @@ test("the t crown does not reverse curvature as it turns behind the stick", asyn
       const ddx = 6 * u * (x2 - 2 * x1 + start[0]) + 6 * t * (x3 - 2 * x2 + x1);
       const ddy = 6 * u * (y2 - 2 * y1 + start[1]) + 6 * t * (y3 - 2 * y2 + y1);
       const cross = dx * ddy - dy * ddx;
-      if (Math.abs(cross) > 1e-7) signs.add(Math.sign(cross));
+      if (Math.abs(cross) > 1e-7) {signs.add(Math.sign(cross));}
     }
     start = [x3, y3];
   }

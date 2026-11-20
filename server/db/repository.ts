@@ -38,7 +38,7 @@ async function requireList(transaction: Transaction, listId: string) {
     .select({ id: lists.id })
     .from(lists)
     .where(eq(lists.id, listId));
-  if (!parent) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+  if (!parent) {throw new NotFoundError("Diese Liste existiert nicht mehr.");}
 }
 export async function readState() {
   // A consistent snapshot avoids mismatched lists/items during concurrent deletion.
@@ -85,14 +85,14 @@ function validateOrder(current: Array<string>, change: OrderChange) {
     current.length !== change.before.length ||
     current.some((id, index) => id !== change.before[index])
   )
-    throw new HttpError(409, "Die Reihenfolge wurde geändert. Bitte versuche es erneut.");
+    {throw new HttpError(409, "Die Reihenfolge wurde geändert. Bitte versuche es erneut.");}
   const currentIds = new Set(current);
   if (
     new Set(change.after).size !== current.length ||
     change.after.length !== current.length ||
     change.after.some((id) => !currentIds.has(id))
   )
-    throw new HttpError(400, "Ungültige Reihenfolge.");
+    {throw new HttpError(400, "Ungültige Reihenfolge.");}
 }
 
 export async function reorderLists(change: OrderChange) {
@@ -107,10 +107,10 @@ export async function reorderLists(change: OrderChange) {
       change,
     );
     for (const [index, id] of change.after.entries())
-      await tx
+      {await tx
         .update(lists)
         .set({ position: index + 1 })
-        .where(eq(lists.id, id));
+        .where(eq(lists.id, id));}
   });
 }
 
@@ -128,10 +128,10 @@ export async function reorderItems(listId: string, completed: boolean, change: O
       change,
     );
     for (const [index, id] of change.after.entries())
-      await tx
+      {await tx
         .update(items)
         .set({ position: index + 1 })
-        .where(eq(items.id, id));
+        .where(eq(items.id, id));}
   });
 }
 export async function createList(input: z.infer<typeof listInputSchema>, actor: Actor) {
@@ -158,7 +158,7 @@ export async function updateList(
     .set({ ...input, updatedAt: sql`clock_timestamp()`, updatedById: actor.id })
     .where(eq(lists.id, id))
     .returning();
-  if (!row) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+  if (!row) {throw new NotFoundError("Diese Liste existiert nicht mehr.");}
   return databaseListSchema.parse({ ...row, updatedBy: actor.name });
 }
 export async function deleteList(id: string) {
@@ -166,7 +166,7 @@ export async function deleteList(id: string) {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(1010)`);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${id}))`);
     const rows = await tx.delete(lists).where(eq(lists.id, id)).returning();
-    if (!rows.length) throw new NotFoundError("Diese Liste existiert nicht mehr.");
+    if (!rows.length) {throw new NotFoundError("Diese Liste existiert nicht mehr.");}
   });
 }
 export async function createItem(
@@ -237,10 +237,10 @@ export async function changeItem(
       .select({ listId: items.listId })
       .from(items)
       .where(eq(items.id, id));
-    if (!located) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    if (!located) {throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");}
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${located.listId}))`);
     const [previous] = await transaction.select().from(items).where(eq(items.id, id)).for("update");
-    if (!previous) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    if (!previous) {throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");}
     const original = databaseItemSchema.parse(previous);
     const [row] =
       input === null
@@ -257,7 +257,7 @@ export async function changeItem(
             })
             .where(eq(items.id, id))
             .returning();
-    if (!row) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    if (!row) {throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");}
     const parsed = databaseItemSchema.parse(row);
     for (const name of new Set([original.name, parsed.name])) {
       await transaction
@@ -310,13 +310,13 @@ export async function forgetItem(
         await transaction.select().from(items).where(eq(items.listId, listId))
       ).filter((item) => item.name.toLowerCase() === key);
       if (matching.some((item) => !item.completed))
-        throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");
+        {throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");}
       const actualIds = matching.map((item) => item.id).sort();
       if (JSON.stringify(actualIds) !== JSON.stringify([...input.completedIds].sort()))
-        throw new HttpError(
+        {throw new HttpError(
           409,
           "Die erledigten Einträge haben sich geändert. Bitte prüfe den Vorschlag erneut.",
-        );
+        );}
       const photos = actualIds.length
         ? await transaction.select().from(itemPhotos).where(inArray(itemPhotos.itemId, actualIds))
         : [];
@@ -332,10 +332,10 @@ export async function forgetItem(
           256;
         undoToken = forgottenItems.remember(undoScope(listId, actor), snapshot, bytes);
         if (!undoToken)
-          throw new HttpError(
+          {throw new HttpError(
             503,
             "Rückgängig ist gerade nicht verfügbar. Der Eintrag wurde nicht entfernt. Bitte versuche es gleich erneut.",
-          );
+          );}
       }
       if (actualIds.length) {
         await transaction.delete(items).where(inArray(items.id, actualIds));
@@ -344,7 +344,7 @@ export async function forgetItem(
       return { remembered: remembered ?? null, removedCompleted: matching.length > 0, undoToken };
     });
   } catch (error) {
-    if (undoToken) forgottenItems.discard(undoToken);
+    if (undoToken) {forgottenItems.discard(undoToken);}
     throw error;
   }
 }
@@ -353,7 +353,7 @@ export async function undoForgetItem(listId: string, token: string, actor: Actor
   await database.transaction(async (transaction) => {
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
     const snapshot = forgottenItems.get(undoScope(listId, actor), token);
-    if (!snapshot) throw new HttpError(410, "Rückgängig ist nicht mehr verfügbar.");
+    if (!snapshot) {throw new HttpError(410, "Rückgängig ist nicht mehr verfügbar.");}
     await requireList(transaction, listId);
     if (snapshot.items.length) {
       const current = await transaction.select().from(items).where(eq(items.listId, listId));
@@ -362,12 +362,12 @@ export async function undoForgetItem(listId: string, token: string, actor: Actor
           snapshot.items.some((saved) => saved.name.toLowerCase() === item.name.toLowerCase()),
         )
       )
-        throw new HttpError(
+        {throw new HttpError(
           409,
           "Ein Eintrag mit diesem Namen wurde inzwischen hinzugefügt. Es wurde nichts überschrieben.",
-        );
+        );}
       await transaction.insert(items).values(snapshot.items);
-      if (snapshot.photos.length) await transaction.insert(itemPhotos).values(snapshot.photos);
+      if (snapshot.photos.length) {await transaction.insert(itemPhotos).values(snapshot.photos);}
       await markListUpdated(transaction, listId, actor.id);
     }
     if (snapshot.remembered) {

@@ -24,10 +24,10 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
     removedCompleted: boolean;
   } | null>(null);
   useEffect(() => {
-    if (!managing) setForgotten(null);
+    if (!managing) {setForgotten(null);}
   }, [managing]);
   useEffect(() => {
-    if (!forgotten) return;
+    if (!forgotten) {return;}
     const timeout = window.setTimeout(() => setForgotten(null), snackbarDurationMs);
     return () => window.clearTimeout(timeout);
   }, [forgotten]);
@@ -80,12 +80,12 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
   // History refreshes on mount, focus and mutations; never offer removal of a known active item.
   const names = (history.data?.names ?? []).filter((name) => !activeNames.has(name.toLowerCase()));
   function forget(name: string) {
-    if (busy || activeNames.has(name.toLowerCase())) return;
+    if (busy || activeNames.has(name.toLowerCase())) {return;}
     const completed = items.filter(
       (item) => item.completed && item.name.toLowerCase() === name.toLowerCase(),
     );
-    if (completed.length) setConfirmation({ name, completed });
-    else remove.mutate({ name, completedIds: [] });
+    if (completed.length) {setConfirmation({ name, completed });}
+    else {remove.mutate({ name, completedIds: [] });}
   }
   const confirmationDialog = confirmation ? (
     <Dialog
@@ -95,10 +95,10 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
       onSubmit={(event) => {
         event.preventDefault();
         if (!busy)
-          remove.mutate({
+          {remove.mutate({
             name: confirmation.name,
             completedIds: confirmation.completed.map((item) => item.id),
-          });
+          });}
       }}
     >
       <p>
@@ -144,7 +144,7 @@ export function SuggestionsDialog({
   const [search, setSearch] = useState("");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!busy && document.activeElement === document.body) input.current?.focus();
+    if (!busy && document.activeElement === document.body) {input.current?.focus();}
   }, [busy]);
   const query = search.trim().toLocaleLowerCase();
   const matches = names.filter((name) => name.toLocaleLowerCase().includes(query));

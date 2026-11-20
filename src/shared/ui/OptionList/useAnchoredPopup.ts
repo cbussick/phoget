@@ -12,9 +12,9 @@ export function useAnchoredPopup(
   useLayoutEffect(() => {
     const element = popup.current;
     const anchor = trigger.current;
-    if (!open || !element || !anchor) return;
+    if (!open || !element || !anchor) {return;}
 
-    if (element.showPopover) element.showPopover();
+    if (element.showPopover) {element.showPopover();}
     const style = getComputedStyle(element);
     const gap = Number.parseFloat(style.paddingTop);
     const gutter = gap * 2;
@@ -50,7 +50,7 @@ export function useAnchoredPopup(
         "px";
     };
     const viewportChanged = (event: Event) => {
-      if (event.target instanceof Node && element.contains(event.target)) return;
+      if (event.target instanceof Node && element.contains(event.target)) {return;}
       position();
     };
 
@@ -64,7 +64,7 @@ export function useAnchoredPopup(
       observer.disconnect();
       window.removeEventListener("resize", viewportChanged);
       window.removeEventListener("scroll", viewportChanged, true);
-      if (element.matches(":popover-open")) element.hidePopover();
+      if (element.matches(":popover-open")) {element.hidePopover();}
     };
   }, [open, trigger, popup, constrainHeight]);
 }

@@ -21,11 +21,11 @@ export function App() {
   const client = useQueryClient();
   const user = session.data?.user;
   useEffect(() => {
-    if (!user) client.removeQueries({ predicate: (query) => query.queryKey[0] !== "session" });
+    if (!user) {client.removeQueries({ predicate: (query) => query.queryKey[0] !== "session" });}
   }, [user?.id, client]);
-  if (session.isPending) return <LoadingScreen />;
+  if (session.isPending) {return <LoadingScreen />;}
   if (session.isError && !session.data)
-    return (
+    {return (
       <main className="error-page">
         <h1>Keine Verbindung möglich</h1>
         <Feedback error={session.error} />
@@ -33,16 +33,16 @@ export function App() {
           Erneut versuchen
         </Button>
       </main>
-    );
-  if (!user) return <LoginPage />;
+    );}
+  if (!user) {return <LoginPage />;}
   if (user.mustChangePassword)
-    return (
+    {return (
       <main className="auth-page">
         <h1>Willkommen, {user.name}</h1>
         <PasswordForm required />
         <SignOutButton />
       </main>
-    );
+    );}
   return <HouseholdApp key={user.id} user={user} />;
 }
 function HouseholdApp({ user }: { user: User }) {
@@ -60,9 +60,9 @@ function HouseholdApp({ user }: { user: User }) {
   }, [title]);
   const opening = state.isPending && !state.data;
   useEffect(() => {
-    if (!opening) document.getElementById("main-content")?.focus({ preventScroll: true });
+    if (!opening) {document.getElementById("main-content")?.focus({ preventScroll: true });}
   }, [path, opening]);
-  if (opening) return <LoadingScreen message="Deine Listen werden geladen…" />;
+  if (opening) {return <LoadingScreen message="Deine Listen werden geladen…" />;}
   return (
     <AppShell path={path} user={user}>
       {!state.data ? (

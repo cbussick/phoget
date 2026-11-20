@@ -179,6 +179,6 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
     await expect(add).toHaveCSS("background-color", "rgb(139, 205, 241)");
   } finally {
     await other.close();
-    for (const id of ids) await request.delete("/api/lists/" + id);
+    for (const id of ids) {await request.delete("/api/lists/" + id);}
   }
 });

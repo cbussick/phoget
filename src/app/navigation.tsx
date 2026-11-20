@@ -32,7 +32,7 @@ export function Link({
           event.altKey ||
           props.target === "_blank"
         )
-          return;
+          {return;}
         event.preventDefault();
         navigate(href);
       }}

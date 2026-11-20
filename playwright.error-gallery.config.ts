@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const port = process.env.PHOGET_TEST_PORT;
-if (!port) throw new Error("Run gallery via the worktree runtime");
+if (!port) {throw new Error("Run gallery via the worktree runtime");}
 const origin = `http://127.0.0.1:${port}`;
 export default defineConfig({
   testDir: "scripts",

@@ -32,7 +32,7 @@ export function Dialog({
       ?.focus();
     return () => {
       dialog.close();
-      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      if (previous instanceof HTMLElement && previous.isConnected) {previous.focus();}
     };
   }, [initialFocus]);
   return (
@@ -42,10 +42,10 @@ export function Dialog({
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        if (!busy) onClose();
+        if (!busy) {onClose();}
       }}
       onClick={(event) => {
-        if (event.target !== event.currentTarget || busy) return;
+        if (event.target !== event.currentTarget || busy) {return;}
         const box = event.currentTarget.getBoundingClientRect();
         if (
           event.clientX < box.left ||
@@ -53,7 +53,7 @@ export function Dialog({
           event.clientY < box.top ||
           event.clientY > box.bottom
         )
-          onClose();
+          {onClose();}
       }}
     >
       <form noValidate onSubmit={onSubmit}>

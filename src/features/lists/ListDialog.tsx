@@ -29,7 +29,7 @@ export function ListDialog({
     list ? listApi.update(list.id, value) : listApi.create(value),
   );
   const remove = useAction(async () => {
-    if (list) await listApi.remove(list.id);
+    if (list) {await listApi.remove(list.id);}
     onClose();
     navigate("/");
   });
@@ -60,10 +60,10 @@ export function ListDialog({
       busy={busy}
       onClose={onClose}
       onSubmit={(event) => {
-        if (busy || confirmDelete) event.preventDefault();
-        if (busy) return;
-        if (confirmDelete) remove.mutate(undefined);
-        else submit(event);
+        if (busy || confirmDelete) {event.preventDefault();}
+        if (busy) {return;}
+        if (confirmDelete) {remove.mutate(undefined);}
+        else {submit(event);}
       }}
     >
       {confirmDelete ? (

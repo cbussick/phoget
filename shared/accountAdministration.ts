@@ -21,8 +21,8 @@ export function accountAdministrationBlock(
     administratorCount <= 1 &&
     (action === "delete" || (action === "edit" && nextRole !== "admin"))
   )
-    return accountAdministrationMessages.lastAdmin;
-  if (actorId === target.id && action === "delete") return accountAdministrationMessages.selfDelete;
-  if (actorId === target.id && action === "reset") return accountAdministrationMessages.selfReset;
+    {return accountAdministrationMessages.lastAdmin;}
+  if (actorId === target.id && action === "delete") {return accountAdministrationMessages.selfDelete;}
+  if (actorId === target.id && action === "reset") {return accountAdministrationMessages.selfReset;}
   return null;
 }

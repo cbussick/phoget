@@ -34,7 +34,7 @@ export function ItemPhoto({
   useErrorSnackbar(error);
   useAnchoredPopup(choosing && !busy, trigger, popup, false);
   useLayoutEffect(() => {
-    if (confirmDelete) cancelDelete.current?.focus();
+    if (confirmDelete) {cancelDelete.current?.focus();}
   }, [confirmDelete]);
   useLayoutEffect(() => {
     if (!busy && !hasPhoto && restoreAfterRemoval.current) {
@@ -46,7 +46,7 @@ export function ItemPhoto({
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
+    if (!file) {return;}
     setChoosing(false);
     setError(null);
     if (file.size > 12 * 1024 * 1024) {
@@ -92,7 +92,7 @@ export function ItemPhoto({
     } finally {
       setBusy(false);
       onBusyChange(false);
-      if (removed) restoreAfterRemoval.current = true;
+      if (removed) {restoreAfterRemoval.current = true;}
     }
   }
   const url = `/api/items/${item.id}/photo?v=${version}`;
@@ -160,7 +160,7 @@ export function ItemPhoto({
           aria-label="Fotoquelle"
           popover="auto"
           onToggle={(event) => {
-            if (event.newState === "closed") setChoosing(false);
+            if (event.newState === "closed") {setChoosing(false);}
           }}
           onKeyDown={(event) => {
             if (event.key === "Escape") {

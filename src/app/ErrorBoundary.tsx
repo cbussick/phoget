@@ -9,7 +9,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
   }
   render() {
     if (this.state.failed)
-      return (
+      {return (
         <main className="error-page">
           <h1>Etwas ist schiefgelaufen</h1>
           <p>
@@ -19,7 +19,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
             phoget neu laden
           </Button>
         </main>
-      );
+      );}
     return this.props.children;
   }
 }

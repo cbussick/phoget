@@ -43,18 +43,18 @@ function setSession(response: Response, value: string) {
 }
 export const authenticate: RequestHandler = async (request, response, next) => {
   const user = await readSession(token(request));
-  if (!user) throw new HttpError(401, "Bitte melde dich an, um fortzufahren.");
+  if (!user) {throw new HttpError(401, "Bitte melde dich an, um fortzufahren.");}
   response.locals.user = user;
   next();
 };
 export const requireReady: RequestHandler = (_request, response, next) => {
   if (userSchema.parse(response.locals.user).mustChangePassword)
-    throw new HttpError(403, "Ändere dein vorläufiges Passwort, um fortzufahren.");
+    {throw new HttpError(403, "Ändere dein vorläufiges Passwort, um fortzufahren.");}
   next();
 };
 export const adminOnly: RequestHandler = (_request, response, next) => {
   if (userSchema.parse(response.locals.user).role !== "admin")
-    throw new HttpError(403, "Administratorrechte sind erforderlich.");
+    {throw new HttpError(403, "Administratorrechte sind erforderlich.");}
   next();
 };
 export const authRouter = Router();

@@ -29,7 +29,7 @@ async function lockAccounts(transaction: Transaction) {
 async function requireAdmin(transaction: Transaction, actorId: string) {
   const [row] = await transaction.select().from(users).where(eq(users.id, actorId));
   if (!row || userSchema.parse(row).role !== "admin" || row.mustChangePassword)
-    throw new HttpError(403, "Administratorrechte sind erforderlich.");
+    {throw new HttpError(403, "Administratorrechte sind erforderlich.");}
 }
 export async function throttleLogin(key: string) {
   const now = new Date();
@@ -47,7 +47,7 @@ export async function throttleLogin(key: string) {
       })
       .returning();
     if (z.object({ count: z.number().int() }).parse(row).count > limit)
-      throw new HttpError(429, "Zu viele Versuche. Bitte versuche es in 15 Minuten erneut.");
+      {throw new HttpError(429, "Zu viele Versuche. Bitte versuche es in 15 Minuten erneut.");}
   }
 }
 async function issueSession(transaction: Transaction, userId: string) {
@@ -65,18 +65,18 @@ export async function signIn(username: string, password: string) {
   const [raw] = await database.select().from(users).where(eq(users.username, username));
   const stored = raw ? storedUserSchema.parse(raw) : null;
   const valid = await verifyPassword(password, stored?.passwordHash ?? dummyHash);
-  if (!stored || !valid) throw new HttpError(401, "Benutzername oder Passwort ist falsch.");
+  if (!stored || !valid) {throw new HttpError(401, "Benutzername oder Passwort ist falsch.");}
 
   return database.transaction(async (transaction) => {
     await lockAccounts(transaction);
     const [current] = await transaction.select().from(users).where(eq(users.id, stored.id));
     if (!current || storedUserSchema.parse(current).passwordHash !== stored.passwordHash)
-      throw new HttpError(401, "Benutzername oder Passwort ist falsch.");
+      {throw new HttpError(401, "Benutzername oder Passwort ist falsch.");}
     return { user: userSchema.parse(current), token: await issueSession(transaction, stored.id) };
   });
 }
 export async function readSession(token: string | undefined): Promise<User | null> {
-  if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) {return null;}
   const [row] = await database
     .select({ user: users })
     .from(sessions)
@@ -85,7 +85,7 @@ export async function readSession(token: string | undefined): Promise<User | nul
   return row ? userSchema.parse(row.user) : null;
 }
 export async function signOut(token: string | undefined) {
-  if (token) await database.delete(sessions).where(eq(sessions.tokenHash, tokenDigest(token)));
+  if (token) {await database.delete(sessions).where(eq(sessions.tokenHash, tokenDigest(token)));}
 }
 export async function readUsers() {
   return usersSchema.parse(
@@ -104,9 +104,9 @@ export async function createAccount(input: z.infer<typeof createUserSchema>, act
   const passwordHash = await hashPassword(input.password);
   return database.transaction(async (transaction) => {
     await lockAccounts(transaction);
-    if (actorId) await requireAdmin(transaction, actorId);
+    if (actorId) {await requireAdmin(transaction, actorId);}
     else if ((await transaction.select({ id: users.id }).from(users).limit(1)).length)
-      throw new HttpError(409, "Der erste Administrator existiert bereits.");
+      {throw new HttpError(409, "Der erste Administrator existiert bereits.");}
     const [row] = await transaction
       .insert(users)
       .values({
@@ -130,7 +130,7 @@ export async function editAccount(
     await requireAdmin(transaction, actorId);
     const stored = usersSchema.parse(await transaction.select().from(users));
     const target = stored.find((user) => user.id === id);
-    if (!target) throw new HttpError(404, "Dieses Konto existiert nicht mehr.");
+    if (!target) {throw new HttpError(404, "Dieses Konto existiert nicht mehr.");}
     const blocked = accountAdministrationBlock(
       actorId,
       target,
@@ -138,31 +138,31 @@ export async function editAccount(
       input ? "edit" : "delete",
       input?.role,
     );
-    if (blocked) throw new HttpError(409, blocked);
+    if (blocked) {throw new HttpError(409, blocked);}
     if (!input) {
       await transaction.delete(users).where(eq(users.id, id));
       return null;
     }
     const [row] = await transaction.update(users).set(input).where(eq(users.id, id)).returning();
     if (target.role !== input.role)
-      await transaction.delete(sessions).where(eq(sessions.userId, id));
+      {await transaction.delete(sessions).where(eq(sessions.userId, id));}
     return userSchema.parse(row);
   });
 }
 export async function editProfile(id: string, name: string) {
   const [row] = await database.update(users).set({ name }).where(eq(users.id, id)).returning();
-  if (!row) throw new HttpError(401, "Bitte melde dich erneut an.");
+  if (!row) {throw new HttpError(401, "Bitte melde dich erneut an.");}
   return userSchema.parse(row);
 }
 export async function changePassword(id: string, password: string, currentPassword: string) {
   await throttleLogin("password:" + id);
   const [row] = await database.select().from(users).where(eq(users.id, id));
-  if (!row) throw new HttpError(401, "Bitte melde dich erneut an.");
+  if (!row) {throw new HttpError(401, "Bitte melde dich erneut an.");}
   const stored = storedUserSchema.parse(row);
   if (!(await verifyPassword(currentPassword, stored.passwordHash)))
-    throw new HttpError(400, "Das aktuelle Passwort ist falsch.", "currentPassword");
+    {throw new HttpError(400, "Das aktuelle Passwort ist falsch.", "currentPassword");}
   if (password === currentPassword)
-    throw new HttpError(400, "Wähle ein anderes Passwort.", "password");
+    {throw new HttpError(400, "Wähle ein anderes Passwort.", "password");}
   const passwordHash = await hashPassword(password);
   return database.transaction(async (transaction) => {
     await lockAccounts(transaction);
@@ -172,7 +172,7 @@ export async function changePassword(id: string, password: string, currentPasswo
       .where(and(eq(users.id, id), eq(users.passwordHash, stored.passwordHash)))
       .returning();
     if (!updated)
-      throw new HttpError(409, "Dein Konto wurde geändert. Bitte melde dich erneut an.");
+      {throw new HttpError(409, "Dein Konto wurde geändert. Bitte melde dich erneut an.");}
     await transaction.delete(sessions).where(eq(sessions.userId, id));
     return { user: userSchema.parse(updated), token: await issueSession(transaction, id) };
   });
@@ -182,13 +182,13 @@ export async function resetPassword(actorId: string, id: string, password: strin
   return database.transaction(async (transaction) => {
     await lockAccounts(transaction);
     await requireAdmin(transaction, actorId);
-    if (actorId === id) throw new HttpError(409, accountAdministrationMessages.selfReset);
+    if (actorId === id) {throw new HttpError(409, accountAdministrationMessages.selfReset);}
     const [row] = await transaction
       .update(users)
       .set({ passwordHash, mustChangePassword: true })
       .where(eq(users.id, id))
       .returning();
-    if (!row) throw new HttpError(404, "Dieses Konto existiert nicht mehr.");
+    if (!row) {throw new HttpError(404, "Dieses Konto existiert nicht mehr.");}
     await transaction.delete(sessions).where(eq(sessions.userId, id));
     return userSchema.parse(row);
   });
