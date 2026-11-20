@@ -40,12 +40,12 @@ adminUrl.pathname = "/postgres";
 
 async function port() {
   const server = net.createServer();
-  await new Promise((ok, fail) => server.once("error", fail).listen(0, "127.0.0.1", ok));
+  await new Promise((ok, fail) => { server.once("error", fail).listen(0, "127.0.0.1", ok); });
   const address = server.address();
   if (!address || typeof address === "string") {
     throw new Error("No TCP port allocated");
   }
-  await new Promise((ok) => server.close(ok));
+  await new Promise((ok) => { server.close(ok); });
   return address.port;
 }
 async function database(name, drop = false) {

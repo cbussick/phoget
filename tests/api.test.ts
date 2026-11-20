@@ -28,7 +28,7 @@ before(async () => {
   );
   assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
   server = app.listen(0, "127.0.0.1");
-  await new Promise<void>((resolve) => server.on("listening", resolve));
+  await new Promise<void>((resolve) => { server.on("listening", resolve); });
   const address = server.address();
   assert.ok(address && typeof address === "object");
   base = "http://127.0.0.1:" + address.port;
@@ -42,7 +42,7 @@ beforeEach(async () => {
 });
 after(async () => {
   await prepareAccounts();
-  await new Promise<void>((resolve) => server.close(() => resolve()));
+  await new Promise<void>((resolve) => { server.close(() => resolve()); });
   await pool.end();
 });
 function send(path: string, method = "GET", body?: unknown, headers: Record<string, string> = {}) {

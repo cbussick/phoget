@@ -272,7 +272,7 @@ test("completed tab uses the remaining viewport without moving the header or tab
     });
     for (const [index, position] of (await visiblePositions()).entries()) {
       // Transformed icon bounds may differ by floating-point rounding in WebKit.
-      expect(position.top).toBeCloseTo(before[index]!.top, 2);
+      expect(position.top).toBeCloseTo(before[index].top, 2);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);

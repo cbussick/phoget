@@ -46,7 +46,7 @@ test("the t crown does not reverse curvature as it turns behind the stick", asyn
   for (const [, coordinates] of turn.matchAll(/C\s*([^C]+)/g)) {
     const values = coordinates.match(/-?\d+(?:\.\d+)?/g)?.map(Number);
     assert.equal(values?.length, 6);
-    const [x1, y1, x2, y2, x3, y3] = values!;
+    const [x1, y1, x2, y2, x3, y3] = values;
     for (const t of [0, 0.25, 0.5, 0.75, 1]) {
       const u = 1 - t;
       const dx = 3 * u * u * (x1 - start[0]) + 6 * u * t * (x2 - x1) + 3 * t * t * (x3 - x2);
