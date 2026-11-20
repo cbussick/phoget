@@ -95,7 +95,7 @@ export function SortableRow({
   );
 }
 
-export function SortableRows<T extends { id: string }>({
+export function SortableRows<T extends { id: string }, Result>({
   rows,
   className,
   save,
@@ -104,7 +104,7 @@ export function SortableRows<T extends { id: string }>({
 }: {
   rows: Array<T>;
   className: string;
-  save: (before: Array<string>, after: Array<string>) => Promise<unknown>;
+  save: (before: Array<string>, after: Array<string>) => Promise<Result>;
   renderRow: (row: T) => ReactNode;
   getLabel: (row: T) => string;
 }) {
