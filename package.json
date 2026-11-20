@@ -14,7 +14,7 @@
     "db:seed": "tsx --env-file=.env server/db/seed.ts",
     "dev:seed": "tsx --env-file=.env server/db/seedDevelopment.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
-    "lint": "oxlint src server shared scripts tests .storybook *.ts && stylelint \"src/**/*.css\" \".storybook/*.css\"",
+    "lint": "oxlint . --threads=2 && stylelint \"src/**/*.css\" \".storybook/*.css\"",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "tsx --env-file=.env.test --test tests/*.test.ts",
@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@cloudflare/oxlint-config": "0.1.0",
     "@playwright/test": "1.63.0",
     "@storybook/addon-a11y": "10.6.6",
     "@storybook/react-vite": "10.6.6",
@@ -70,7 +71,7 @@
     "storybook-addon-pseudo-states": "10.6.6",
     "stylelint": "17.15.0",
     "stylelint-config-standard": "40.0.0",
-    "tsrs": "7.1.0-beta.tsrs3",
+    "tsrs": "0.25.0-ts7.1.0-beta",
     "tsx": "4.23.13",
     "typescript": "7.0.2",
     "vite": "8.3.7"
