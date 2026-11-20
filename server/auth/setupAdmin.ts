@@ -1,3 +1,4 @@
+import { logger } from "../../shared/logging.js";
 import { z } from "zod";
 import { HttpError } from "../httpErrors.js";
 import { createInterface } from "node:readline/promises";
@@ -70,9 +71,9 @@ try {
     password: await readPassword(),
   });
   const user = await createAccount(input);
-  console.log(`Administrator ${user.username} created.`);
+  logger.log(`Administrator ${user.username} created.`);
 } catch (error) {
-  console.error(
+  logger.error(
     error instanceof z.ZodError
       ? error.issues[0]?.message
       : error instanceof HttpError

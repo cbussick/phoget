@@ -1,3 +1,4 @@
+import { logger } from "../../shared/logging.js";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -30,7 +31,7 @@ try {
       })
       .onConflictDoNothing({ target: users.username })
       .returning({ username: users.username });
-    console.log(
+    logger.log(
       `${username}/${username}: ${inserted.length ? "created" : "already exists (credentials unchanged)"}`,
     );
   }

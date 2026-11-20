@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.js";
 import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { parseArgs } from "node:util";
@@ -65,7 +66,7 @@ try {
   });
   api.once("error", () => void stop(1));
   api.once("exit", (code) => void stop(code ?? 1));
-  console.log(`Phoget dev origin: ${publicOrigin ?? origin}`);
+  logger.log(`Phoget dev origin: ${publicOrigin ?? origin}`);
   vite.printUrls();
 } catch (error) {
   await stop(1);

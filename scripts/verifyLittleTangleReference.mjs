@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -123,7 +124,7 @@ try {
     },
   );
   for (const score of scores.outlines) {
-    console.log(
+    logger.log(
       `${String(score.name)}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
     );
     assert.ok(
@@ -137,14 +138,14 @@ try {
       `White seam at ${contact.x}/${contact.y}: alpha ${contact.alpha}`,
     );
   }
-  console.log("Chopstick contacts: opaque shared occlusion boundaries passed");
+  logger.log("Chopstick contacts: opaque shared occlusion boundaries passed");
   assert.ok(
     scores.pReturnSlant >= 1.25,
     `p return is a vertical patch, not a slanted ribbon: ${scores.pReturnSlant}px`,
   );
-  console.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
+  logger.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
   assert.ok(scores.tFoldAlpha >= 250, `Triangular gap at the t fold: alpha ${scores.tFoldAlpha}`);
-  console.log("t fold: no triangular gap at the upper stick");
+  logger.log("t fold: no triangular gap at the upper stick");
 } finally {
   await browser.close();
 }

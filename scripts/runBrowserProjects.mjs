@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import { spawn } from "node:child_process";
 
 const browsers = ["chromium", "firefox", "webkit"];
@@ -23,7 +24,7 @@ for (const browser of browsers) {
   activeProcess = child;
   const passed = await new Promise((resolve) => {
     child.once("error", (error) => {
-      console.error(error);
+      logger.error(error);
       resolve(false);
     });
     child.once("exit", (code) => resolve(code === 0));

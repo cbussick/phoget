@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -91,7 +92,7 @@ if (command === "clean") {
   }
   await database(names.test, true);
   await database(names.dev, true);
-  console.log(
+  logger.log(
     `Removed ${names.dev}, ${names.test}, and browser test databases. Runtime ports are retained for reuse.`,
   );
 } else {
@@ -164,7 +165,7 @@ if (command === "clean") {
       { mode: 0o600 },
     );
   }
-  console.log(
+  logger.log(
     `Worktree ${id}: dev http://127.0.0.1:${web} (API ${api}), test ${test}, Storybook ${storybook}; databases ${names.dev}, ${names.test}`,
   );
   if (command === "run") {
@@ -187,7 +188,7 @@ if (command === "clean") {
       process.once(signal, () => child.kill(signal));
     }
     child.once("error", (error) => {
-      console.error(error);
+      logger.error(error);
       process.exitCode = 1;
     });
     child.once("exit", (code, signal) => {

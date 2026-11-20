@@ -1,3 +1,4 @@
+import { logger } from "../../shared/logging.js";
 import { database, pool } from "./database.js";
 import { lists, items } from "./schema.js";
 
@@ -120,7 +121,7 @@ try {
         .onConflictDoNothing();
     }
   });
-  console.log("Demo sample data added.");
+  logger.log("Demo sample data added.");
 } finally {
   await pool.end();
 }

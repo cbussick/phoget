@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.js";
 import express from "express";
 import type { ErrorRequestHandler } from "express";
 import helmet from "helmet";
@@ -67,7 +68,7 @@ app.use("/api", (request, response, next) => {
   response.once("finish", () => {
     // Use Express route templates, never raw URLs (which may contain IDs or query strings).
     const route = request.route?.path;
-    console.info(
+    logger.info(
       JSON.stringify({
         event: "api_request",
         requestId,
@@ -295,7 +296,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
     return;
   }
   if (status === 500) {
-    console.error("Request failed", { name: error.name, code: error.code });
+    logger.error("Request failed", { name: error.name, code: error.code });
   }
   response.status(status).json(
     errorSchema.parse({

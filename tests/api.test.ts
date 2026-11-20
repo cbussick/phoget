@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.js";
 import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
@@ -59,8 +60,8 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
 }
 test("request logs use route templates without exposing query strings or list IDs", async () => {
   const messages: Array<string> = [];
-  const original = console.info;
-  console.info = (message: string) => {
+  const original = logger.info;
+  logger.info = (message: string) => {
     messages.push(message);
   };
   try {
@@ -76,7 +77,7 @@ test("request logs use route templates without exposing query strings or list ID
     assert.equal(typeof entry?.durationMs, "number");
     assert.ok(!messages.join(" ").includes("do-not-log"));
   } finally {
-    console.info = original;
+    logger.info = original;
   }
 });
 async function create(name = "API test") {

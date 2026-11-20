@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -219,7 +220,7 @@ try {
     660,
     optionStyles,
   );
-  console.log(`Rendered direct-SVG 2× review images in ${fileURLToPath(output)}`);
+  logger.log(`Rendered direct-SVG 2× review images in ${fileURLToPath(output)}`);
 } finally {
   await browser.close();
 }
