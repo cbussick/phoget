@@ -1,14 +1,17 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Button } from "../Button/Button";
-import { FieldLayout, type FieldPresentation } from "../FieldLayout/FieldLayout";
+import { FieldLayout } from '../FieldLayout/FieldLayout';
+import type { FieldPresentation } from '../FieldLayout/FieldLayout';
 import { Icon } from "../Icon/Icon";
 import { useAnchoredPopup } from "../OptionList/useAnchoredPopup";
-import { OptionList, type ListOption } from "../OptionList/OptionList";
+import { OptionList } from '../OptionList/OptionList';
+import type { ListOption } from '../OptionList/OptionList';
 import "./Select.css";
 
 export type SelectOption = ListOption;
 export type SelectProps = FieldPresentation & {
-  options: readonly SelectOption[];
+  options: ReadonlyArray<SelectOption>;
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;

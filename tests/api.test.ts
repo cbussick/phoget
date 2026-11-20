@@ -58,7 +58,7 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
   });
 }
 test("request logs use route templates without exposing query strings or list IDs", async () => {
-  const messages: string[] = [];
+  const messages: Array<string> = [];
   const original = console.info;
   console.info = (message: string) => {
     messages.push(message);
@@ -777,7 +777,7 @@ test("forget deletes history outright, confirms completed IDs, protects active i
     );
   const history = async () =>
     itemHistorySchema.parse(await (await send(`/lists/${list.id}/history`)).json());
-  const forget = (name: string, completedIds: string[] = []) =>
+  const forget = (name: string, completedIds: Array<string> = []) =>
     send(`/lists/${list.id}/history`, "DELETE", { name, completedIds });
   const item = await add(list.id, "Milk");
   const independent = await add(other.id, "Milk");

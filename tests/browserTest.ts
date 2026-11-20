@@ -1,4 +1,5 @@
-import { test as base, type BrowserContext } from "@playwright/test";
+import { test as base } from '@playwright/test';
+import type { BrowserContext } from '@playwright/test';
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 

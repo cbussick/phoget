@@ -2,13 +2,8 @@ import { z } from "zod";
 import { useStore } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { accountAdministrationBlock } from "../../../shared/accountAdministration";
-import {
-  displayNameSchema,
-  usernameSchema,
-  roleSchema,
-  passwordSchema,
-  type User,
-} from "../../../shared/accounts";
+import { displayNameSchema, usernameSchema, roleSchema, passwordSchema } from '../../../shared/accounts';
+import type { User } from '../../../shared/accounts';
 import { useValidatedForm, textFieldProps, fieldError } from "../../shared/forms/useValidatedForm";
 import { Callout } from "../../shared/ui/Callout/Callout";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";

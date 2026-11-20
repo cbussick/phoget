@@ -1,4 +1,5 @@
-import { useId, useRef, type ReactNode } from "react";
+import { useId, useRef } from 'react';
+import type { ReactNode } from 'react';
 import "./ToggleButtonGroup.css";
 
 type Option = { value: string; label: string; icon: ReactNode; disabled?: boolean };
@@ -13,7 +14,7 @@ export function ToggleButtonGroup({
 }: {
   label: string;
   value: string;
-  options: Option[];
+  options: Array<Option>;
   onValueChange: (value: string) => void;
   onBlur?: () => void;
   disabled?: boolean;

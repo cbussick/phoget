@@ -1,5 +1,7 @@
-import { useState, type FormEvent } from "react";
-import { useForm, useStore, type DeepKeys } from "@tanstack/react-form";
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
+import type { DeepKeys } from '@tanstack/react-form';
 import { ApiError } from "../api/request";
 import type { z } from "zod";
 
@@ -48,7 +50,7 @@ export function useValidatedForm<T extends Record<string, string>>(
 
 type Field = {
   name: string;
-  state: { value: string; meta: { errors: unknown[] } };
+  state: { value: string; meta: { errors: Array<unknown> } };
   form: { state: { submissionAttempts: number } };
   handleChange: (value: string) => void;
   handleBlur: () => void;

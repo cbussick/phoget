@@ -1,4 +1,5 @@
-import { Router, type Request, type Response, type RequestHandler } from "express";
+import { Router } from 'express';
+import type { Request, Response, RequestHandler } from 'express';
 import { config } from "../config.js";
 import { idSchema } from "../../shared/contracts.js";
 import {

@@ -2,7 +2,8 @@ import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { createUndoStore } from "../undoStore.js";
 import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
-import { database, type Transaction } from "./database.js";
+import { database } from './database.js';
+import type { Transaction } from './database.js';
 import { markListUpdated } from "./listActivity.js";
 import type { User } from "../../shared/accounts.js";
 import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.js";
@@ -77,8 +78,8 @@ export async function readState() {
 }
 type Actor = Pick<User, "id" | "name">;
 
-type OrderChange = { before: string[]; after: string[] };
-function validateOrder(current: string[], change: OrderChange) {
+type OrderChange = { before: Array<string>; after: Array<string> };
+function validateOrder(current: Array<string>, change: OrderChange) {
   if (
     current.length !== change.before.length ||
     current.some((id, index) => id !== change.before[index])
@@ -285,8 +286,8 @@ export async function updateSettings(input: z.input<typeof settingsSchema>) {
 }
 
 type ForgottenItem = {
-  items: (typeof items.$inferSelect)[];
-  photos: (typeof itemPhotos.$inferSelect)[];
+  items: Array<typeof items.$inferSelect>;
+  photos: Array<typeof itemPhotos.$inferSelect>;
   remembered: z.infer<typeof rememberedItemSchema> | null;
 };
 const forgottenItems = createUndoStore<ForgottenItem>();

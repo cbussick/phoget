@@ -6,7 +6,7 @@ export function Table({
   children,
 }: {
   caption: string;
-  columns: string[];
+  columns: Array<string>;
   children: ReactNode;
 }) {
   return (

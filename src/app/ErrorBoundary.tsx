@@ -1,4 +1,5 @@
-import { Component, type ReactNode } from "react";
+import { Component } from 'react';
+import type { ReactNode } from 'react';
 import { Button } from "../shared/ui/Button/Button";
 import "./errorPage.css";
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {

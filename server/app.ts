@@ -1,4 +1,5 @@
-import express, { type ErrorRequestHandler } from "express";
+import express from 'express';
+import type { ErrorRequestHandler } from 'express';
 import helmet from "helmet";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";

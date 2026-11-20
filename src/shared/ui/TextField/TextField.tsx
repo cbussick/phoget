@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode, Ref } from "react";
-import { FieldLayout, type FieldPresentation } from "../FieldLayout/FieldLayout";
+import { FieldLayout } from '../FieldLayout/FieldLayout';
+import type { FieldPresentation } from '../FieldLayout/FieldLayout';
 import "./TextField.css";
 
 export type TextFieldProps = FieldPresentation & {

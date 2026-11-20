@@ -1,5 +1,6 @@
 import "./Dialog.css";
-import { useEffect, useId, useRef, type ReactNode, type FormEventHandler } from "react";
+import { useEffect, useId, useRef } from 'react';
+import type { ReactNode, FormEventHandler } from 'react';
 import { Button } from "../Button/Button";
 export function Dialog({
   title,

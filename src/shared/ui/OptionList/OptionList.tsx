@@ -19,7 +19,7 @@ export function OptionList({
   ref: Ref<HTMLDivElement>;
   id: string;
   labelledBy: string;
-  options: readonly ListOption[];
+  options: ReadonlyArray<ListOption>;
   selected?: string;
   active?: string;
   onActive: (value: string) => void;

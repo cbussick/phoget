@@ -1,6 +1,7 @@
 import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
 import { useQueryClient } from "@tanstack/react-query";
-import { profileSchema, type User } from "../../../shared/accounts";
+import { profileSchema } from '../../../shared/accounts';
+import type { User } from '../../../shared/accounts';
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";

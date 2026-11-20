@@ -1,16 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
 import { and, asc, eq, gt, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { database, type Transaction } from "../db/database.js";
+import { database } from '../db/database.js';
+import type { Transaction } from '../db/database.js';
 import { users, sessions, settings, loginAttempts } from "../db/schema.js";
-import {
-  userSchema,
-  usersSchema,
-  membersSchema,
-  type User,
-  type createUserSchema,
-  type userInputSchema,
-} from "../../shared/accounts.js";
+import { userSchema, usersSchema, membersSchema } from '../../shared/accounts.js';
+import type { User, createUserSchema, userInputSchema } from '../../shared/accounts.js';
 import {
   accountAdministrationBlock,
   accountAdministrationMessages,

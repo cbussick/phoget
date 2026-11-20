@@ -23,7 +23,7 @@ export function ListPage({
   syncError,
 }: {
   list: List;
-  items: Item[];
+  items: Array<Item>;
   syncError: boolean;
 }) {
   const now = useActivityClock();

@@ -4,7 +4,7 @@ import { test } from "./browserTest";
 import { addItemResultSchema, listSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-const createdListIds: string[] = [];
+const createdListIds: Array<string> = [];
 test.beforeEach(async ({ request, context }) => {
   const login = await request.post("/api/session", { data: testCredentials });
   expect(login.status()).toBe(200);

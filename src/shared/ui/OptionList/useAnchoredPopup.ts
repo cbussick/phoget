@@ -1,4 +1,5 @@
-import { useLayoutEffect, type RefObject } from "react";
+import { useLayoutEffect } from 'react';
+import type { RefObject } from 'react';
 
 // Measure the anchor, but take the gap and viewport gutter from the popup's tokens.
 // The top layer lets a select inside a modal extend beyond the modal's scroll area.

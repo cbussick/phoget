@@ -14,7 +14,7 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
   expect((await request.post("/api/session", { data: testCredentials })).status()).toBe(200);
   await context.addCookies((await request.storageState()).cookies);
   const name = "Farben " + crypto.randomUUID();
-  const ids: string[] = [];
+  const ids: Array<string> = [];
   const other = await context.newPage();
   try {
     const untouched = listSchema.parse(

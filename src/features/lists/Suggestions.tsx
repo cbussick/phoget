@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { itemHistorySchema, type Item } from "../../../shared/contracts";
+import { itemHistorySchema } from '../../../shared/contracts';
+import type { Item } from '../../../shared/contracts';
 import { householdKey } from "../../shared/api/queryKeys";
 import { request } from "../../shared/api/request";
 import { useAction } from "../../shared/api/useAction";
@@ -11,10 +12,10 @@ import { snackbarDurationMs, useSnackbar } from "../../shared/ui/Snackbar/Snackb
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
 
-export function useSuggestions(listId: string, items: Item[], managing: boolean) {
+export function useSuggestions(listId: string, items: Array<Item>, managing: boolean) {
   const notify = useSnackbar();
   const client = useQueryClient();
-  const [confirmation, setConfirmation] = useState<{ name: string; completed: Item[] } | null>(
+  const [confirmation, setConfirmation] = useState<{ name: string; completed: Array<Item> } | null>(
     null,
   );
   const [forgotten, setForgotten] = useState<{
@@ -46,7 +47,7 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
       );
     },
   );
-  const remove = useAction(async (input: { name: string; completedIds: string[] }) => {
+  const remove = useAction(async (input: { name: string; completedIds: Array<string> }) => {
     try {
       const result = await listApi.forgetItem(listId, input);
       setConfirmation(null);
@@ -132,7 +133,7 @@ export function SuggestionsDialog({
   onClose,
   undo,
 }: {
-  names: string[];
+  names: Array<string>;
   busy: boolean;
   loading: boolean;
   error: boolean;

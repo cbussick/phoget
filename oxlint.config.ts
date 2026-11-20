@@ -63,8 +63,6 @@ export default defineConfig({
       files: ["**/*"],
       rules: {
         // Temporary migration baseline; remove each entry with its fixes.
-        "import/consistent-type-specifier-style": "off",
-        "typescript/array-type": "off",
         curly: "off",
         "typescript/no-non-null-assertion": "off",
         "react/immutability": "off",

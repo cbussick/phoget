@@ -3,7 +3,8 @@ import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import test, { type TestContext } from "node:test";
+import test from 'node:test';
+import type { TestContext } from 'node:test';
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 

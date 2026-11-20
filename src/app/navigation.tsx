@@ -1,4 +1,5 @@
-import { useSyncExternalStore, type AnchorHTMLAttributes } from "react";
+import { useSyncExternalStore } from 'react';
+import type { AnchorHTMLAttributes } from 'react';
 
 function subscribe(callback: () => void) {
   window.addEventListener("popstate", callback);

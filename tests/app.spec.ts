@@ -1,10 +1,11 @@
-import { expect, type Page } from "@playwright/test";
+import { expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { addItemResultSchema, listSchema, stateSchema } from "../shared/contracts";
 
 import { testCredentials } from "./testCredentials";
-const createdListIds: string[] = [];
+const createdListIds: Array<string> = [];
 test.beforeEach(async ({ request, context }) => {
   const result = await request.post("/api/session", { data: testCredentials });
   expect(result.status()).toBe(200);
@@ -301,8 +302,8 @@ test("complete household workflow persists through reload and a second browser",
   browserName,
 }) => {
   test.setTimeout(browserName === "webkit" ? 240_000 : 180_000); // Cross-browser sync now takes up to 10 seconds per change.
-  const errors: string[] = [];
-  const sessionTraffic: string[] = [];
+  const errors: Array<string> = [];
+  const sessionTraffic: Array<string> = [];
   const record = (event: string) => {
     sessionTraffic.push(`${new Date().toISOString()} ${event}`);
     if (sessionTraffic.length > 40) sessionTraffic.shift();

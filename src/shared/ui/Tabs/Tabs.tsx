@@ -1,9 +1,5 @@
-import {
-  Tab as AriaTab,
-  TabList as AriaTabList,
-  type TabProps,
-  type TabListProps,
-} from "react-aria-components";
+import { Tab as AriaTab, TabList as AriaTabList } from 'react-aria-components';
+import type { TabProps, TabListProps } from 'react-aria-components';
 import "./Tabs.css";
 
 export { Tabs, TabPanel } from "react-aria-components";

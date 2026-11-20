@@ -1,15 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import {
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  useDndContext,
-  type DragEndEvent,
-} from "@dnd-kit/core";
+import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { DndContext, KeyboardSensor, MouseSensor, TouchSensor, closestCenter, useSensor, useSensors, useDndContext } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -101,13 +93,13 @@ export function SortableRows<T extends { id: string }>({
   renderRow,
   getLabel,
 }: {
-  rows: T[];
+  rows: Array<T>;
   className: string;
-  save: (before: string[], after: string[]) => Promise<unknown>;
+  save: (before: Array<string>, after: Array<string>) => Promise<unknown>;
   renderRow: (row: T) => ReactNode;
   getLabel: (row: T) => string;
 }) {
-  const [order, setOrder] = useState<string[]>(() => rows.map((row) => row.id));
+  const [order, setOrder] = useState<Array<string>>(() => rows.map((row) => row.id));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // A drag started on a link can still produce a click after mouseup.

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type Ref } from "react";
+import { useEffect, useId, useRef, useState } from 'react';
+import type { Ref } from 'react';
 import { TextField } from "../TextField/TextField";
 import type { FieldPresentation } from "../FieldLayout/FieldLayout";
 import { Button } from "../Button/Button";
@@ -21,7 +22,7 @@ export function ComboBox({
   ...field
 }: FieldPresentation & {
   value: string;
-  options: readonly string[];
+  options: ReadonlyArray<string>;
   onValueChange: (value: string) => void;
   onBlur?: () => void;
   onRemove?: (value: string) => void;

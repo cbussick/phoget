@@ -1,4 +1,5 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
+import { expect, test } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { testCredentials } from "../tests/testCredentials";
@@ -6,7 +7,7 @@ import { testCredentials } from "../tests/testCredentials";
 const output = resolve("error-gallery");
 const shots = resolve(output, "screenshots");
 type Entry = { slug: string; title: string; area: string; trigger: string };
-const entries: Entry[] = [];
+const entries: Array<Entry> = [];
 
 async function capture(page: Page, entry: Entry) {
   await page.evaluate(() => document.fonts.ready);

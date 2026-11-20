@@ -10,7 +10,7 @@ for (const headers of [
   [
     ["Authorization", "test"],
     ["content-type", "text/plain"],
-  ] as [string, string][],
+  ] as Array<[string, string]>,
 ]) {
   test(`request preserves ${headers.constructor.name} headers and caller cancellation`, async (t) => {
     const controller = new AbortController();

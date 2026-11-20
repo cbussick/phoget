@@ -200,7 +200,7 @@ test("password visibility and dialog focus work in Storybook", async ({ page }) 
 });
 
 test("Storybook controls update the real component preview", async ({ page }) => {
-  const errors: string[] = [];
+  const errors: Array<string> = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/?path=/story/components-button--primary");
   const preview = page.frameLocator("#storybook-preview-iframe");
