@@ -40,17 +40,17 @@ export function ComboBox({
   const anchor = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>();
+  // Discard transient interaction state before committing a blocked control.
+  if ((disabled || field.error) && (open || active !== undefined)) {
+    setOpen(false);
+    setActive(undefined);
+  }
   const search = value.trim().toLocaleLowerCase();
   const matches = options.filter((option) => option.toLocaleLowerCase().includes(search));
   const expanded = open && !disabled && !field.error && matches.length > 0;
   const highlighted = active && matches.includes(active) ? active : undefined;
   useAnchoredPopup(expanded, anchor, popup);
-  useEffect(() => {
-    if (disabled || field.error) {
-      setOpen(false);
-      setActive(undefined);
-    }
-  }, [disabled, field.error]);
+
   useEffect(() => {
     if (highlighted && expanded) {
       document

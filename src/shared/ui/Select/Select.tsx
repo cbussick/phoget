@@ -40,6 +40,9 @@ export function Select({
   const enabled = options.filter((option) => !option.disabled);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>();
+  if (disabled && open) {
+    setOpen(false);
+  }
   const expanded = open && !disabled;
   const trigger = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLDivElement>(null);
@@ -135,11 +138,7 @@ export function Select({
     }
   }
 
-  useEffect(() => {
-    if (disabled) {
-      setOpen(false);
-    }
-  }, [disabled]);
+
 
   useEffect(() => {
     if (!expanded) {
