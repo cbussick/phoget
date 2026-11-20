@@ -124,11 +124,11 @@ try {
   );
   for (const score of scores.outlines) {
     console.log(
-      `${score.name}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
+      `${String(score.name)}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
     );
     assert.ok(
       score.iou >= 0.96,
-      `${score.name}: the vector contours drifted from the actual reference`,
+      `${String(score.name)}: the vector contours drifted from the actual reference`,
     );
   }
   for (const contact of scores.contacts) {

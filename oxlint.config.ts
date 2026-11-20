@@ -82,7 +82,6 @@ export default defineConfig({
         "typescript/require-array-sort-compare": "off",
         "typescript/no-unnecessary-type-assertion": "off",
         "typescript/use-unknown-in-catch-callback-variable": "off",
-        "typescript/restrict-template-expressions": "off",
       },
     },
   ],

@@ -156,7 +156,7 @@ try {
           samples[index]
             .slice(0, 3)
             .every((channel, position) => Math.abs(channel - checks[index].color[position]) <= 2),
-          `${name}: ${checks[index].name}; got ${samples[index]}, expected ${checks[index].color}`,
+          `${name}: ${checks[index].name}; got ${String(samples[index])}, expected ${String(checks[index].color)}`,
         );
       }
     }
