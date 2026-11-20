@@ -1,5 +1,5 @@
-import { expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { addItemResultSchema, listSchema, stateSchema } from "../shared/contracts";
@@ -18,7 +18,9 @@ test.afterEach(async ({ playwright, request }) => {
     storageState: await request.storageState(),
   });
   try {
-    for (const id of createdListIds.splice(0)) {await cleanup.delete("/api/lists/" + id);}
+    for (const id of createdListIds.splice(0)) {
+      await cleanup.delete("/api/lists/" + id);
+    }
   } finally {
     await cleanup.dispose();
   }
@@ -306,7 +308,9 @@ test("complete household workflow persists through reload and a second browser",
   const sessionTraffic: Array<string> = [];
   const record = (event: string) => {
     sessionTraffic.push(`${new Date().toISOString()} ${event}`);
-    if (sessionTraffic.length > 40) {sessionTraffic.shift();}
+    if (sessionTraffic.length > 40) {
+      sessionTraffic.shift();
+    }
   };
   page.on("pageerror", (error) => {
     errors.push(error.message);
@@ -314,21 +318,24 @@ test("complete household workflow persists through reload and a second browser",
   });
   const started = new WeakMap<object, number>();
   page.on("request", (request) => {
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
-      {started.set(request, Date.now());}
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
+      started.set(request, Date.now());
+    }
   });
   page.on("requestfailed", (request) => {
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
-      {record(
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
+      record(
         `${request.method()} ${new URL(request.url()).pathname} failed after ${Date.now() - (started.get(request) ?? Date.now())}ms: ${request.failure()?.errorText}`,
-      );}
+      );
+    }
   });
   page.on("response", (response) => {
     const request = response.request();
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
-      {record(
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
+      record(
         `${request.method()} ${new URL(request.url()).pathname} HTTP ${response.status()} after ${Date.now() - (started.get(request) ?? Date.now())}ms`,
-      );}
+      );
+    }
   });
   const name = "Weekend " + crypto.randomUUID();
   const id = await createList(page, name);

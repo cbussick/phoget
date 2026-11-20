@@ -1,5 +1,5 @@
-import { useId } from 'react';
-import type { AnchorHTMLAttributes, ComponentProps, ComponentType } from 'react';
+import { useId } from "react";
+import type { AnchorHTMLAttributes, ComponentProps, ComponentType } from "react";
 import { Icon } from "../Icon/Icon";
 import { ListIcon } from "../ListIcon/ListIcon";
 import "./ListRow.css";

@@ -17,7 +17,9 @@ export async function request<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type")) {headers.set("Content-Type", "application/json");}
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   headers.set("X-Phoget-Request", "1");
   const response = await fetch("/api" + path, {
     ...options,
@@ -32,6 +34,8 @@ export async function request<T>(
       parsed.success ? parsed.data.field : undefined,
     );
   }
-  if (response.status === 204) {return schema.parse(undefined);}
+  if (response.status === 204) {
+    return schema.parse(undefined);
+  }
   return schema.parse(await response.json());
 }

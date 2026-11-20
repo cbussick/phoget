@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { SnackbarProvider, useSnackbar } from './Snackbar';
-import type { SnackbarVariant } from './Snackbar';
+import { SnackbarProvider, useSnackbar } from "./Snackbar";
+import type { SnackbarVariant } from "./Snackbar";
 import { Button } from "../Button/Button";
 
 function Preview({ variant = "success" }: { variant?: SnackbarVariant }) {

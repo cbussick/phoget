@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { InputHTMLAttributes } from 'react';
+import { useState } from "react";
+import type { InputHTMLAttributes } from "react";
 import { TextField } from "../TextField/TextField";
 import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";

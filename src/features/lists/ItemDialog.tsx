@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ItemPhoto } from "./ItemPhoto";
-import { itemInputSchema } from '../../../shared/contracts';
-import type { Item } from '../../../shared/contracts';
+import { itemInputSchema } from "../../../shared/contracts";
+import type { Item } from "../../../shared/contracts";
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
 import { TextField } from "../../shared/ui/TextField/TextField";
@@ -48,8 +48,11 @@ export function ItemDialog({
       onClose={onClose}
       busy={busy}
       onSubmit={(event) => {
-        if (remove.isPending || photoBusy) {event.preventDefault();}
-        else {submit(event);}
+        if (remove.isPending || photoBusy) {
+          event.preventDefault();
+        } else {
+          submit(event);
+        }
       }}
     >
       <form.Field name="name">

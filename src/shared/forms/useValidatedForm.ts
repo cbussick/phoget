@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import { useForm, useStore } from '@tanstack/react-form';
-import type { DeepKeys } from '@tanstack/react-form';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import type { DeepKeys } from "@tanstack/react-form";
 import { ApiError } from "../api/request";
 import type { z } from "zod";
 
@@ -25,12 +25,11 @@ export function useValidatedForm<T extends Record<string, string>>(
           Object.hasOwn(defaultValues, error_.field)
         ) {
           // The server field was validated above against this form's own keys.
-          const fields = { [error_.field]: error_.message } as Partial<
-            Record<DeepKeys<T>, string>
-          >;
+          const fields = { [error_.field]: error_.message } as Partial<Record<DeepKeys<T>, string>>;
           formApi.setErrorMap({ onSubmit: { fields } });
-        } else
-          {setError(error_ instanceof Error ? error_ : new Error("Bitte versuche es erneut."));}
+        } else {
+          setError(error_ instanceof Error ? error_ : new Error("Bitte versuche es erneut."));
+        }
       }
     },
   });
@@ -40,9 +39,13 @@ export function useValidatedForm<T extends Record<string, string>>(
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const element = event.currentTarget;
-    if (form.state.isSubmitting) {return;}
+    if (form.state.isSubmitting) {
+      return;
+    }
     void form.handleSubmit().then(() => {
-      if (!form.state.isValid) {element.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();}
+      if (!form.state.isValid) {
+        element.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      }
     });
   }
   return { form, busy, error, submit };
@@ -56,7 +59,9 @@ type Field = {
   handleBlur: () => void;
 };
 export function fieldError(field: Pick<Field, "state" | "form">) {
-  if (!field.form.state.submissionAttempts) {return undefined;}
+  if (!field.form.state.submissionAttempts) {
+    return undefined;
+  }
   const error = field.state.meta.errors[0];
   return typeof error === "string"
     ? error

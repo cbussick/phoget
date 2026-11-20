@@ -1,5 +1,5 @@
-import express from 'express';
-import type { ErrorRequestHandler } from 'express';
+import express from "express";
+import type { ErrorRequestHandler } from "express";
 import helmet from "helmet";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -141,7 +141,9 @@ app.put(
   }),
   async (request, response) => {
     const id = parseInput(idSchema, request.params.id);
-    if (!Buffer.isBuffer(request.body)) {throw new HttpError(415, "Ungültiger Bildtyp.");}
+    if (!Buffer.isBuffer(request.body)) {
+      throw new HttpError(415, "Ungültiger Bildtyp.");
+    }
     const data = await processPhoto(request.body);
     await changeItemPhoto(id, data, userSchema.parse(response.locals.user).id);
     response.status(204).end();
@@ -181,8 +183,9 @@ app.put("/api/lists/:id", async (request, response) => {
 });
 app.put("/api/lists/:id/items/order/:completed", async (request, response) => {
   const completed = request.params.completed;
-  if (completed !== "open" && completed !== "completed")
-    {throw new HttpError(400, "Ungültiger Abschnitt.");}
+  if (completed !== "open" && completed !== "completed") {
+    throw new HttpError(400, "Ungültiger Abschnitt.");
+  }
   await reorderItems(
     parseInput(idSchema, request.params.id),
     completed === "completed",
@@ -291,7 +294,9 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
       .json({ error: "Dieser Benutzername ist bereits vergeben.", field: "username" });
     return;
   }
-  if (status === 500) {console.error("Request failed", { name: error.name, code: error.code });}
+  if (status === 500) {
+    console.error("Request failed", { name: error.name, code: error.code });
+  }
   response.status(status).json(
     errorSchema.parse({
       field: error instanceof HttpError ? error.field : undefined,

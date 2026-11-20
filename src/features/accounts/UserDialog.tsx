@@ -2,8 +2,13 @@ import { z } from "zod";
 import { useStore } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { accountAdministrationBlock } from "../../../shared/accountAdministration";
-import { displayNameSchema, usernameSchema, roleSchema, passwordSchema } from '../../../shared/accounts';
-import type { User } from '../../../shared/accounts';
+import {
+  displayNameSchema,
+  usernameSchema,
+  roleSchema,
+  passwordSchema,
+} from "../../../shared/accounts";
+import type { User } from "../../../shared/accounts";
 import { useValidatedForm, textFieldProps, fieldError } from "../../shared/forms/useValidatedForm";
 import { Callout } from "../../shared/ui/Callout/Callout";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
@@ -54,8 +59,9 @@ export function UserDialog({
           action.kind,
           role,
         )
-      )
-        {return;}
+      ) {
+        return;
+      }
       switch (action.kind) {
         case "create":
           await accountApi.create({ name, username, role, password });
@@ -99,8 +105,11 @@ export function UserDialog({
       spacious
       onClose={onClose}
       onSubmit={(event) => {
-        if (blocked) {event.preventDefault();}
-        else {submit(event);}
+        if (blocked) {
+          event.preventDefault();
+        } else {
+          submit(event);
+        }
       }}
     >
       {blocked && action.kind !== "edit" ? null : action.kind === "delete" ? (

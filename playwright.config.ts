@@ -2,14 +2,17 @@ import { defineConfig, devices } from "@playwright/test";
 if (
   !process.env.PHOGET_TEST_PORT ||
   !["chromium", "firefox", "webkit"].includes(process.env.PHOGET_BROWSER_PROJECT ?? "")
-)
-  {throw new Error("Run browser tests via node scripts/worktree.mjs run npm run test:e2e");}
+) {
+  throw new Error("Run browser tests via node scripts/worktree.mjs run npm run test:e2e");
+}
 const browsers = ["chromium", "firefox", "webkit"] as const;
 const environments = browsers.map((name) => {
   const key = `PHOGET_${name.toUpperCase()}_TEST`;
   const databaseUrl = process.env[`${key}_URL`];
   const browserPort = process.env[`${key}_PORT`];
-  if (!databaseUrl || !browserPort) {throw new Error(`Missing ${key} worktree runtime`);}
+  if (!databaseUrl || !browserPort) {
+    throw new Error(`Missing ${key} worktree runtime`);
+  }
   return { name, databaseUrl, port: browserPort, origin: `http://127.0.0.1:${browserPort}` };
 });
 export default defineConfig({

@@ -18,7 +18,8 @@ export async function verifyPassword(password: string, hash: string) {
     version !== "scrypt-v1" ||
     !/^[a-f0-9]{32}$/.test(salt ?? "") ||
     !/^[a-f0-9]{128}$/.test(key ?? "")
-  )
-    {return false;}
+  ) {
+    return false;
+  }
   return timingSafeEqual(await derive(password, salt), Buffer.from(key, "hex"));
 }

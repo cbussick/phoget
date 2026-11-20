@@ -53,11 +53,15 @@ test(
               const path = new URL(route.request().url()).pathname;
               if (path === "/api/session") {
                 await sessionHold?.promise;
-                if (sessionFail) {return route.abort("failed");}
+                if (sessionFail) {
+                  return route.abort("failed");
+                }
               }
               if (path === "/api/state") {
                 await stateHold?.promise;
-                if (stateFail) {return route.fulfill({ status: 503, json: { error: "Offline" } });}
+                if (stateFail) {
+                  return route.fulfill({ status: 503, json: { error: "Offline" } });
+                }
               }
               return route.fulfill({
                 json:
@@ -90,8 +94,9 @@ test(
             const navBox = await page.locator(".sidebar .nav-links").boundingBox();
             assert.ok(navBox);
             assert.equal(Math.round(navBox.y - markBox.y - markBox.height), 24);
-            if (name === "chromium")
-              {await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });}
+            if (name === "chromium") {
+              await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });
+            }
             await page.setViewportSize({ width: 320, height: 844 });
             await page.reload();
             await page.getByRole("heading", { name: "Alle Listen", exact: true }).waitFor();
@@ -106,8 +111,9 @@ test(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,
             );
-            if (name === "chromium")
-              {await page.screenshot({ path: ".runtime/branding-review/header-mobile.png" });}
+            if (name === "chromium") {
+              await page.screenshot({ path: ".runtime/branding-review/header-mobile.png" });
+            }
             signedIn = false;
             await page.reload();
             await page.getByRole("heading", { name: "Willkommen zu Hause", exact: true }).waitFor();

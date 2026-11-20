@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from 'react';
-import type { AnchorHTMLAttributes } from 'react';
+import { useSyncExternalStore } from "react";
+import type { AnchorHTMLAttributes } from "react";
 
 function subscribe(callback: () => void) {
   window.addEventListener("popstate", callback);
@@ -31,8 +31,9 @@ export function Link({
           event.shiftKey ||
           event.altKey ||
           props.target === "_blank"
-        )
-          {return;}
+        ) {
+          return;
+        }
         event.preventDefault();
         navigate(href);
       }}

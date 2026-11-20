@@ -61,8 +61,9 @@ test(
         origin = output.match(/Phoget dev origin: (http:\/\/127\.0\.0\.1:\d+)/)?.[1];
         if (origin) {
           try {
-            if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok)
-              {break;}
+            if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok) {
+              break;
+            }
           } catch {
             /* Wait for the API watcher to start. */
           }

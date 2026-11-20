@@ -154,7 +154,9 @@ test("administrator creates a user; user changes password and sees personal and 
     });
   } finally {
     await other.close();
-    if (userId) {await request.delete("/api/users/" + userId);}
+    if (userId) {
+      await request.delete("/api/users/" + userId);
+    }
   }
 });
 

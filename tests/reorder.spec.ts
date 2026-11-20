@@ -75,7 +75,9 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       await expect(row).toHaveCSS("opacity", "0.9");
       await expect(row).not.toHaveCSS("box-shadow", "none");
       await expect(link).toHaveCSS("cursor", "grabbing");
-      if (reducedMotion === "reduce") {await expect(row).toHaveCSS("transition-duration", "0s");}
+      if (reducedMotion === "reduce") {
+        await expect(row).toHaveCSS("transition-duration", "0s");
+      }
       await page.keyboard.press("Escape");
       await page.mouse.up();
       await expect(row).not.toHaveClass(/is-dragging/);
@@ -434,7 +436,9 @@ test("keyboard handle reorders lists and items without changing row actions", as
       "transition-duration",
       "0s",
     );
-    for (let i = 0; i < 5; i++) {await page.keyboard.press("ArrowUp");}
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press("ArrowUp");
+    }
     await page.keyboard.press("Space");
     await expect
       .poll(async () => {
@@ -454,7 +458,9 @@ test("keyboard handle reorders lists and items without changing row actions", as
     await page.goto(`/lists/${one.id}`);
     await page.getByRole("button", { name: "Sort B verschieben" }).focus();
     await page.keyboard.press("Space");
-    for (let i = 0; i < 4; i++) {await page.keyboard.press("ArrowUp");}
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press("ArrowUp");
+    }
     await page.keyboard.press("Space");
     await expect
       .poll(async () =>

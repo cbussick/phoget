@@ -479,8 +479,9 @@ test("settings persist and validate, with security headers on responses", async 
 });
 
 test("authentication protects data and mutations require the same-origin header", async () => {
-  for (const path of ["/state", "/users", "/members"])
-    {assert.equal((await send(path, "GET", undefined, { Cookie: "" })).status, 401);}
+  for (const path of ["/state", "/users", "/members"]) {
+    assert.equal((await send(path, "GET", undefined, { Cookie: "" })).status, 401);
+  }
   assert.equal(
     (await send("/session", "POST", { ...testCredentials, password: "wrong" }, { Cookie: "" }))
       .status,
@@ -970,11 +971,12 @@ test("Often Bought ranks completed names per list, excludes unfinished names and
         [200, 200],
       );
     }
-    if (name === "Coffee")
-      {assert.ok(
+    if (name === "Coffee") {
+      assert.ok(
         (await history()).oftenBought.some((entry) => entry.name === name),
         "done items remain eligible",
-      );}
+      );
+    }
     await send("/items/" + item.id, "DELETE");
   }
   assert.deepEqual((await history()).oftenBought, [

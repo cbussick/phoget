@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import type { Ref } from 'react';
+import { useEffect, useId, useRef, useState } from "react";
+import type { Ref } from "react";
 import { TextField } from "../TextField/TextField";
 import type { FieldPresentation } from "../FieldLayout/FieldLayout";
 import { Button } from "../Button/Button";
@@ -52,10 +52,11 @@ export function ComboBox({
     }
   }, [disabled, field.error]);
   useEffect(() => {
-    if (highlighted && expanded)
-      {document
+    if (highlighted && expanded) {
+      document
         .getElementById(popupId + "-" + encodeURIComponent(highlighted))
-        ?.scrollIntoView({ block: "nearest" });}
+        ?.scrollIntoView({ block: "nearest" });
+    }
   }, [highlighted, expanded, popupId]);
   function choose(next: string) {
     onValueChange(next);
@@ -77,8 +78,11 @@ export function ComboBox({
         inputRef={(element) => {
           input.current = element;
           anchor.current = element?.parentElement ?? null;
-          if (typeof inputRef === "function") {inputRef(element);}
-          else if (inputRef) {inputRef.current = element;}
+          if (typeof inputRef === "function") {
+            inputRef(element);
+          } else if (inputRef) {
+            inputRef.current = element;
+          }
         }}
         role="combobox"
         aria-autocomplete="list"
@@ -95,12 +99,16 @@ export function ComboBox({
         }}
         onFocus={() => setOpen(true)}
         onBlur={(event) => {
-          if (!popup.current?.contains(event.relatedTarget)) {setOpen(false);}
+          if (!popup.current?.contains(event.relatedTarget)) {
+            setOpen(false);
+          }
           onBlur?.();
         }}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing) {
-            if (event.key === "Enter") {event.preventDefault();}
+            if (event.key === "Enter") {
+              event.preventDefault();
+            }
             return;
           }
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -179,8 +187,9 @@ export function ComboBox({
             if (
               !popup.current?.contains(event.relatedTarget) &&
               event.relatedTarget !== input.current
-            )
-              {setOpen(false);}
+            ) {
+              setOpen(false);
+            }
           }}
         />
       ) : null}

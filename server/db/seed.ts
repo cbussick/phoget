@@ -107,16 +107,18 @@ const demoItems = [
 ];
 try {
   await database.transaction(async (transaction) => {
-    for (const [index, list] of demoLists.entries())
-      {await transaction
+    for (const [index, list] of demoLists.entries()) {
+      await transaction
         .insert(lists)
         .values({ ...list, createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString() })
-        .onConflictDoNothing();}
-    for (const [index, item] of demoItems.entries())
-      {await transaction
+        .onConflictDoNothing();
+    }
+    for (const [index, item] of demoItems.entries()) {
+      await transaction
         .insert(items)
         .values({ ...item, createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString() })
-        .onConflictDoNothing();}
+        .onConflictDoNothing();
+    }
   });
   console.log("Demo sample data added.");
 } finally {

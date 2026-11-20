@@ -1,12 +1,12 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { Button } from "../Button/Button";
-import { FieldLayout } from '../FieldLayout/FieldLayout';
-import type { FieldPresentation } from '../FieldLayout/FieldLayout';
+import { FieldLayout } from "../FieldLayout/FieldLayout";
+import type { FieldPresentation } from "../FieldLayout/FieldLayout";
 import { Icon } from "../Icon/Icon";
 import { useAnchoredPopup } from "../OptionList/useAnchoredPopup";
-import { OptionList } from '../OptionList/OptionList';
-import type { ListOption } from '../OptionList/OptionList';
+import { OptionList } from "../OptionList/OptionList";
+import type { ListOption } from "../OptionList/OptionList";
 import "./Select.css";
 
 export type SelectOption = ListOption;
@@ -48,7 +48,9 @@ export function Select({
   useAnchoredPopup(expanded, trigger, popup);
 
   function commit(next: string) {
-    if (value === undefined) {setLocalValue(next);}
+    if (value === undefined) {
+      setLocalValue(next);
+    }
     onValueChange?.(next);
   }
   function show(
@@ -63,7 +65,9 @@ export function Select({
     trigger.current?.focus();
   }
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.ctrlKey || event.metaKey) {return;}
+    if (event.ctrlKey || event.metaKey) {
+      return;
+    }
     const current = enabled.findIndex((option) => option.value === active);
     const typingSpace = event.key === " " && Date.now() - typeahead.current.time < typeaheadTimeout;
     if (event.key.length === 1 && !event.altKey && (event.key !== " " || typingSpace)) {
@@ -78,23 +82,27 @@ export function Select({
       const start = repeated ? Math.max(0, current + 1) : 0;
       const ordered = [...enabled.slice(start), ...enabled.slice(0, start)];
       const match = ordered.find((option) => option.label.toLowerCase().startsWith(search));
-      if (match) {show(match.value);}
+      if (match) {
+        show(match.value);
+      }
       return;
     }
     switch (event.key) {
       case "ArrowDown":
       case "ArrowUp": {
         event.preventDefault();
-        if (!expanded) {show();}
-        else
-          {setActive(
+        if (!expanded) {
+          show();
+        } else {
+          setActive(
             enabled[
               Math.max(
                 0,
                 Math.min(enabled.length - 1, current + (event.key === "ArrowDown" ? 1 : -1)),
               )
             ]?.value,
-          );}
+          );
+        }
         break;
       }
       case "Home":
@@ -105,8 +113,11 @@ export function Select({
       case "Enter":
       case " ":
         event.preventDefault();
-        if (!expanded) {show();}
-        else if (active) {choose(active);}
+        if (!expanded) {
+          show();
+        } else if (active) {
+          choose(active);
+        }
         break;
       case "Escape":
         if (expanded) {
@@ -116,35 +127,43 @@ export function Select({
         }
         break;
       case "Tab":
-        if (expanded && active) {commit(active);}
+        if (expanded && active) {
+          commit(active);
+        }
         setOpen(false);
         break;
     }
   }
 
   useEffect(() => {
-    if (disabled) {setOpen(false);}
+    if (disabled) {
+      setOpen(false);
+    }
   }, [disabled]);
 
   useEffect(() => {
-    if (!expanded) {return;}
+    if (!expanded) {
+      return;
+    }
     const dismiss = (event: PointerEvent) => {
       if (
         event.target instanceof Node &&
         !trigger.current?.contains(event.target) &&
         !popup.current?.contains(event.target)
-      )
-        {setOpen(false);}
+      ) {
+        setOpen(false);
+      }
     };
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [expanded]);
 
   useEffect(() => {
-    if (expanded && active)
-      {document
+    if (expanded && active) {
+      document
         .getElementById(popupId + "-" + encodeURIComponent(active))
-        ?.scrollIntoView({ block: "nearest" });}
+        ?.scrollIntoView({ block: "nearest" });
+    }
   }, [active, expanded, popupId]);
 
   useEffect(() => {

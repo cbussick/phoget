@@ -1,6 +1,6 @@
 import "./Dialog.css";
-import { useEffect, useId, useRef } from 'react';
-import type { ReactNode, FormEventHandler } from 'react';
+import { useEffect, useId, useRef } from "react";
+import type { ReactNode, FormEventHandler } from "react";
 import { Button } from "../Button/Button";
 export function Dialog({
   title,
@@ -32,7 +32,9 @@ export function Dialog({
       ?.focus();
     return () => {
       dialog.close();
-      if (previous instanceof HTMLElement && previous.isConnected) {previous.focus();}
+      if (previous instanceof HTMLElement && previous.isConnected) {
+        previous.focus();
+      }
     };
   }, [initialFocus]);
   return (
@@ -42,18 +44,23 @@ export function Dialog({
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        if (!busy) {onClose();}
+        if (!busy) {
+          onClose();
+        }
       }}
       onClick={(event) => {
-        if (event.target !== event.currentTarget || busy) {return;}
+        if (event.target !== event.currentTarget || busy) {
+          return;
+        }
         const box = event.currentTarget.getBoundingClientRect();
         if (
           event.clientX < box.left ||
           event.clientX > box.right ||
           event.clientY < box.top ||
           event.clientY > box.bottom
-        )
-          {onClose();}
+        ) {
+          onClose();
+        }
       }}
     >
       <form noValidate onSubmit={onSubmit}>

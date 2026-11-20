@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DEFAULT_LIST_COLOR } from "../../../../shared/colors";
 import { controlPreview } from "../../../../.storybook/controlPreview";
-import { ColorPicker } from './ColorPicker';
-import type { ColorPickerProps } from './ColorPicker';
+import { ColorPicker } from "./ColorPicker";
+import type { ColorPickerProps } from "./ColorPicker";
 import { Dialog } from "../Dialog/Dialog";
 
 function Example(args: ColorPickerProps) {

@@ -18,7 +18,9 @@ const readSvg = (name: string) => readFile(new URL(`${name}.svg`, directory), "u
 test("the proposed logo assets are self-contained, accessible vector artwork", async () => {
   const palette = new Set(["#8bcdf1", "#176f9f", "#18302b"]);
   const tokens = await readFile(new URL("../src/app/tokens.css", import.meta.url), "utf8");
-  for (const color of palette) {assert.ok(tokens.includes(color));}
+  for (const color of palette) {
+    assert.ok(tokens.includes(color));
+  }
 
   for (const name of svgNames) {
     const svg = await readSvg(name);
@@ -54,13 +56,16 @@ test("all lettering layouts preserve the original Little Tangle wordmark", async
   assert.ok(fullLettering);
 
   let prefix = 0;
-  while (source[prefix] === fullLettering[prefix] && prefix < source.length) {prefix++;}
+  while (source[prefix] === fullLettering[prefix] && prefix < source.length) {
+    prefix++;
+  }
   let suffix = 0;
   while (
     suffix < source.length - prefix &&
     source[source.length - 1 - suffix] === fullLettering[fullLettering.length - 1 - suffix]
-  )
-    {suffix++;}
+  ) {
+    suffix++;
+  }
   assert.ok((prefix + suffix) / source.length > 0.94, "Only the final t terminal may change");
 
   const sticks = wordmark.match(/<g id="chopsticks"[^>]*>[\s\S]*?<\/g>/)?.[0];
@@ -120,7 +125,8 @@ test("favicon and home-screen raster companions have their advertised dimensions
     assert.equal(png.subarray(1, 4).toString(), "PNG");
     assert.equal(png.readUInt32BE(16), size);
     assert.equal(png.readUInt32BE(20), size);
-    if (name.startsWith("app-icon"))
-      {assert.equal(png[25], 2, "Home-screen PNGs must be opaque RGB");}
+    if (name.startsWith("app-icon")) {
+      assert.equal(png[25], 2, "Home-screen PNGs must be opaque RGB");
+    }
   }
 });

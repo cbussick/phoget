@@ -1,7 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
-import { DndContext, KeyboardSensor, MouseSensor, TouchSensor, closestCenter, useSensor, useSensors, useDndContext } from '@dnd-kit/core';
-import type { DragEndEvent } from '@dnd-kit/core';
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  useDndContext,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -110,7 +119,9 @@ export function SortableRows<T extends { id: string }>({
     // dnd-kit intercepts the post-drag click at document capture, before React
     // sees it. Prevent the browser's native link navigation at window capture.
     const preventDragClick = (event: MouseEvent) => {
-      if (!suppressClick.current || !listRef.current?.contains(event.target as Node)) {return;}
+      if (!suppressClick.current || !listRef.current?.contains(event.target as Node)) {
+        return;
+      }
       event.preventDefault();
       suppressClick.current = false;
     };
@@ -121,7 +132,9 @@ export function SortableRows<T extends { id: string }>({
   const ids = rows.map((row) => row.id);
   const signature = ids.join("|");
   useEffect(() => {
-    if (!busy) {setOrder(ids);}
+    if (!busy) {
+      setOrder(ids);
+    }
   }, [signature, busy]); // Server order is authoritative after sync.
   useErrorSnackbar(error);
   const sensors = useSensors(
@@ -131,10 +144,16 @@ export function SortableRows<T extends { id: string }>({
   );
   const byId = new Map(rows.map((row) => [row.id, row]));
   const visible = order.filter((id) => byId.has(id));
-  for (const id of ids) {if (!visible.includes(id)) {visible.push(id);}}
+  for (const id of ids) {
+    if (!visible.includes(id)) {
+      visible.push(id);
+    }
+  }
   async function finish(event: DragEndEvent) {
     const { active, over } = event;
-    if (!over || active.id === over.id || busy) {return;}
+    if (!over || active.id === over.id || busy) {
+      return;
+    }
     const before = visible;
     const after = arrayMove(
       before,
@@ -170,8 +189,9 @@ export function SortableRows<T extends { id: string }>({
       collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       onDragStart={({ activatorEvent }) => {
-        if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart")
-          {suppressClick.current = true;}
+        if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart") {
+          suppressClick.current = true;
+        }
       }}
       onDragEnd={(event) => void finish(event)}
       accessibility={{

@@ -1,5 +1,5 @@
-import { useId, useRef } from 'react';
-import type { ReactNode } from 'react';
+import { useId, useRef } from "react";
+import type { ReactNode } from "react";
 import "./ToggleButtonGroup.css";
 
 type Option = { value: string; label: string; icon: ReactNode; disabled?: boolean };
@@ -37,10 +37,14 @@ export function ToggleButtonGroup({
         aria-labelledby={id + "-label"}
         aria-describedby={error ? id + "-error" : undefined}
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {onBlur?.();}
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            onBlur?.();
+          }
         }}
         onKeyDown={(event) => {
-          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {return;}
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+            return;
+          }
           event.preventDefault();
           const buttons = [...root.current!.querySelectorAll<HTMLButtonElement>("button:enabled")];
           const index = buttons.indexOf(document.activeElement as HTMLButtonElement);

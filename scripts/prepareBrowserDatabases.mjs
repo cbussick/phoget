@@ -4,10 +4,13 @@ for (const browser of ["chromium", "firefox", "webkit"]) {
   const key = `PHOGET_${browser.toUpperCase()}_TEST`;
   const databaseUrl = process.env[`${key}_URL`];
   const port = process.env[`${key}_PORT`];
-  if (!databaseUrl || !port) {throw new Error(`Run test:e2e through the worktree runtime (${key})`);}
+  if (!databaseUrl || !port) {
+    throw new Error(`Run test:e2e through the worktree runtime (${key})`);
+  }
   const database = new URL(databaseUrl).pathname.slice(1);
-  if (!new RegExp(`^phoget_test_[a-f0-9]{12}_${browser}$`).test(database))
-    {throw new Error(`Invalid ${browser} test database`);}
+  if (!new RegExp(`^phoget_test_[a-f0-9]{12}_${browser}$`).test(database)) {
+    throw new Error(`Invalid ${browser} test database`);
+  }
   const env = {
     ...process.env,
     DATABASE_URL: databaseUrl,
@@ -21,7 +24,11 @@ for (const browser of ["chromium", "firefox", "webkit"]) {
     ["--import", "tsx", "server/db/setup.ts"],
   ]) {
     const result = spawnSync(process.execPath, args, { env, stdio: "inherit" });
-    if (result.error) {throw result.error;}
-    if (result.status !== 0) {process.exit(result.status ?? 1);}
+    if (result.error) {
+      throw result.error;
+    }
+    if (result.status !== 0) {
+      process.exit(result.status ?? 1);
+    }
   }
 }

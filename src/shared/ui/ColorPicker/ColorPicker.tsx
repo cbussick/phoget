@@ -35,7 +35,9 @@ export function ColorPicker({ value, onValueChange, onBlur, disabled, error }: C
   const popup = useRef<HTMLDivElement>(null);
   useAnchoredPopup(open && !disabled, anchor, popup, false);
   useLayoutEffect(() => {
-    if (open && !disabled) {popup.current?.focus();}
+    if (open && !disabled) {
+      popup.current?.focus();
+    }
   }, [open, disabled]);
   const close = () => {
     setOpen(false);
@@ -112,7 +114,9 @@ export function ColorPicker({ value, onValueChange, onBlur, disabled, error }: C
           aria-labelledby={id + "-popup-title"}
           className="color-popover"
           onToggle={(event) => {
-            if (event.newState === "closed") {setOpen(false);}
+            if (event.newState === "closed") {
+              setOpen(false);
+            }
           }}
           onKeyDown={(event) => {
             if (event.key === "Escape") {

@@ -25,7 +25,9 @@ function contrast(a: string, b: string) {
 }
 
 function foreground(background: string) {
-  if (contrast(ink, background) >= 4.5) {return ink;}
+  if (contrast(ink, background) >= 4.5) {
+    return ink;
+  }
   return contrast(white, background) >= contrast(black, background) ? white : black;
 }
 

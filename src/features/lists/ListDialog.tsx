@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { z } from "zod";
 import { DEFAULT_LIST_COLOR } from "../../../shared/colors";
 import { ColorPicker } from "../../shared/ui/ColorPicker/ColorPicker";
-import { iconSchema, listInputSchema } from '../../../shared/contracts';
-import type { List } from '../../../shared/contracts';
+import { iconSchema, listInputSchema } from "../../../shared/contracts";
+import type { List } from "../../../shared/contracts";
 import { useValidatedForm, textFieldProps, fieldError } from "../../shared/forms/useValidatedForm";
 import { navigate } from "../../app/navigation";
 import { Dialog } from "../../shared/ui/Dialog/Dialog";
@@ -29,7 +29,9 @@ export function ListDialog({
     list ? listApi.update(list.id, value) : listApi.create(value),
   );
   const remove = useAction(async () => {
-    if (list) {await listApi.remove(list.id);}
+    if (list) {
+      await listApi.remove(list.id);
+    }
     onClose();
     navigate("/");
   });
@@ -60,10 +62,17 @@ export function ListDialog({
       busy={busy}
       onClose={onClose}
       onSubmit={(event) => {
-        if (busy || confirmDelete) {event.preventDefault();}
-        if (busy) {return;}
-        if (confirmDelete) {remove.mutate(undefined);}
-        else {submit(event);}
+        if (busy || confirmDelete) {
+          event.preventDefault();
+        }
+        if (busy) {
+          return;
+        }
+        if (confirmDelete) {
+          remove.mutate(undefined);
+        } else {
+          submit(event);
+        }
       }}
     >
       {confirmDelete ? (

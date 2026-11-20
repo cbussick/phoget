@@ -59,7 +59,9 @@ export function OptionList({
                   className="listbox-option"
                   disabled={option.disabled}
                   onPointerMove={() => {
-                    if (!option.disabled) {onActive(option.value);}
+                    if (!option.disabled) {
+                      onActive(option.value);
+                    }
                   }}
                   onClick={() => onChoose(option.value)}
                 >
@@ -92,7 +94,9 @@ export function OptionList({
               disabled={option.disabled}
               data-highlighted={option.value === active}
               onPointerMove={() => {
-                if (!option.disabled) {onActive(option.value);}
+                if (!option.disabled) {
+                  onActive(option.value);
+                }
               }}
               onClick={() => onChoose(option.value)}
             >

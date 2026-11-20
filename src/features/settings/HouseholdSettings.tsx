@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { membersSchema } from '../../../shared/accounts';
-import type { User } from '../../../shared/accounts';
+import { membersSchema } from "../../../shared/accounts";
+import type { User } from "../../../shared/accounts";
 import { UsersPage } from "../accounts/UsersPage";
 import { request } from "../../shared/api/request";
 import { Avatar } from "../../shared/ui/Avatar/Avatar";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
-import { settingsInputSchema } from '../../../shared/contracts';
-import type { Settings } from '../../../shared/contracts';
+import { settingsInputSchema } from "../../../shared/contracts";
+import type { Settings } from "../../../shared/contracts";
 import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
 import { TextField } from "../../shared/ui/TextField/TextField";
 import { Button } from "../../shared/ui/Button/Button";

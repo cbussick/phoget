@@ -57,7 +57,9 @@ test("camera and gallery pickers share upload handling without losing the item e
       buffer: Buffer.from("not a real image"),
     };
     for (const input of [camera, gallery]) {
-      if (input === gallery) {await page.getByRole("button", { name: "Foto wählen" }).click();}
+      if (input === gallery) {
+        await page.getByRole("button", { name: "Foto wählen" }).click();
+      }
       const response = page.waitForResponse(
         (result) =>
           result.url().endsWith(`/api/items/${item.id}/photo`) &&
@@ -117,7 +119,9 @@ test("existing photo appears above its actions only in the edit dialog", async (
     );
     // Store a real WebP fixture without depending on host ImageMagick in browser tests.
     const databaseUrl = process.env[`PHOGET_${browserName.toUpperCase()}_TEST_URL`];
-    if (!databaseUrl) {throw new Error("Missing browser test database");}
+    if (!databaseUrl) {
+      throw new Error("Missing browser test database");
+    }
     const pool = new Pool({ connectionString: databaseUrl });
     try {
       await pool.query('INSERT INTO item_photos ("itemId", data) VALUES ($1, $2)', [
