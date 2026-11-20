@@ -7,14 +7,15 @@ import type { Transaction } from './database.js';
 import { markListUpdated } from "./listActivity.js";
 import type { User } from "../../shared/accounts.js";
 import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.js";
+import type {
+  forgetItemSchema,
+  rememberedItemSchema,
+  listInputSchema,
+  listUpdateSchema} from "../../shared/contracts.js";
 import {
   itemSchema,
   itemHistorySchema,
-  forgetItemSchema,
-  rememberedItemSchema,
   listSchema,
-  listInputSchema,
-  listUpdateSchema,
   settingsSchema,
   stateSchema,
 } from "../../shared/contracts.js";

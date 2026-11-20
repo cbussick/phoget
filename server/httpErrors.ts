@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 export class HttpError extends Error {
   constructor(
     public status: number,

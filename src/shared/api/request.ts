@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { errorSchema } from "../../../shared/contracts";
 
 export class ApiError extends Error {

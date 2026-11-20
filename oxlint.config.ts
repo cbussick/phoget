@@ -71,7 +71,6 @@ export default defineConfig({
         "quality/no-conditional-empty-object-spread": "off",
         "react/set-state-in-effect": "off",
         "unicorn/catch-error-name": "off",
-        "typescript/consistent-type-imports": "off",
         "quality/no-unknown-returns": "off",
         "unicorn/consistent-function-scoping": "off",
         "no-console": "off",
