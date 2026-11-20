@@ -122,7 +122,7 @@ test("shared reorder persists, rejects stale orders, and keeps sections separate
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
   ]);
-  assert.deepEqual(concurrent.map((response) => response.status).sort(), [204, 409]);
+  assert.deepEqual(concurrent.map((response) => response.status).sort((a, b) => a - b), [204, 409]);
   assert.equal(
     (await send(path, "PUT", { before: [a.id, b.id], after: [b.id, a.id] })).status,
     204,

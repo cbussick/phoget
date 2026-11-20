@@ -60,8 +60,8 @@ setTimeout(() => {
     await rm(directory, { recursive: true, force: true });
   });
   const events = async () => {
-    const contents = await readFile(eventLog, "utf8").catch((error) => {
-      if (error.code === "ENOENT") {
+    const contents = await readFile(eventLog, "utf8").catch((error: unknown) => {
+      if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
         return "";
       }
       throw error;

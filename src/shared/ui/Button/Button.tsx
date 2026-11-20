@@ -30,7 +30,7 @@ export function Button({
         ...(accentColor && variant === "primary" ? accentColorStyle(accentColor) : {}),
         ...style,
       }}
-      type={type}
+      type={type === "submit" ? "submit" : type === "reset" ? "reset" : "button"}
       data-variant={variant}
       data-size={size}
       disabled={disabled || loading}
