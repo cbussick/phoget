@@ -69,7 +69,6 @@ export default defineConfig({
         "@nkzw/no-instanceof": "off",
         "react/button-has-type": "off",
         "quality/no-conditional-empty-object-spread": "off",
-        "unicorn/numeric-separators-style": "off",
         "react/set-state-in-effect": "off",
         "unicorn/catch-error-name": "off",
         "typescript/consistent-type-imports": "off",

@@ -15,10 +15,10 @@ test("activity labels use German time units without inventing legacy authors", (
     [2880, "Vor 2 Tagen"],
   ] as const) {
     assert.equal(
-      listActivityLabel(at, "Alex", now + minutes * 60000),
+      listActivityLabel(at, "Alex", now + minutes * 60_000),
       `${label} aktualisiert von Alex`,
     );
   }
   assert.equal(listActivityLabel(at, null, now), "Gerade aktualisiert");
-  assert.equal(listActivityLabel(at, "Alex", now - 60000), "Gerade aktualisiert von Alex");
+  assert.equal(listActivityLabel(at, "Alex", now - 60_000), "Gerade aktualisiert von Alex");
 });

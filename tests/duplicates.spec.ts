@@ -37,7 +37,7 @@ test("duplicate toast does not shift layout or focus; completed items restore si
     expect(await page.locator(".add-item-form").boundingBox()).toEqual(before);
     await expect(page.locator(".item-name")).toHaveCount(1);
     await page.mouse.move(0, 0);
-    await expect(toast).toBeHidden({ timeout: 10000 });
+    await expect(toast).toBeHidden({ timeout: 10_000 });
 
     await request.patch(`/api/items/${item.id}`, { data: { completed: true } });
     await page.reload();

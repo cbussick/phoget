@@ -76,7 +76,7 @@ export async function processPhoto(data: Buffer) {
         destination,
       ],
       {
-        timeout: 20000,
+        timeout: 20_000,
         maxBuffer: 4096,
         env: { ...process.env, MAGICK_TEMPORARY_PATH: directory },
       },

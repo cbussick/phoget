@@ -104,9 +104,9 @@ for (const viewport of [
     const activeItems = page.getByRole("tabpanel", { name: "Offen", exact: true });
     const firstItem = activeItems.locator("li").first();
     const firstItemBounds = await firstItem.boundingBox();
-    for (const position of [1, 12, 700, 100000, 12, 1, 0]) {
+    for (const position of [1, 12, 700, 100_000, 12, 1, 0]) {
       await activeItems.evaluate((element, y) => element.scrollTo(0, y), position);
-      if (position === 100000) {
+      if (position === 100_000) {
         await expect
           .poll(() => activeItems.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(700);

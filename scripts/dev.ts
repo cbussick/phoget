@@ -17,7 +17,7 @@ if (
   throw new Error("PHOGET_DEV_PUBLIC_ORIGIN must be an HTTPS origin without a path.");
 }
 for (const value of [port, apiPort]) {
-  if (!Number.isInteger(value) || value < 1 || value > 65535) {
+  if (!Number.isInteger(value) || value < 1 || value > 65_535) {
     throw new Error("Ports must be integers between 1 and 65535.");
   }
 }

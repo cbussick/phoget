@@ -205,7 +205,7 @@ test("Storybook controls update the real component preview", async ({ page }) =>
   await page.goto("/?path=/story/components-button--primary");
   const preview = page.frameLocator("#storybook-preview-iframe");
   await expect(preview.getByRole("button", { name: "Save changes" })).toBeVisible({
-    timeout: 15000,
+    timeout: 15_000,
   });
   await page
     .getByRole("row")

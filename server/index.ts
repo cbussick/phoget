@@ -11,7 +11,7 @@ function shutdown() {
   server.close(() => {
     void pool.end().then(() => process.exit(0));
   });
-  setTimeout(() => process.exit(1), 10000).unref();
+  setTimeout(() => process.exit(1), 10_000).unref();
 }
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);

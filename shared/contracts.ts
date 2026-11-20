@@ -85,7 +85,7 @@ export const oftenBoughtItemSchema = z.object({
 });
 export const rememberedItemSchema = z.object({
   name: nameSchema,
-  completionCount: z.number().int().nonnegative().max(2147483647),
+  completionCount: z.number().int().nonnegative().max(2_147_483_647),
 });
 export const forgetItemSchema = z
   .object({

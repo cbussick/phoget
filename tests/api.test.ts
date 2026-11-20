@@ -411,7 +411,7 @@ test("rejects malformed, unknown, oversized and hostile input without leaking de
     (await send("/lists/00000000-0000-4000-8000-000000000001/items", "POST", { name: "x" })).status,
     404,
   );
-  assert.equal((await send("/lists", "POST", { name: "x".repeat(20000) })).status, 413);
+  assert.equal((await send("/lists", "POST", { name: "x".repeat(20_000) })).status, 413);
   assert.equal(
     (await send("/lists", "POST", { name: "x" }, { Origin: "https://attacker.invalid" })).status,
     403,
@@ -647,7 +647,7 @@ test("expired sessions are rejected and login attempts are rate limited", async 
   const username = "rate-limit-test";
   await database
     .insert(loginAttempts)
-    .values({ key: tokenDigest(username), count: 30, expiresAt: new Date(Date.now() + 60000) });
+    .values({ key: tokenDigest(username), count: 30, expiresAt: new Date(Date.now() + 60_000) });
   try {
     assert.equal(
       (await send("/session", "POST", { username, password: "incorrect password" })).status,

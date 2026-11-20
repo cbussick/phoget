@@ -22,7 +22,7 @@ export async function request<T>(
   const response = await fetch("/api" + path, {
     ...options,
     headers,
-    signal: options.signal ?? AbortSignal.timeout(15000),
+    signal: options.signal ?? AbortSignal.timeout(15_000),
   });
   if (!response.ok) {
     const parsed = errorSchema.safeParse(await response.json().catch(() => null));

@@ -20,7 +20,7 @@ export default defineConfig({
   fullyParallel: false,
   // Each browser runs in its own Playwright process with one worker per database.
   workers: 1,
-  timeout: 60000,
+  timeout: 60_000,
   expect: { timeout: 8000 },
   use: {
     extraHTTPHeaders: { "X-Phoget-Request": "1" },

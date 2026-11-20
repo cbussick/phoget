@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: "tests",
   testMatch: "storybook.spec.ts",
   workers: 2,
-  timeout: 30000,
+  timeout: 30_000,
   use: {
     ...devices["Desktop Chrome"],
     baseURL: origin,
