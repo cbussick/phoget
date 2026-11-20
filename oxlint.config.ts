@@ -66,7 +66,6 @@ export default defineConfig({
         curly: "off",
         "typescript/no-non-null-assertion": "off",
         "react/immutability": "off",
-        "unicorn/prefer-number-properties": "off",
         "@nkzw/no-instanceof": "off",
         "react/button-has-type": "off",
         "quality/no-conditional-empty-object-spread": "off",

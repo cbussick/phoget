@@ -83,8 +83,8 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
       await page.locator(".color-picker > legend").evaluate((element) => {
         const label = element.parentElement!.querySelector("label")!;
         return (
-          parseFloat(getComputedStyle(element).fontSize) >
-          parseFloat(getComputedStyle(label).fontSize)
+          Number.parseFloat(getComputedStyle(element).fontSize) >
+          Number.parseFloat(getComputedStyle(label).fontSize)
         );
       }),
     ).toBe(true);

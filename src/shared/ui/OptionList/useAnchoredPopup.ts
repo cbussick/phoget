@@ -16,9 +16,9 @@ export function useAnchoredPopup(
 
     if (element.showPopover) element.showPopover();
     const style = getComputedStyle(element);
-    const gap = parseFloat(style.paddingTop);
+    const gap = Number.parseFloat(style.paddingTop);
     const gutter = gap * 2;
-    const maxHeight = parseFloat(style.maxHeight);
+    const maxHeight = Number.parseFloat(style.maxHeight);
     const position = () => {
       const rect = anchor.getBoundingClientRect();
       if (!constrainHeight) {
