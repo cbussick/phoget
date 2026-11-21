@@ -15,14 +15,14 @@ const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage();
   const scores = await page.evaluate(
-    async ({ reference, candidate }) => {
+    async ({ reference, candidate, width, height, alphaThreshold }) => {
       const raster = async (src, scale = 1) => {
         const image = new Image();
         image.src = src;
         await image.decode();
         const canvas = document.createElement("canvas");
-        canvas.width = 765 * scale;
-        canvas.height = 560 * scale;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
         const context = canvas.getContext("2d");
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         return context.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -42,7 +42,7 @@ try {
         [23, 111, 159],
       ];
       const classify = (pixels, index, colors) => {
-        if (pixels[index + 3] < 128) {
+        if (pixels[index + 3] < alphaThreshold) {
           return 0;
         }
         let best = Infinity;
@@ -119,6 +119,9 @@ try {
       return { outlines: result, contacts, pReturnSlant: rearLeft(97) - rearLeft(92), tFoldAlpha };
     },
     {
+      width: 765,
+      height: 560,
+      alphaThreshold: 128,
       reference: `data:image/png;base64,${reference.toString("base64")}`,
       candidate: `data:image/svg+xml;base64,${svg.toString("base64")}`,
     },

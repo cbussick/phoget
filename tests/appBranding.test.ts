@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { deferred } from "./deferred";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -15,13 +16,6 @@ const user = {
   mustChangePassword: false,
 };
 const state = { lists: [], items: [], settings: { id: 1, householdName: "Test" } };
-function deferred() {
-  let release = () => {};
-  const promise = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  return { promise, release };
-}
 
 test(
   "branding and startup loading work across browsers, motion preferences and failures",

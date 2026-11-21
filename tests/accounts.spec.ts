@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { deferred } from "./deferred";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { testCredentials } from "./testCredentials";
@@ -188,10 +189,7 @@ test("login errors preserve username, password visibility is accessible, logout 
     testCredentials.username,
   );
   await page.getByLabel("Passwort", { exact: true }).fill(testCredentials.password);
-  let release = () => {};
-  const hold = new Promise<void>((resolve) => {
-    release = resolve;
-  });
+  const { promise: hold, release } = deferred();
   let submissions = 0;
   await page.route("**/api/session", async (route) => {
     if (route.request().method() === "POST") {

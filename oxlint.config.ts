@@ -59,12 +59,5 @@ export default defineConfig({
         ],
       },
     },
-    {
-      files: ["**/*"],
-      rules: {
-        // Temporary migration baseline; remove each entry with its fixes.
-        "unicorn/consistent-function-scoping": "off",
-      },
-    },
   ],
 });

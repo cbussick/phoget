@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+const lettering = (svg: string) => svg.match(/<path id="noodle-lettering"[^>]* d="([^"]+)"/)?.[1];
+
 const directory = new URL("../public/branding/", import.meta.url);
 const svgNames = [
   "logo-full",
@@ -48,7 +50,6 @@ test("all lettering layouts preserve the original Little Tangle wordmark", async
   const wordmark = await readSvg("logo-wordmark");
   const horizontal = await readSvg("logo-horizontal");
   const full = await readSvg("logo-full");
-  const lettering = (svg: string) => svg.match(/<path id="noodle-lettering"[^>]* d="([^"]+)"/)?.[1];
   const source = lettering(wordmark);
   assert.ok(source);
   assert.equal(lettering(horizontal), source, "The header must not re-letter the original");

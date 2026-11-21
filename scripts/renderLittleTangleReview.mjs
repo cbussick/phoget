@@ -71,19 +71,20 @@ await mkdir(output, { recursive: true });
 // Render vectors through the browser compositor at the final pixel density.
 // Do not draw an SVG into a canvas and then shrink that raster: default canvas
 // filtering undersamples the antialiasing on shallow diagonal chopstick edges.
+const scoped = (svg, prefix, viewBox = "0 0 765 560") =>
+  svg
+    .replace('viewBox="0 0 765 560"', `viewBox="${viewBox}"`)
+    .replaceAll(/id="([^"]+)"/g, (_, id) => `id="${prefix}-${id}"`)
+    .replaceAll(/url\(#([^)]+)\)/g, (_, id) => `url(#${prefix}-${id})`)
+    .replace(
+      'aria-labelledby="title description"',
+      `aria-labelledby="${prefix}-title ${prefix}-description"`,
+    );
+
 const browser = await chromium.launch({ headless: true });
 try {
   const context = await browser.newContext({ deviceScaleFactor: 2 });
   const page = await context.newPage();
-  const scoped = (svg, prefix, viewBox = "0 0 765 560") =>
-    svg
-      .replace('viewBox="0 0 765 560"', `viewBox="${viewBox}"`)
-      .replaceAll(/id="([^"]+)"/g, (_, id) => `id="${prefix}-${id}"`)
-      .replaceAll(/url\(#([^)]+)\)/g, (_, id) => `url(#${prefix}-${id})`)
-      .replace(
-        'aria-labelledby="title description"',
-        `aria-labelledby="${prefix}-title ${prefix}-description"`,
-      );
   const capture = async (name, html, width, height, extraCss = "") => {
     await page.setViewportSize({ width, height });
     await page.setContent(`<style>
