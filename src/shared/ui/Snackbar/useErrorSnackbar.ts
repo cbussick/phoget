@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { z } from "zod";
+import { ZodError } from "zod";
 import { useSnackbar } from "./Snackbar";
 
 export function useErrorSnackbar(error: Error | string | null) {
@@ -12,7 +12,7 @@ export function useErrorSnackbar(error: Error | string | null) {
     const message =
       typeof error === "string"
         ? error
-        : error instanceof z.ZodError
+        : error instanceof ZodError
           ? error.issues[0]?.message
           : error.message;
     notify(message || "Bitte versuche es erneut.", "error");

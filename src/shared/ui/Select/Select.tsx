@@ -146,9 +146,7 @@ export function Select({
     }
     const dismiss = (event: PointerEvent) => {
       if (
-        event.target instanceof Node &&
-        !trigger.current?.contains(event.target) &&
-        !popup.current?.contains(event.target)
+        !event.composedPath().some((target) => target === trigger.current || target === popup.current)
       ) {
         setOpen(false);
       }

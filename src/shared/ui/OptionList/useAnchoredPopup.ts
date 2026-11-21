@@ -54,7 +54,7 @@ export function useAnchoredPopup(
         "px";
     };
     const viewportChanged = (event: Event) => {
-      if (event.target instanceof Node && element.contains(event.target)) {
+      if (event.composedPath().includes(element)) {
         return;
       }
       position();

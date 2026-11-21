@@ -36,7 +36,8 @@ for (const headers of [
 test("request supplies defaults and validates empty responses", async (t) => {
   t.mock.method(globalThis, "fetch", async (_url: string, options: RequestInit) => {
     assert.equal(new Headers(options.headers).get("Content-Type"), "application/json");
-    assert.ok(options.signal instanceof AbortSignal);
+    assert.ok(options.signal);
+    assert.ok(Object.prototype.isPrototypeOf.call(AbortSignal.prototype, options.signal));
     return new Response(null, { status: 204 });
   });
   assert.equal(await request("/example", z.undefined()), undefined);

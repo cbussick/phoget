@@ -1,5 +1,5 @@
 import { logger } from "../../shared/logging.js";
-import { z } from "zod";
+import { ZodError } from "zod";
 import { HttpError } from "../httpErrors.js";
 import { createInterface } from "node:readline/promises";
 import { createAccount } from "./accounts.js";
@@ -74,7 +74,7 @@ try {
   logger.log(`Administrator ${user.username} created.`);
 } catch (error) {
   logger.error(
-    error instanceof z.ZodError
+    error instanceof ZodError
       ? error.issues[0]?.message
       : error instanceof HttpError
         ? error.message

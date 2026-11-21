@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
 import { TextField } from "../TextField/TextField";
 import type { FieldPresentation } from "../FieldLayout/FieldLayout";
@@ -36,6 +36,11 @@ export function ComboBox({
   const id = field.id ?? generatedId;
   const popupId = id + "-options";
   const input = useRef<HTMLInputElement>(null);
+  useImperativeHandle(inputRef, () => {
+    const element = input.current;
+    if (!element) { throw new Error("ComboBox input is not mounted"); }
+    return element;
+  });
   const popup = useRef<HTMLDivElement>(null);
   const anchor = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
@@ -78,11 +83,6 @@ export function ComboBox({
         inputRef={(element) => {
           input.current = element;
           anchor.current = element?.parentElement ?? null;
-          if (typeof inputRef === "function") {
-            inputRef(element);
-          } else if (inputRef) {
-            inputRef.current = element;
-          }
         }}
         role="combobox"
         aria-autocomplete="list"

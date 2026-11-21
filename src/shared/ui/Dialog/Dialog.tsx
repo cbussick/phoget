@@ -1,4 +1,5 @@
 import "./Dialog.css";
+import { isHtmlElement } from "../dom";
 import { useEffect, useId, useRef } from "react";
 import type { ReactNode, FormEventHandler } from "react";
 import { Button } from "../Button/Button";
@@ -24,7 +25,8 @@ export function Dialog({
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useEffect(() => {
-    const dialog = ref.current!;
+    const dialog = ref.current;
+    if (!dialog) { return; }
     const previous = document.activeElement;
     dialog.showModal();
     dialog
@@ -32,7 +34,7 @@ export function Dialog({
       ?.focus();
     return () => {
       dialog.close();
-      if (previous instanceof HTMLElement && previous.isConnected) {
+      if (isHtmlElement(previous) && previous.isConnected) {
         previous.focus();
       }
     };

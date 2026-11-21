@@ -65,7 +65,6 @@ export default defineConfig({
         // Temporary migration baseline; remove each entry with its fixes.
         "typescript/no-non-null-assertion": "off",
         "react/immutability": "off",
-        "@nkzw/no-instanceof": "off",
         "quality/no-conditional-empty-object-spread": "off",
         "react/set-state-in-effect": "off",
         "unicorn/consistent-function-scoping": "off",
