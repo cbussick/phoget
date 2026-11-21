@@ -20,11 +20,12 @@ export function App() {
   const session = useSession();
   const client = useQueryClient();
   const user = session.data?.user;
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       client.removeQueries({ predicate: (query) => query.queryKey[0] !== "session" });
     }
-  }, [user?.id, client]);
+  }, [userId, client]);
   if (session.isPending) {
     return <LoadingScreen />;
   }

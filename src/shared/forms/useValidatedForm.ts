@@ -13,7 +13,7 @@ function isFieldKey<T extends Record<string, string>>(values: T, key: string): k
 export function useValidatedForm<T extends Record<string, string>>(
   defaultValues: T,
   schema: z.ZodType<unknown, T>,
-  save: (value: T) => Promise<void>,
+  save: (value: T, controls: { reset: () => void }) => Promise<void>,
 ) {
   const [error, setError] = useState<Error | null>(null);
   const form = useForm({
@@ -22,7 +22,7 @@ export function useValidatedForm<T extends Record<string, string>>(
     onSubmit: async ({ value, formApi }) => {
       setError(null);
       try {
-        await save(value);
+        await save(value, { reset: () => formApi.reset() });
       } catch (error_) {
         if (
           error_ instanceof ApiError &&

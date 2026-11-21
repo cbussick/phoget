@@ -51,9 +51,9 @@ export function AddItemForm({
     busy: formBusy,
     error,
     submit,
-  } = useValidatedForm({ name: "" }, itemInputSchema.pick({ name: true }), async ({ name }) => {
+  } = useValidatedForm({ name: "" }, itemInputSchema.pick({ name: true }), async ({ name }, { reset }) => {
     await add.mutateAsync(name);
-    form.reset();
+    reset();
     if (restoreInputFocus.current) {
       requestAnimationFrame(() => {
         // Do not steal focus if the user moved elsewhere while saving.
