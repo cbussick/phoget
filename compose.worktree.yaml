@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: phoget
+      POSTGRES_PASSWORD: ${PHOGET_WORKTREE_DB_PASSWORD:?Use scripts/worktree.mjs}
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1::5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "phoget", "-d", "postgres"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  data:

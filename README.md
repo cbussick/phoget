@@ -9,24 +9,23 @@ Requires Node 24+, npm 11, and Docker Compose.
 
 ```sh
 npm ci
-cp .env.example .env
-docker compose up -d db
-npm run db:setup
-npm run account:setup
-npm run dev
+node scripts/worktree.mjs bootstrap
+node scripts/worktree.mjs run npm run db:setup
+node scripts/worktree.mjs run npm run account:setup
+node scripts/worktree.mjs run npm run dev
 ```
 
-Open the printed URL (starting at `http://127.0.0.1:5173`, with automatic port fallback).
-Account setup creates the first administrator. Optional demo data: `npm run db:seed`.
+Open the printed development URL. Account setup creates the first administrator.
+Optional demo data: `node scripts/worktree.mjs run npm run db:seed`.
 
-Database data stays in a Docker volume. Keep `.env` private; example credentials are for local development only.
+Each worktree gets its own PostgreSQL container and data volume. Keep the generated `.env` private.
 
 ## Development
 
 ```sh
-npm run storybook     # Component workshop on port 6006
-npm run check         # Full checks; requires test setup below
-npm run build         # Production build
+node scripts/worktree.mjs run npm run storybook  # Component workshop
+node scripts/worktree.mjs run npm run check      # Full checks; requires test setup below
+npm run build                                     # Production build
 ```
 
 - [Development and test setup](docs/development.md)
