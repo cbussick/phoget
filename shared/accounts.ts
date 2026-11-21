@@ -40,4 +40,3 @@ export const changePasswordSchema = z
   .strict();
 export const resetPasswordSchema = z.object({ password: passwordSchema }).strict();
 export type User = z.infer<typeof userSchema>;
-export type Member = z.infer<typeof memberSchema>;

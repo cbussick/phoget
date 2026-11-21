@@ -6,6 +6,7 @@
   "scripts": {
     "knip": "knip",
     "knip:production": "knip --production",
+    "test:knip": "npm run knip && npm run knip:production",
     "dev": "tsx --env-file=.env scripts/dev.ts",
     "dev:server": "tsx watch --env-file=.env server/index.ts",
     "dev:client": "vite --host 127.0.0.1",

@@ -11,6 +11,23 @@ The initial session/household requests show `LoadingScreen`, inspired by Shelf's
 - These checks use the actual Vite app with intercepted API responses in Chromium, Firefox and WebKit. They cover desktop/mobile/login branding, both startup phases, reduced motion, accessible loading status, cached refresh, connection failures and retries; they do not modify a database.
 - Screenshots are regenerated under `.runtime/branding-review/` for desktop/mobile headers and loading screens.
 
+## Manual branding tools and unused-code validation
+
+Run manual tools through `node scripts/worktree.mjs run node scripts/<tool>.mjs`:
+
+- `renderLittleTangleReview`: regenerates navigation/favicon assets and historical
+  comparison images under `public/branding/little-tangle/review/`; intentionally
+  writes assets, so inspect the diff before committing.
+- `renderAppIcons`: regenerates opaque home-screen icons from the selected SVG.
+- `verifyBrandingSvg`: checks lettering continuity, contacts and bowl placement.
+- `verifyLittleTangleReference`: checks silhouette overlap against the reference
+  fixture; accepts an optional candidate SVG path.
+
+These are explicit development roots in Knip, not production entry points.
+`node scripts/worktree.mjs run npm run test:knip` checks both normal and production
+reachability. Storybook-only Radio lives in `.storybook/components/`, with its
+existing stories under `src/shared/ui/Radio/`; it is not application runtime code.
+
 ## Type-aware linting
 
 `npm run lint` runs `oxlint . --threads=2` with the `tsrs` backend, followed by

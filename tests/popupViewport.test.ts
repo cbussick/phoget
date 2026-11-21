@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createServer } from "vite";
-import { chromium, firefox, webkit } from "playwright";
+import { chromium, firefox, webkit } from "@playwright/test";
 
 // Exercise the production positioning hook. Desktop engines cannot open an iOS
 // keyboard, so model its visual-viewport resize/pan without resizing the layout.

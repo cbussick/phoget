@@ -2,7 +2,7 @@ import { logger } from "../shared/logging.ts";
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 const root = new URL("../", import.meta.url);
 const artwork = "public/branding/little-tangle/logo-full.svg";

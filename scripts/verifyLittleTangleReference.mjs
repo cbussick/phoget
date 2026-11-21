@@ -2,7 +2,7 @@ import { logger } from "../shared/logging.ts";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 const candidate = process.argv[2]
   ? resolve(process.argv[2])

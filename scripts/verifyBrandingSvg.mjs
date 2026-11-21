@@ -1,7 +1,7 @@
 import { logger } from "../shared/logging.ts";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 // Coordinates belong to the original Little Tangle lettering, not the discarded redraw.
 const sky = [139, 205, 241];
