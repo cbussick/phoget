@@ -124,14 +124,13 @@ const icons = {
       <rect x={"4"} y={"2"} width={"16"} height={"20"} rx={"2"} />
     </>
   ),
-  lists: (
+  listTodo: (
     <>
-      <path d={"M3 5h.01"} />
-      <path d={"M3 12h.01"} />
-      <path d={"M3 19h.01"} />
-      <path d={"M8 5h13"} />
-      <path d={"M8 12h13"} />
-      <path d={"M8 19h13"} />
+      <path d={"M13 5h8"} />
+      <path d={"M13 12h8"} />
+      <path d={"M13 19h8"} />
+      <path d={"m3 17 2 2 4-4"} />
+      <rect x={"3"} y={"4"} width={"6"} height={"6"} rx={"1"} />
     </>
   ),
   settings: (
