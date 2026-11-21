@@ -1,4 +1,4 @@
-import { useId, useRef } from "react";
+import { useId } from "react";
 import type { ReactNode } from "react";
 import "./ToggleButtonGroup.css";
 
@@ -21,7 +21,6 @@ export function ToggleButtonGroup({
   error?: string;
 }) {
   const id = useId();
-  const root = useRef<HTMLDivElement>(null);
   const tabStop =
     options.find((option) => option.value === value && !option.disabled) ??
     options.find((option) => !option.disabled);
@@ -31,7 +30,6 @@ export function ToggleButtonGroup({
         {label}
       </span>
       <div
-        ref={root}
         className="toggle-group"
         role="group"
         aria-labelledby={id + "-label"}
@@ -46,8 +44,8 @@ export function ToggleButtonGroup({
             return;
           }
           event.preventDefault();
-          const buttons = [...root.current!.querySelectorAll<HTMLButtonElement>("button:enabled")];
-          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:enabled")];
+          const index = buttons.findIndex((button) => button.matches(":focus"));
           const next =
             event.key === "Home"
               ? 0

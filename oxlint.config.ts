@@ -63,7 +63,6 @@ export default defineConfig({
       files: ["**/*"],
       rules: {
         // Temporary migration baseline; remove each entry with its fixes.
-        "typescript/no-non-null-assertion": "off",
         "react/immutability": "off",
         "quality/no-conditional-empty-object-spread": "off",
         "react/set-state-in-effect": "off",

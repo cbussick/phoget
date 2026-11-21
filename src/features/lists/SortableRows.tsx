@@ -143,6 +143,10 @@ export function SortableRows<T extends { id: string }, Result>({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const byId = new Map(rows.map((row) => [row.id, row]));
+  function labelFor(id: string) {
+    const row = byId.get(id);
+    return row ? getLabel(row) : "Eintrag";
+  }
   const visible = order.filter((id) => byId.has(id));
   for (const id of ids) {
     if (!visible.includes(id)) {
@@ -200,12 +204,12 @@ export function SortableRows<T extends { id: string }, Result>({
             "Leertaste zum Aufnehmen, Pfeiltasten zum Verschieben, Leertaste zum Ablegen, Escape zum Abbrechen.",
         },
         announcements: {
-          onDragStart: ({ active }) => `${getLabel(byId.get(String(active.id))!)} aufgenommen.`,
+          onDragStart: ({ active }) => `${labelFor(String(active.id))} aufgenommen.`,
           onDragOver: ({ over }) =>
             over ? `Über Position ${visible.indexOf(String(over.id)) + 1}.` : "",
           onDragEnd: ({ active, over }) =>
             over
-              ? `${getLabel(byId.get(String(active.id))!)} an Position ${visible.indexOf(String(over.id)) + 1} abgelegt.`
+              ? `${labelFor(String(active.id))} an Position ${visible.indexOf(String(over.id)) + 1} abgelegt.`
               : "Verschieben abgebrochen.",
           onDragCancel: () => "Verschieben abgebrochen.",
         },
@@ -222,7 +226,10 @@ export function SortableRows<T extends { id: string }, Result>({
             suppressClick.current = false;
           }}
         >
-          {visible.map((id) => renderRow(byId.get(id)!))}
+          {visible.map((id) => {
+            const row = byId.get(id);
+            return row ? renderRow(row) : null;
+          })}
         </ul>
       </SortableContext>
     </DndContext>
