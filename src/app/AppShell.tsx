@@ -44,11 +44,6 @@ export function AppShell({
         {allLists ? "Zu den Listen springen" : "Zum Hauptinhalt springen"}
       </a>
       <div className="app-shell">
-        <header className="mobile-brand-header">
-          <Link className="brand" href="/" aria-label="phoget-Startseite">
-            <BrandLogo variant="wordmark" />
-          </Link>
-        </header>
         <aside className="sidebar" aria-label="App-Navigation">
           <Link className="brand" href="/" aria-label="phoget-Startseite">
             <BrandLogo variant="wordmark" />
