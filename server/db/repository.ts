@@ -1,26 +1,14 @@
-import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
-import { createUndoStore } from "../undoStore.js";
 import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
 import { database } from "./database.js";
 import type { Transaction } from "./database.js";
 import { markListUpdated } from "./listActivity.js";
 import type { User } from "../../shared/accounts.js";
-import { items, itemPhotos, lists, settings, itemNames, users } from "./schema.js";
-import type {
-  forgetItemSchema,
-  rememberedItemSchema,
-  listInputSchema,
-  listUpdateSchema,
-} from "../../shared/contracts.js";
-import {
-  itemSchema,
-  itemHistorySchema,
-  listSchema,
-  settingsSchema,
-  stateSchema,
-} from "../../shared/contracts.js";
+import { items, itemPhotos, lists, settings, users } from "./schema.js";
+import type { listInputSchema, listUpdateSchema } from "../../shared/contracts.js";
+import { itemSchema, listSchema, settingsSchema, stateSchema } from "../../shared/contracts.js";
 
 const databaseTimeSchema = z
   .string()
@@ -190,7 +178,7 @@ export async function createItem(
     await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
     await requireList(transaction, listId);
     // The list lock also serializes edits, toggles and reorders. Match with the
-    // same JavaScript case folding as item history; prefer an open legacy copy.
+    // case-insensitive name; prefer an open copy if legacy duplicates exist.
     const candidates = await transaction
       .select()
       .from(items)
@@ -231,12 +219,7 @@ export async function createItem(
         position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
       })
       .returning();
-    const parsed = databaseItemSchema.parse(row);
-    await transaction
-      .insert(itemNames)
-      .values({ listId, key: parsed.name.toLowerCase(), name: parsed.name })
-      .onConflictDoNothing();
-    return { ...parsed, outcome: "created" as const };
+    return { ...databaseItemSchema.parse(row), outcome: "created" as const };
   });
 }
 type ItemChanges = { name?: string; note?: string; completed?: boolean };
@@ -256,7 +239,6 @@ export async function changeItem(id: string, input: ItemChanges | null, actor: A
     if (!previous) {
       throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     }
-    const original = databaseItemSchema.parse(previous);
     const changes: PositionedItemChanges = { ...input };
     if (input?.completed !== undefined && input.completed !== previous.completed) {
       changes.position = sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${previous.listId} AND completed = ${input.completed})`;
@@ -269,20 +251,6 @@ export async function changeItem(id: string, input: ItemChanges | null, actor: A
       throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     }
     const parsed = databaseItemSchema.parse(row);
-    for (const name of new Set([original.name, parsed.name])) {
-      await transaction
-        .insert(itemNames)
-        .values({ listId: parsed.listId, key: name.toLowerCase(), name })
-        .onConflictDoNothing();
-    }
-    if (input !== null && !original.completed && parsed.completed) {
-      await transaction
-        .update(itemNames)
-        .set({ completionCount: sql`${itemNames.completionCount} + 1` })
-        .where(
-          and(eq(itemNames.listId, parsed.listId), eq(itemNames.key, parsed.name.toLowerCase())),
-        );
-    }
     await markListUpdated(transaction, parsed.listId, actor.id);
     return parsed;
   });
@@ -294,157 +262,4 @@ export async function updateSettings(input: z.input<typeof settingsSchema>) {
     .onConflictDoUpdate({ target: settings.id, set: input })
     .returning();
   return settingsSchema.parse(row);
-}
-
-type ForgottenItem = {
-  items: Array<typeof items.$inferSelect>;
-  photos: Array<typeof itemPhotos.$inferSelect>;
-  remembered: z.infer<typeof rememberedItemSchema> | null;
-};
-const forgottenItems = createUndoStore<ForgottenItem>();
-const undoScope = (listId: string, actor: Actor) => `${listId}:${actor.id}`;
-
-// Share the list lock with add/edit/complete and photo updates so the snapshot is consistent.
-export async function forgetItem(
-  listId: string,
-  input: z.infer<typeof forgetItemSchema>,
-  actor: Actor,
-) {
-  let undoToken: string | null = null;
-  try {
-    return await database.transaction(async (transaction) => {
-      await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-      await requireList(transaction, listId);
-      const key = input.name.toLowerCase();
-      const matching = (
-        await transaction.select().from(items).where(eq(items.listId, listId))
-      ).filter((item) => item.name.toLowerCase() === key);
-      if (matching.some((item) => !item.completed)) {
-        throw new HttpError(409, "Dieser Eintrag steht inzwischen auf der offenen Liste.");
-      }
-      const actualIds = matching.map((item) => item.id).sort();
-      if (JSON.stringify(actualIds) !== JSON.stringify([...input.completedIds].sort())) {
-        throw new HttpError(
-          409,
-          "Die erledigten Einträge haben sich geändert. Bitte prüfe den Vorschlag erneut.",
-        );
-      }
-      const photos = actualIds.length
-        ? await transaction.select().from(itemPhotos).where(inArray(itemPhotos.itemId, actualIds))
-        : [];
-      const [remembered] = await transaction
-        .delete(itemNames)
-        .where(and(eq(itemNames.listId, listId), eq(itemNames.key, key)))
-        .returning({ name: itemNames.name, completionCount: itemNames.completionCount });
-      if (matching.length || remembered) {
-        const snapshot = { items: matching, photos, remembered: remembered ?? null };
-        const bytes =
-          Buffer.byteLength(JSON.stringify({ items: matching, remembered })) +
-          photos.reduce((total, photo) => total + photo.data.length, 0) +
-          256;
-        undoToken = forgottenItems.remember(undoScope(listId, actor), snapshot, bytes);
-        if (!undoToken) {
-          throw new HttpError(
-            503,
-            "Rückgängig ist gerade nicht verfügbar. Der Eintrag wurde nicht entfernt. Bitte versuche es gleich erneut.",
-          );
-        }
-      }
-      if (actualIds.length) {
-        await transaction.delete(items).where(inArray(items.id, actualIds));
-        await markListUpdated(transaction, listId, actor.id);
-      }
-      return { remembered: remembered ?? null, removedCompleted: matching.length > 0, undoToken };
-    });
-  } catch (error) {
-    if (undoToken) {
-      forgottenItems.discard(undoToken);
-    }
-    throw error;
-  }
-}
-
-export async function undoForgetItem(listId: string, token: string, actor: Actor) {
-  await database.transaction(async (transaction) => {
-    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    const snapshot = forgottenItems.get(undoScope(listId, actor), token);
-    if (!snapshot) {
-      throw new HttpError(410, "Rückgängig ist nicht mehr verfügbar.");
-    }
-    await requireList(transaction, listId);
-    if (snapshot.items.length) {
-      const current = await transaction.select().from(items).where(eq(items.listId, listId));
-      if (
-        current.some((item) =>
-          snapshot.items.some((saved) => saved.name.toLowerCase() === item.name.toLowerCase()),
-        )
-      ) {
-        throw new HttpError(
-          409,
-          "Ein Eintrag mit diesem Namen wurde inzwischen hinzugefügt. Es wurde nichts überschrieben.",
-        );
-      }
-      await transaction.insert(items).values(snapshot.items);
-      if (snapshot.photos.length) {
-        await transaction.insert(itemPhotos).values(snapshot.photos);
-      }
-      await markListUpdated(transaction, listId, actor.id);
-    }
-    if (snapshot.remembered) {
-      await transaction
-        .insert(itemNames)
-        .values({ ...snapshot.remembered, listId, key: snapshot.remembered.name.toLowerCase() })
-        .onConflictDoNothing();
-    }
-  });
-  // Consume only after a successful commit; a transient failure can be retried.
-  forgottenItems.discard(token);
-}
-
-// Compatibility with older clients' history-only Undo. Never overwrite newly learned history.
-export async function restoreRememberedItem(
-  listId: string,
-  input: z.infer<typeof rememberedItemSchema>,
-) {
-  await database.transaction(async (transaction) => {
-    await transaction.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
-    await requireList(transaction, listId);
-    await transaction
-      .insert(itemNames)
-      .values({ ...input, listId, key: input.name.toLowerCase() })
-      .onConflictDoNothing();
-  });
-}
-
-export async function readItemHistory(listId: string) {
-  return database.transaction(
-    async (transaction) => {
-      await requireList(transaction, listId);
-      const history = await transaction
-        .select({ name: itemNames.name, completionCount: itemNames.completionCount })
-        .from(itemNames)
-        .where(eq(itemNames.listId, listId));
-      const present = await transaction
-        .select({ name: items.name, completed: items.completed })
-        .from(items)
-        .where(eq(items.listId, listId));
-      const existingNames = new Set(
-        present.filter((row) => !row.completed).map((row) => row.name.toLowerCase()),
-      );
-      return itemHistorySchema.parse({
-        names: [
-          ...new Map(
-            [...history, ...present].map((row) => [row.name.toLowerCase(), row.name]),
-          ).values(),
-        ]
-          .filter((name) => !existingNames.has(name.toLowerCase()))
-          .sort((a, b) => a.localeCompare(b)),
-        oftenBought: history
-          .filter((row) => row.completionCount > 0 && !existingNames.has(row.name.toLowerCase()))
-          .sort((a, b) => b.completionCount - a.completionCount || a.name.localeCompare(b.name))
-          .slice(0, 3),
-      });
-    },
-    { isolationLevel: "repeatable read", accessMode: "read only" },
-  );
 }

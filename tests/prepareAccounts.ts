@@ -23,7 +23,7 @@ export async function prepareAccounts() {
   await database.transaction(async (tx) => {
     await tx.delete(sessions);
     await tx.delete(loginAttempts);
-    await tx.delete(lists); // Cascades to items and item-name history.
+    await tx.delete(lists); // Cascades to items and photos.
     await tx.delete(users);
     await tx.delete(settings);
     await tx.insert(settings).values({ id: 1, householdName: "Unser Haushalt" });

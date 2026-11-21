@@ -68,19 +68,9 @@ for (const viewport of [
       });
       expect(item.status()).toBe(201);
     }
-    const suggestionResponse = await request.post(`/api/lists/${list.id}/items`, {
-      data: { name: "Hafermilch" },
-    });
-    expect(suggestionResponse.status()).toBe(201);
-    const suggestion = addItemResultSchema.parse(await suggestionResponse.json());
-    const completed = await request.patch(`/api/items/${suggestion.id}`, {
-      data: { completed: true },
-    });
-    expect(completed.status()).toBe(200);
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".active-items > li")).toHaveCount(30);
-    await expect(page.getByRole("button", { name: "+ Hafermilch", exact: true })).toBeVisible();
-    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toHaveCSS("text-overflow", "ellipsis");
     await expect(page.locator("body")).toHaveCSS("background-image", "none");
     await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 246, 244)");
@@ -98,9 +88,8 @@ for (const viewport of [
     const controls = [
       page.getByRole("heading", { name: list.name, exact: true }),
       page.locator(".back-link"),
-      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
+      page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }),
       page.getByRole("button", { name: "Hinzufügen", exact: true }),
-      page.getByRole("button", { name: "+ Hafermilch", exact: true }),
     ];
     const initialBounds = await Promise.all(controls.map((control) => control.boundingBox()));
     const activeItems = page.getByRole("tabpanel", { name: "Offen", exact: true });
@@ -118,7 +107,9 @@ for (const viewport of [
           .toBe(position);
       }
       for (const [index, control] of controls.entries()) {
-        await expect(control).toBeInViewport({ ratio: 1 });
+        // WebKit rounds the textbox intersection to device pixels. The bounds
+        // must still stay fixed, with at most a subpixel loss of intersection.
+        await expect(control).toBeInViewport({ ratio: 0.998 });
         expect(await control.boundingBox()).toEqual(initialBounds[index]);
       }
       const scrolledItem = await firstItem.boundingBox();
@@ -128,12 +119,12 @@ for (const viewport of [
     }
     await activeItems.evaluate((element) => element.scrollTo(0, 700));
     await page
-      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Added while scrolled");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.locator(".active-items > li")).toHaveCount(31);
     await expect(
-      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
+      page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }),
     ).toHaveValue("");
     await page.locator(".back-link").click();
     await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
@@ -219,7 +210,7 @@ test("completed tab uses the remaining viewport without moving the header or tab
       "true",
     );
     await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
-    await expect(page.locator(".quick-add button")).toHaveCount(3);
+    await expect(page.getByText("Häufig gekauft", { exact: true })).toHaveCount(0);
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() => window.scrollTo(0, 0));
     const visiblePositions = () =>
@@ -227,7 +218,7 @@ test("completed tab uses the remaining viewport without moving the header or tab
         const offset = window.visualViewport?.offsetTop ?? 0;
         return Array.from(
           document.querySelectorAll(
-            ".back-link, .list-controls h1, .list-controls .list-icon, .add-item-form, .quick-add, .list-status-tab-list, .mobile-nav",
+            ".back-link, .list-controls h1, .list-controls .list-icon, .add-item-form, .list-status-tab-list, .mobile-nav",
           ),
         ).map((element) => ({
           selector: element.className || element.tagName,
@@ -348,7 +339,7 @@ test("complete household workflow persists through reload and a second browser",
     });
     await expect(second.getByRole("heading", { name, level: 1 })).toBeVisible();
     await page
-      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Pack towels");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(second.getByRole("button", { name: "Pack towels", exact: true })).toBeVisible({
@@ -395,7 +386,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(page.locator(".active-items")).toContainText("Pack two towels", {
       timeout: 15_000,
     });
-    await page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
+    await page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
     const divider = page.locator(".active-items .item-divider:visible");
@@ -406,44 +397,20 @@ test("complete household workflow persists through reload and a second browser",
       .getByRole("checkbox", { name: "Bananas als erledigt markieren", exact: true })
       .click();
     await expect(page.getByRole("tab", { name: "Erledigt", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "+ Bananas", exact: true })).toBeVisible();
     await page.getByRole("tab", { name: "Erledigt", exact: true }).click();
     await page.getByRole("button", { name: "Bananas", exact: true }).click();
     await page.getByRole("button", { name: "Eintrag entfernen", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "+ Bananas", exact: true })).toBeVisible();
-    const addBounds = await page
-      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
-      .boundingBox();
-    const oftenBounds = await page.locator(".quick-add").boundingBox();
-    expect(oftenBounds!.y - addBounds!.y - addBounds!.height).toBeLessThan(60);
-    const draftInput = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
-    await draftInput.fill("Keep my draft");
-    await draftInput.press("Escape");
-    await page.getByRole("button", { name: "+ Bananas", exact: true }).click();
-    await expect(page.getByRole("button", { name: "+ Bananas", exact: true })).toHaveCount(0);
-    await expect(draftInput).not.toBeFocused();
-    await expect(draftInput).toHaveAttribute("aria-expanded", "false");
-    await expect(draftInput).toHaveValue("Keep my draft");
     await page.getByRole("tab", { name: "Offen", exact: true }).click();
-    await page.getByRole("button", { name: "Bananas", exact: true }).click();
-    await page.getByRole("button", { name: "Eintrag entfernen", exact: true }).click();
-    await expect(page.getByRole("dialog")).toBeHidden();
-    const combo = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
-    await combo.fill("ban");
-    await expect(
-      page.getByRole("grid").getByRole("button", { name: "Bananas", exact: true }),
-    ).toBeVisible();
-    await combo.press("ArrowDown");
-    await combo.press("Enter");
-    await expect(combo).toHaveValue("Bananas");
+    await page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
     const more = page.getByRole("button", { name: "Weitere Optionen", exact: true });
     await expect(more.locator("svg")).toBeVisible();
     await expect(more.locator("svg")).toHaveAttribute("aria-hidden", "true");
     await more.click();
+    await expect(page.getByRole("button", { name: "Vorschläge verwalten" })).toHaveCount(0);
     await page.getByLabel("Listenname", { exact: true }).fill("Coast trip");
     await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Coast trip", exact: true })).toBeVisible();
@@ -466,7 +433,7 @@ test("failed saves retain input, whitespace is rejected, and keyboard dialog foc
 }) => {
   const id = await createList(page, "Failure " + crypto.randomUUID());
   try {
-    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     await input.fill("   ");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).focus();
     await expect(page.locator(".field-error")).toHaveCount(0);
@@ -563,7 +530,6 @@ test("household settings persist and update the household overview", async ({ pa
     await page
       .getByRole("textbox", { name: "Name des Haushalts", exact: true })
       .fill("Our little home");
-    await expect(page.getByRole("textbox", { name: /Häufig gekauft/ })).toHaveCount(0);
     await page.getByRole("button", { name: "Änderungen speichern", exact: true }).click();
     await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
       "Einstellungen gespeichert.",

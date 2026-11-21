@@ -1,11 +1,11 @@
 import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
-import { TextField } from "../TextField/TextField";
-import type { FieldPresentation } from "../FieldLayout/FieldLayout";
-import { Button } from "../Button/Button";
-import { Icon } from "../Icon/Icon";
-import { OptionList } from "../OptionList/OptionList";
-import { useAnchoredPopup } from "../OptionList/useAnchoredPopup";
+import { TextField } from "../../src/shared/ui/TextField/TextField";
+import type { FieldPresentation } from "../../src/shared/ui/FieldLayout/FieldLayout";
+import { Button } from "../../src/shared/ui/Button/Button";
+import { Icon } from "../../src/shared/ui/Icon/Icon";
+import { OptionList } from "../../src/shared/ui/OptionList/OptionList";
+import { useAnchoredPopup } from "../../src/shared/ui/OptionList/useAnchoredPopup";
 import "./ComboBox.css";
 
 export function ComboBox({

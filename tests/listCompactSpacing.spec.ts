@@ -30,18 +30,9 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
         201,
       );
     }
-    for (const name of ["Brot", "Ingwer", "Lauchzwiebel"]) {
-      const item = await (
-        await request.post(`/api/lists/${list.id}/items`, { data: { name } })
-      ).json();
-      expect(
-        (await request.patch(`/api/items/${item.id}`, { data: { completed: true } })).status(),
-      ).toBe(200);
-    }
     await page.goto(`/lists/${list.id}`);
-    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toBeVisible();
-    await expect(page.getByRole("button", { name: "+ Lauchzwiebel", exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await testInfo.attach("short-screen-layout", {
       body: await page.screenshot(),
@@ -57,7 +48,6 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
       "min-block-size",
       "21px",
     );
-    await expect(page.locator(".quick-add")).toHaveCSS("padding-bottom", "12px");
     const icon = await page.locator(".page-header > .list-icon").boundingBox();
     for (const selector of [".title-row > div", ".title-row > button"]) {
       const box = await page.locator(selector).boundingBox();
@@ -80,14 +70,10 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
     await expect(page.locator(".add-item-form .field-error")).toHaveText("Gib einen Namen ein.");
     expect(await page.locator(".add-item-form").boundingBox()).toEqual(composerBeforeError);
     await expect(input).toHaveAttribute("aria-invalid", "true");
-    await expect(input).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator(".add-item-form .field-control")).toHaveCSS(
       "border-color",
       "rgb(163, 41, 41)",
     );
-    const errorBox = await page.locator(".add-item-form .field-error").boundingBox();
-    const suggestionsBox = await page.locator(".quick-add").boundingBox();
-    expect(suggestionsBox!.y - errorBox!.y - errorBox!.height).toBeCloseTo(12, 1);
     await testInfo.attach("validation-message", {
       body: await page.screenshot(),
       contentType: "image/png",

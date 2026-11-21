@@ -4,7 +4,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { listSchema, stateSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-test("adding preserves input focus only for Enter in the combobox; new icons persist", async ({
+test("adding preserves input focus only for Enter in the item field; new icons persist", async ({
   page,
   request,
   context,
@@ -21,7 +21,7 @@ test("adding preserves input focus only for Enter in the combobox; new icons per
   try {
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".list-meta")).toContainText("aktualisiert von Test Admin");
-    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     const add = page.getByRole("button", { name: "Hinzufügen", exact: true });
     for (const method of ["input", "mouse", "button"] as const) {
       const name = method + crypto.randomUUID();

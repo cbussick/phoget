@@ -1,6 +1,5 @@
 import {
   pgTable,
-  primaryKey,
   uuid,
   text,
   timestamp,
@@ -77,16 +76,3 @@ export const loginAttempts = pgTable("login_attempts", {
   count: integer().notNull(),
   expiresAt: timestamp({ withTimezone: true, mode: "date" }).notNull(),
 });
-
-export const itemNames = pgTable(
-  "item_names",
-  {
-    listId: uuid()
-      .notNull()
-      .references(() => lists.id, { onDelete: "cascade" }),
-    key: text().notNull(),
-    name: text().notNull(),
-    completionCount: integer().notNull().default(0),
-  },
-  (table) => [primaryKey({ columns: [table.listId, table.key] })],
-);

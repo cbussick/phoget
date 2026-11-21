@@ -79,30 +79,6 @@ export const stateSchema = z.object({
   items: z.array(itemSchema),
   settings: settingsSchema,
 });
-export const oftenBoughtItemSchema = z.object({
-  name: nameSchema,
-  completionCount: z.number().int().positive(),
-});
-export const rememberedItemSchema = z.object({
-  name: nameSchema,
-  completionCount: z.number().int().nonnegative().max(2_147_483_647),
-});
-export const forgetItemSchema = z
-  .object({
-    name: nameSchema,
-    completedIds: z.array(idSchema).default([]),
-  })
-  .strict();
-export const forgetItemResultSchema = z.object({
-  remembered: rememberedItemSchema.nullable(),
-  removedCompleted: z.boolean(),
-  undoToken: idSchema.nullable(),
-});
-export const undoForgetItemSchema = z.object({ token: idSchema }).strict();
-export const itemHistorySchema = z.object({
-  names: z.array(nameSchema),
-  oftenBought: z.array(oftenBoughtItemSchema).max(3),
-});
 export const errorSchema = z.object({ error: z.string(), field: z.string().optional() });
 export type List = z.infer<typeof listSchema>;
 export type Item = z.infer<typeof itemSchema>;

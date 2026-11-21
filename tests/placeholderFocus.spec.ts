@@ -3,7 +3,7 @@ import { test } from "./browserTest";
 import { listSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-test("overflowing placeholder looks identical before focus, during suggestions and after blur", async ({
+test("overflowing placeholder looks identical before focus, during focus and after blur", async ({
   page,
   request,
   context,
@@ -15,14 +15,8 @@ test("overflowing placeholder looks identical before focus, during suggestions a
     await (await request.post("/api/lists", { data: { name: "Placeholder focus" } })).json(),
   );
   try {
-    const item = await (
-      await request.post(`/api/lists/${list.id}/items`, { data: { name: "Bananen" } })
-    ).json();
-    expect(
-      (await request.patch(`/api/items/${item.id}`, { data: { completed: true } })).status(),
-    ).toBe(200);
     await page.goto(`/lists/${list.id}`);
-    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     const placeholder = page.locator(".text-field-placeholder");
@@ -53,7 +47,7 @@ test("overflowing placeholder looks identical before focus, during suggestions a
               return ctx.getImageData(0, 0, img.width, img.height);
             }),
           );
-          // Allow a one-pixel rasterization shift when the popup creates a layer.
+          // Allow a one-pixel rasterization shift on focus.
           let smallest = 1;
           for (const dx of [-1, 0, 1]) {
             for (const dy of [-1, 0, 1]) {
@@ -81,7 +75,7 @@ test("overflowing placeholder looks identical before focus, during suggestions a
       expect(difference).toBeLessThan(0.01);
     }
     await input.click();
-    await expect(input).toHaveAttribute("aria-expanded", "true");
+    await expect(input).toBeFocused();
     await expectSamePlaceholder();
     await page.getByRole("heading", { name: list.name, exact: true }).click();
     await expect(input).not.toBeFocused();

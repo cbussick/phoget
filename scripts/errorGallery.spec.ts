@@ -121,16 +121,15 @@ test("capture the application's error states", async ({ page }) => {
     await page.goto(`/lists/${list.id}`);
     await expect(page.getByRole("heading", { name: "Error state review" })).toBeVisible();
     await page.route("**/api/state", failure("Verbindung unterbrochen."));
-    await page.route("**/api/items/history", failure("Vorschläge nicht verfügbar."));
     await page.waitForTimeout(4500);
     await expect(page.getByRole("region", { name: "Benachrichtigung" })).toContainText(
       "Verbindung unterbrochen. Die zuletzt gespeicherte Version wird angezeigt.",
     );
     await capture(page, {
-      slug: "list-stale-and-suggestions",
-      title: "List is stale and suggestions are unavailable",
+      slug: "list-stale",
+      title: "List state is stale",
       area: "List page callouts",
-      trigger: "Background state refresh and item history both fail",
+      trigger: "Background state refresh fails",
     });
     await page.unrouteAll();
     await page.reload();
@@ -138,7 +137,7 @@ test("capture the application's error states", async ({ page }) => {
 
     await page.route(`**/api/lists/${list.id}/items`, failure());
     await page
-      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Keep this draft");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("region", { name: "Benachrichtigung" })).toBeVisible();

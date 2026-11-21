@@ -22,20 +22,11 @@ import {
   stateSchema,
   itemSchema,
   addItemResultSchema,
-  itemHistorySchema,
-  forgetItemSchema,
-  forgetItemResultSchema,
-  undoForgetItemSchema,
-  rememberedItemSchema,
   listSchema,
   settingsSchema,
 } from "../shared/contracts.js";
 import {
   readState,
-  readItemHistory,
-  forgetItem,
-  undoForgetItem,
-  restoreRememberedItem,
   createList,
   updateList,
   deleteList,
@@ -202,37 +193,6 @@ app.put("/api/lists/:id/items/order/:completed", async (request, response) => {
 });
 app.delete("/api/lists/:id", async (request, response) => {
   await deleteList(parseInput(idSchema, request.params.id));
-  response.status(204).end();
-});
-app.get("/api/lists/:id/history", async (request, response) => {
-  response.json(
-    itemHistorySchema.parse(await readItemHistory(parseInput(idSchema, request.params.id))),
-  );
-});
-app.delete("/api/lists/:id/history", async (request, response) => {
-  response.json(
-    forgetItemResultSchema.parse(
-      await forgetItem(
-        parseInput(idSchema, request.params.id),
-        parseInput(forgetItemSchema, request.body),
-        userSchema.parse(response.locals.user),
-      ),
-    ),
-  );
-});
-app.post("/api/lists/:id/history/undo", async (request, response) => {
-  await undoForgetItem(
-    parseInput(idSchema, request.params.id),
-    parseInput(undoForgetItemSchema, request.body).token,
-    userSchema.parse(response.locals.user),
-  );
-  response.status(204).end();
-});
-app.post("/api/lists/:id/history", async (request, response) => {
-  await restoreRememberedItem(
-    parseInput(idSchema, request.params.id),
-    parseInput(rememberedItemSchema.strict(), request.body),
-  );
   response.status(204).end();
 });
 app.post("/api/lists/:id/items", async (request, response) => {

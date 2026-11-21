@@ -3,7 +3,7 @@ import { test } from "./browserTest";
 import { listSchema } from "../shared/contracts";
 import { testCredentials } from "./testCredentials";
 
-test("idle list sync does not repeatedly fetch members or suggestion history", async ({
+test("idle list sync does not fetch members or retired suggestion history", async ({
   page,
   request,
   context,
@@ -26,14 +26,13 @@ test("idle list sync does not repeatedly fetch members or suggestion history", a
     await page.clock.install();
     await page.goto(`/lists/${list.id}`);
     await expect(page.getByRole("heading", { name: list.name, exact: true })).toBeVisible();
-    await expect.poll(() => counts.get(`/api/lists/${list.id}/history`)).toBe(1);
     expect(counts.get("/api/members") ?? 0).toBe(0);
     // E2E builds shorten all production polling intervals to one second.
     // Drive several cycles: list sync must continue, auxiliary queries must not.
     await page.clock.runFor(3500);
     expect(counts.get("/api/state")).toBeGreaterThanOrEqual(2);
     expect(counts.get("/api/members") ?? 0).toBe(0);
-    expect(counts.get(`/api/lists/${list.id}/history`)).toBe(1);
+    expect(counts.has(`/api/lists/${list.id}/history`)).toBe(false);
 
     await page.getByRole("link", { name: "Einstellungen" }).click();
     await page.getByRole("tab", { name: "Haushalt", exact: true }).click();

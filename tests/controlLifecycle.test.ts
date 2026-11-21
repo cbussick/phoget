@@ -43,18 +43,6 @@ test(
           const browser = await engine.launch();
           try {
             const page = await browser.newPage();
-            await page.route("**/api/lists/**", (route) =>
-              route.fulfill({
-                json:
-                  route.request().method() === "DELETE"
-                    ? {
-                        remembered: null,
-                        removedCompleted: false,
-                        undoToken: "22222222-2222-4222-8222-222222222222",
-                      }
-                    : { names: ["Coffee"], oftenBought: [] },
-              }),
-            );
             await page.goto(`http://127.0.0.1:${address.port}/control-lifecycle`);
             const combo = page.getByRole("combobox", { name: "Item", exact: true });
             const select = page.getByRole("combobox", { name: "Role", exact: true });
@@ -83,11 +71,6 @@ test(
             await select.press("End");
             await select.press("Enter");
             await expect(select).toHaveText("Admin");
-            await page.getByRole("button", { name: "Forget coffee" }).click();
-            await expect(page.locator("#undo-state")).toHaveText("undo available");
-            await page.getByRole("button", { name: "Toggle managing" }).click();
-            await page.getByRole("button", { name: "Toggle managing" }).click();
-            await expect(page.locator("#undo-state")).toHaveText("no undo");
             let releaseSave: (() => void) | undefined;
             const saveHold = new Promise<void>((resolve) => {
               releaseSave = resolve;

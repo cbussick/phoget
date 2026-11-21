@@ -9,22 +9,9 @@ import {
   itemSchema,
   addItemResultSchema,
   reorderSchema,
-  forgetItemSchema,
-  forgetItemResultSchema,
-  undoForgetItemSchema,
 } from "../../../shared/contracts";
 
 export const listApi = {
-  forgetItem: (id: string, input: z.input<typeof forgetItemSchema>) =>
-    request(`/lists/${id}/history`, forgetItemResultSchema, {
-      method: "DELETE",
-      body: JSON.stringify(forgetItemSchema.parse(input)),
-    }),
-  undoForgetItem: (id: string, token: string) =>
-    request(`/lists/${id}/history/undo`, z.undefined(), {
-      method: "POST",
-      body: JSON.stringify(undoForgetItemSchema.parse({ token })),
-    }),
   reorderLists: (input: z.input<typeof reorderSchema>) =>
     request("/lists/order", z.undefined(), {
       method: "PUT",
