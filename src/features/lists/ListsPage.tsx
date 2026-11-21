@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { List } from "../../../shared/contracts";
+import { BrandLogo } from "../../app/BrandLogo";
 import { Link } from "../../app/navigation";
 import { Button } from "../../shared/ui/Button/Button";
 import { EmptyState } from "../../shared/ui/EmptyState/EmptyState";
@@ -13,16 +14,12 @@ export function ListsPage({ lists }: { lists: Array<List> }) {
   return (
     <>
       <header className="lists-header">
-        <div>
+        <div className="lists-overview-heading">
           <h1>Alle Listen</h1>
           <p>Alles, was ihr gemeinsam im Blick behaltet.</p>
+          <BrandLogo variant="wordmark" />
         </div>
-        <Button
-          variant="primary"
-          size="large"
-          className="new-list-button"
-          onClick={() => setCreating(true)}
-        >
+        <Button variant="primary" size="large" onClick={() => setCreating(true)}>
           <Icon name="plus" />
           Neue Liste
         </Button>

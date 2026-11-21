@@ -69,7 +69,9 @@ test(
             await page.goto(origin);
             await page.getByRole("heading", { name: "Alle Listen", exact: true }).waitFor();
             const desktop = page.locator(".sidebar .brand-logo");
+            const overviewMark = page.locator(".lists-overview-heading .brand-logo");
             assert.equal(await desktop.isVisible(), true);
+            assert.equal(await overviewMark.isVisible(), false);
             assert.equal(
               await desktop.getAttribute("src"),
               "/branding/little-tangle/logo-wordmark.svg",
@@ -99,8 +101,23 @@ test(
               await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight),
               true,
             );
-            assert.equal(await page.locator(".mobile-brand-header .brand-logo").isVisible(), true);
             assert.equal(await desktop.isVisible(), false);
+            assert.equal(
+              await overviewMark.getAttribute("src"),
+              "/branding/little-tangle/logo-wordmark.svg",
+            );
+            const heading = await page
+              .getByRole("heading", { name: "Alle Listen", exact: true })
+              .boundingBox();
+            const mark = await overviewMark.boundingBox();
+            assert.ok(heading && mark);
+            assert.equal(mark.width, 80);
+            assert.ok(mark.x >= heading.x + heading.width);
+            assert.ok(Math.abs(mark.y + mark.height / 2 - heading.y - heading.height / 2) < 1);
+            assert.equal(
+              await page.getByText("Alles, was ihr gemeinsam im Blick behaltet.").isVisible(),
+              false,
+            );
             assert.equal(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,

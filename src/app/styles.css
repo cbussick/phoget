@@ -1,6 +1,4 @@
 .app-shell {
-  --app-header-height: 0px;
-
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
@@ -22,10 +20,6 @@
   width: min(100%, 11rem);
   margin-inline: var(--space-2);
   text-decoration: none;
-}
-
-.mobile-brand-header {
-  display: none;
 }
 
 .nav-links {
@@ -146,20 +140,7 @@
 }
 
 @media (width <= 47.99rem) {
-  .mobile-brand-header {
-    display: flex;
-    block-size: var(--app-header-height);
-    justify-content: center;
-    padding: var(--space-3) var(--space-4) 0;
-  }
-
-  .mobile-brand-header .brand {
-    width: 6.5rem;
-  }
-
   .app-shell {
-    --app-header-height: 4.25rem;
-
     display: block;
   }
 
@@ -168,9 +149,7 @@
   }
 
   .page-message {
-    min-block-size: calc(
-      100svh - var(--app-header-height) - var(--space-6) - var(--mobile-bottom-space)
-    );
+    min-block-size: calc(100svh - var(--space-6) - var(--mobile-bottom-space));
   }
 
   .mobile-nav {

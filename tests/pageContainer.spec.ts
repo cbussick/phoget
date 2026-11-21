@@ -26,9 +26,17 @@ for (const width of [320, 390, 768, 1280]) {
     expect(settings!.x).toBe(lists!.x);
     expect(settings!.width).toBe(lists!.width);
     expect(settingsHeading!.x).toBe(listsHeading!.x);
-    expect(settingsHeading!.y).toBe(listsHeading!.y);
+    const wordmark = page.getByRole("img", { name: "phoget", exact: true });
+    if (width < 768) {
+      // The overview title is centered beside its wordmark, while settings has no wordmark.
+      expect(listsHeading!.y).toBeLessThan(48);
+      expect(settingsHeading!.y).toBeLessThan(48);
+      await expect(wordmark).toHaveCount(0);
+    } else {
+      expect(settingsHeading!.y).toBe(listsHeading!.y);
+      await expect(wordmark).toBeVisible();
+    }
     await expect(page).toHaveTitle("Einstellungen | phoget");
-    await expect(page.getByRole("img", { name: "phoget", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
     await page.getByRole("tab", { name: "Haushalt", exact: true }).click();
     await expect(page.getByRole("table", { name: "Benutzer im Haushalt" })).toBeVisible();
