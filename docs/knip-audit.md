@@ -57,10 +57,12 @@ inspection found it unbound and a retry passed without killing any process.
 Firefox took 8.5 minutes and WebKit 8.3 minutes. Runtime performance investigation
 is tracked separately in PHO-21; no performance changes are bundled here.
 
-At delivery, the remote target still matched base `914e55e`; no reconciliation
-source changes were necessary. Existing full-stage results were reused rather
-than restarting the browser suites. Final bounded validation covers both Knip
-modes and formatting. Task-owned databases, dependencies, generated builds,
+Delivery initially found remote base `914e55e` unchanged. The subsequent
+workflow-only cleanup update `7809a7c` was integrated into the task branch without
+conflicts or runtime/configuration changes. Existing full-stage results were
+reused rather than restarting the browser suites. Fresh independent read-only
+review covers this documentation-only reconciliation; bounded validation covers
+both Knip modes and formatting. Task-owned databases, dependencies, generated builds,
 screenshots/results and raw logs/reviewer scratch are disposable after merge;
 tracked fixtures, useful branding tools and unrelated worktrees remain intact.
 
