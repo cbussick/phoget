@@ -9,9 +9,20 @@ test skips or timeout increases were added. Inherited preset exceptions remain
 except where they would weaken original correctness checks; those checks are
 explicitly restored, including unbound methods in tests.
 
-The coordinator will arrange two independent, read-only local reviews of the
-entire base-to-final diff. This report is implementation evidence, not review
-approval or permission to integrate. No push, PR, remote comment, merge or deploy.
+Two fresh independent, read-only local Pi processes reviewed the full diff from
+`c5b28c929f6e873d924e871a9b4ab17b33d234d0` to implementation tip
+`d7aae74e34e69d86c88b79f56a31ef839bfa631b`: Standards/behavior and Spec/behavior.
+Both completed successfully with **zero blockers**. They inspected code and
+retained evidence, not independent check reruns. No integration authorization
+is implied. No push, PR, remote comment, merge or deploy.
+
+Optional review observations remain explicit coverage limitations: combined
+incoming-row updates with failed reorder; held real household refetch; delayed
+submit/reset; leaving suggestion management while removal is pending. The last
+can allow the already-existing captured completion callback to repopulate undo
+state after exit; this migration does not claim to fix that inherited race.
+Current regressions cover leaving after completion. No claim of comprehensive
+async-interleaving coverage is made.
 
 ## Sources, versions and discovery
 
@@ -201,5 +212,8 @@ load remains uncontrolled. Archived timings and `completed-timings.json` use the
 invalid five-file baseline and must not be used for performance conclusions.
 
 All raw evidence is retained locally under `.runtime/oxlint-audit/`. Small local
-implementation commits are preserved for coordinator review; final commit SHA
-and post-report checks are supplied in the handoff.
+implementation commits are preserved. The committed implementation tip also
+passed an additional complete `check` run, recorded in
+`final-committed-check.log`. Final report/review commit pins are supplied in the
+handoff. Both Knip modes remain failing as documented; do not represent all
+validation commands as green or integrate without the applicable failure gate.
