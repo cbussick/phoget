@@ -67,7 +67,6 @@ export default defineConfig({
         "react/set-state-in-effect": "off",
         "unicorn/consistent-function-scoping": "off",
         "react-hooks/exhaustive-deps": "off",
-        "quality/no-array-filter-map": "off",
         "typescript/no-unsafe-assignment": "off",
         "typescript/no-unsafe-member-access": "off",
         "typescript/no-unsafe-type-assertion": "off",

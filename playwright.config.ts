@@ -41,8 +41,7 @@ export default defineConfig({
     },
   })),
   webServer: environments
-    .filter(({ name }) => name === process.env.PHOGET_BROWSER_PROJECT)
-    .map(({ databaseUrl, port: browserPort, origin }) => ({
+    .flatMap(({ name, databaseUrl, port: browserPort, origin }) => name === process.env.PHOGET_BROWSER_PROJECT ? [{ 
       command: "node --env-file=.env.test dist/server/index.js",
       env: {
         DATABASE_URL: databaseUrl,
@@ -52,5 +51,5 @@ export default defineConfig({
       },
       url: `${origin}/api/health`,
       reuseExistingServer: false,
-    })),
+    }] : []),
 });
