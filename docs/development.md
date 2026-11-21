@@ -1,5 +1,17 @@
 # Development and testing
 
+## Choose checks for the change
+
+Select checks by affected behavior and risk, not by file count. Review the diff and pick the smallest set that verifies the change and likely regressions. Use the same rule for the combined result if the merge target moves.
+
+| Change                             | Local checks                                                                                                                                                                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Documentation only                 | Check formatting, review the diff, and verify changed links and commands. No app suite is needed unless the change affects runtime behavior.                                                                               |
+| Scoped UI or application behavior  | Run the relevant static checks and focused tests. For layout changes, include the affected mobile and desktop views and the browser engines relevant to the change. Verify adjacent behavior that shares the changed code. |
+| Cross-cutting or high-risk changes | Run the full `node scripts/worktree.mjs run npm run check` suite when the impact cannot be bounded, or when changing shared infrastructure such as authentication, persistence, deployment, or the test harness.           |
+
+Use the full suite for release verification or when the human asks for it. If focused tests reveal broader impact, expand the check set. Report the commands and browser coverage actually run. This local policy does not replace a remote CI gate.
+
 ## Branding and startup review
 
 The desktop sidebar and mobile list overview use `BrandLogo`'s compact `wordmark` variant (no bowl). Other mobile app pages omit the wordmark; login and startup keep the default full variant. Browser and home-screen icons use the selected logo-p identity in `public/branding/little-tangle/`. Regenerate opaque home-screen PNGs with `node scripts/worktree.mjs run node scripts/renderAppIcons.mjs` after regenerating branding assets.
