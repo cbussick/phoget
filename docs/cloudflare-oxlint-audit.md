@@ -1,173 +1,205 @@
-# Cloudflare Oxlint migration — incomplete implementation checkpoint
+# Cloudflare Oxlint defaults migration
 
-## Status
+## Status and scope
 
-**Not ready for approval or integration as the requested full migration.** This is a
-passing migration baseline plus mechanical style fixes, not the full defaults
-migration. 19 temporary disables remain. They are migration debt,
-not accepted policy exceptions. No file grandfathering or convenience exceptions
-have been adopted. No lifecycle behavior has been redesigned and no tests,
-timeouts, compiler checks, or assertions have been weakened.
+Implemented locally on `cloudflare-oxlint`, based on `c5b28c9`. **All 19 temporary
+migration disables have been removed.** No project rule exemptions, grandfathered
+files, lint suppression comments, weaker compiler checks, deferred state updates,
+test skips or timeout increases were added. Inherited preset exceptions remain
+except where they would weaken original correctness checks; those checks are
+explicitly restored, including unbound methods in tests.
 
-Base: `c5b28c9`. Worktree: `cloudflare-oxlint`. Local commits only.
+The coordinator will arrange two independent, read-only local reviews of the
+entire base-to-final diff. This report is implementation evidence, not review
+approval or permission to integrate. No push, PR, remote comment, merge or deploy.
 
-## Sources and versions
+## Sources, versions and discovery
 
-Read the official Cloudflare README and entire migration skill before edits:
+Read the official README and full migration skill:
 
 - https://github.com/cloudflare/oxlint-config
 - https://raw.githubusercontent.com/cloudflare/oxlint-config/main/skills/migrate-oxlint-config/SKILL.md
 
-Installed: Cloudflare 0.1.0, nkzw 3.0.0, Oxlint 1.94.0,
-tsrs 0.25.0-ts7.1.0-beta. Original tsrs: 7.1.0-beta.tsrs3.
-The tsrs change satisfies the preset peer dependency. npm lockfile retained;
-fresh `npm ci` and `npm ls` succeeded.
+Installed versions: Cloudflare **0.1.0**, nkzw **3.0.0**, Oxlint **1.94.0**,
+tsrs **0.25.0-ts7.1.0-beta**. Original tsrs was **7.1.0-beta.tsrs3**; its prerelease
+version does not satisfy Cloudflare's peer range. npm lockfile retained. Fresh
+`npm ci` and `npm ls` pass. Evidence: `completed-npm-ci.log`, `completed-versions.log`.
 
-## Configuration and coverage
+`.oxlintrc.json` was replaced with `oxlint.config.ts`, spreading the preset at the
+root, including its plugins and overrides. Original plugins: unicorn, typescript,
+oxc; preset also brings react, import, vitest, jsx-a11y, promise and JS plugins.
+No Vokhanhbel plugin existed in this repository's original configuration.
 
-Replaced `.oxlintrc.json` with `oxlint.config.ts`. Spread preset at root;
-preserve preset plugins and overrides. Original plugins were unicorn,
-typescript, oxc; preset adds react, import, vitest, jsx-a11y, promise and JS plugins.
-Original four explicit TypeScript rules retained, including strict JSX promise
-callbacks. The sole existing known-safe promise call remains Node's tracked
-`node:test` `test`; no new safe-call exemptions.
+Lint now uses `oxlint . --threads=2`, then the original Stylelint scopes. Original
+explicit directories already included JS/MJS scripts; root discovery removes the
+need to maintain that directory list. Generated/local artifact ignores only:
+`.runtime`, `.worktrees`, `dist`, `storybook-static`, `test-results`,
+`playwright-report`, plus inherited node_modules. Final Oxlint reports 175 files
+and 257 rules versus original 165 files and 112 rules. Added source, regression
+fixtures and discovery configuration account for the expanded workload.
 
-Root lint is now `oxlint . --threads=2`, including JS/MJS scripts previously
-omitted by discovery, followed by unchanged Stylelint scopes. Ignore additions
-are generated/local artifacts only: .runtime, .worktrees, dist, storybook-static,
-test-results, playwright-report. tsc client/server checks and build retained.
+`server/tsconfig.json` inherits NodeNext server semantics;
+`.storybook/tsconfig.json` inherits client/Vite CSS types. Both original tsc checks
+and the compilation in build remain; lint does not replace compilation.
 
-Full effective original/current configurations and diagnostics are preserved under
-`.runtime/oxlint-audit/`. The original config's correctness category is not
-silently replaced by the preset's disabled categories. Explicitly restored rules
-(absent or disabled in the preset):
+## Original correctness parity
 
-- `no-caller`
-- `no-iterator`
-- `no-unassigned-vars`
-- `oxc/bad-array-method-on-arguments`
-- `oxc/bad-match-all-arg`
-- `oxc/erasing-op`
-- `oxc/only-used-in-recursion`
-- `typescript/no-base-to-string`
-- `typescript/no-meaningless-void-operator`
-- `typescript/no-redundant-type-constituents`
-- `typescript/no-this-alias`
-- `typescript/no-useless-default-assignment`
-- `typescript/no-useless-empty-export`
-- `typescript/restrict-template-expressions`
-- `unicorn/no-await-in-promise-methods`
-- `unicorn/no-empty-file`
-- `unicorn/no-new-array`
-- `unicorn/no-single-promise-in-promise-methods`
-- `unicorn/no-thenable`
-- `unicorn/no-unnecessary-await`
-- `unicorn/no-useless-fallback-in-spread`
-- `unicorn/no-useless-length-check`
-- `unicorn/prefer-string-starts-ends-with`
+Original whole-category correctness must not disappear behind the preset's
+explicit category disables. Preserved explicitly at error severity:
 
-All restored rules are errors. The JS template-expression rule required explicit
-String conversion in existing diagnostic messages (same runtime string coercion).
-Original checks should also be examined against preset file overrides before
-final approval; comprehensive behavior probes have **not** yet been performed.
+- no-caller, no-iterator, no-unassigned-vars
+- oxc/bad-array-method-on-arguments, bad-match-all-arg, erasing-op, only-used-in-recursion
+- typescript/no-base-to-string, no-meaningless-void-operator,
+  no-redundant-type-constituents, no-this-alias, no-useless-default-assignment,
+  no-useless-empty-export, restrict-template-expressions
+- unicorn/no-await-in-promise-methods, no-empty-file, no-new-array,
+  no-single-promise-in-promise-methods, no-thenable, no-unnecessary-await,
+  no-useless-fallback-in-spread, no-useless-length-check, prefer-string-starts-ends-with
 
-## Completed rule fixes
+A final TypeScript override also restores original checks relaxed by inherited
+file overrides: constructor-super, getter-return, no-class-assign, no-const-assign,
+no-dupe-class-members, no-dupe-keys, no-func-assign, no-import-assign,
+no-new-native-nonconstructor, no-obj-calls, no-setter-return, no-this-before-super,
+no-unreachable, no-unsafe-negation, no-with, typescript/unbound-method.
 
-- Top-level type imports (initial fix was committed with array-type fixes).
-- Array<T> style.
-- Braced control flow.
-- Number static properties.
-- Numeric separators.
-- Consistent type imports.
-- Catch variable naming.
-- replaceAll for global replacements.
-- Explicit template-expression string conversion for newly discovered scripts.
+The original explicit await-thenable, no-implied-eval, no-misused-promises and
+no-floating-promises checks remain. Async JSX attributes are not exempted.
+The **only** known-safe promise call remains `test` from `node:test`, whose runner
+tracks completion and failures; arbitrary test promises remain checked.
+Original/current effective configurations are saved in the evidence directory,
+including `original-print-config.json` and `completed-print-config.json`.
 
-Formatter subsequently applied to changed source files. No intentional
-application behavior changes.
+## Rule fixes
 
-## Temporary disables still requiring implementation
+Earlier small commits preserve the baseline migration and fix top-level type
+imports, Array<T> style, braces, numeric separators/static Number properties,
+catch names, replaceAll and explicit diagnostic string conversion.
 
-- `typescript/no-non-null-assertion`
-- `react/immutability`
-- `@nkzw/no-instanceof`
-- `react/button-has-type`
-- `quality/no-conditional-empty-object-spread`
-- `react/set-state-in-effect`
-- `quality/no-unknown-returns`
-- `unicorn/consistent-function-scoping`
-- `no-console`
-- `react-hooks/exhaustive-deps`
-- `quality/no-array-filter-map`
-- `no-promise-executor-return`
-- `typescript/no-unsafe-assignment`
-- `typescript/no-unsafe-member-access`
-- `typescript/no-unsafe-type-assertion`
-- `typescript/no-unsafe-return`
-- `typescript/require-array-sort-compare`
-- `typescript/no-unnecessary-type-assertion`
-- `typescript/use-unknown-in-catch-callback-variable`
+All formerly temporary rules now use the preset defaults:
 
-The remaining full-preset diagnostic snapshot is
-`.runtime/oxlint-audit/remaining.json` (before later formatting/template fixes).
-Required work includes React state synchronization in ComboBox, Select,
-Suggestions, SortableRows; form callback initialization; DOM ref ownership;
-server error-boundary narrowing; DnD third-party callback typing; generic form
-field-key validation; runtime DOM narrowing; CLI/server logging and the remaining
-mechanical rules. These are **unfinished**, not claims that rules cannot fit.
-Add red/green regressions for behavior changes, not deferred state updates or
-unsupported type assertions. No final design/policy decision was made here.
+| Rule                                              | Implementation                                                                                                                                                                                                                    |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| typescript/no-non-null-assertion                  | Check mounted roots/dialogs and gallery environment; guard missing sortable rows; keyboard controls use their event's owned element.                                                                                              |
+| react/immutability                                | Commit-owned input ref via useImperativeHandle; CSSOM setters for popup layout; submission callbacks receive reset controls from formApi rather than referencing the form being initialized.                                      |
+| @nkzw/no-instanceof                               | Named ZodError imports; composed event paths for DOM containment; HTML namespace narrowing for focus restoration. Cancellation tests exercise the native AbortSignal brand check and non-aborted default, not a weaker duck-type. |
+| react/button-has-type                             | Explicitly validated button/submit/reset attributes, with button as the default.                                                                                                                                                  |
+| quality/no-conditional-empty-object-spread        | Explicit builders for optional styles, request bodies, Vite allowedHosts and database position patches; preserve omission and style precedence.                                                                                   |
+| react/set-state-in-effect                         | Guarded render-time invalid/disabled interaction resets; undo state cleared at managing transitions; server order derived directly outside pending saves.                                                                         |
+| quality/no-unknown-returns                        | Preserve actual action/save result types with generics.                                                                                                                                                                           |
+| unicorn/consistent-function-scoping               | Hoist reusable CLI/test helpers; shared deferred gate; one-pass image decoding; serialized raster helpers receive frame dimensions and alpha threshold as analysis inputs.                                                        |
+| no-console                                        | Tested application/CLI output boundary using stdout/stderr and Node formatting; API request log tests still verify route privacy.                                                                                                 |
+| react-hooks/exhaustive-deps                       | Session cleanup depends on the user ID it reads; remove signature-based reorder synchronization effect.                                                                                                                           |
+| quality/no-array-filter-map                       | Single flatMap passes for active names and selected browser server configuration.                                                                                                                                                 |
+| no-promise-executor-return                        | Explicit void executor bodies, retaining existing completion events and delays.                                                                                                                                                   |
+| typescript/no-unsafe-assignment                   | Narrow Express route metadata and error values; no any assignments at these boundaries.                                                                                                                                           |
+| typescript/no-unsafe-member-access                | Parse error metadata, including nested database conflict codes, before access.                                                                                                                                                    |
+| typescript/no-unsafe-type-assertion               | Validate form field names, parse icon names, use typed browser element callbacks and event paths.                                                                                                                                 |
+| typescript/no-unsafe-return                       | Parse gallery payloads through contracts; validate request logs; DnD void callbacks do not return third-party any values.                                                                                                         |
+| typescript/require-array-sort-compare             | Numeric status comparison in the API concurrency test.                                                                                                                                                                            |
+| typescript/no-unnecessary-type-assertion          | Remove assertions that add no type information.                                                                                                                                                                                   |
+| typescript/use-unknown-in-catch-callback-variable | Narrow filesystem errors before checking ENOENT in browser-runner regressions.                                                                                                                                                    |
 
-## Validation at this checkpoint
+## Lifecycle and regression evidence
 
-Commands ran serially through `node scripts/worktree.mjs run` where applicable.
-Runtime uses databases phoget_dev_81235b55fce0 / phoget_test_81235b55fce0.
+`tests/controlLifecycle.test.ts` serves the actual components through Vite with
+isolated network responses, in Chromium, Firefox and WebKit. It exercises:
 
-- Isolated original checkout/install: extracted exact base under
-  `.runtime/oxlint-audit/original`; `npm ci` and original `npm run lint` pass.
-  This is an archived isolated checkout rather than a registered Git worktree.
-- Fresh migration `npm ci`: pass.
-- `npm run lint` including Stylelint: pass **with temporary disables**.
-- `npm run typecheck`: both tsc checks pass.
-- `npm run build`: pass.
-- `npm test`: 66 passed, zero skipped.
-- `npm run check`: stopped at photo-container due unreadable container
-  package.json; checkout files were mode 600. Restored read permissions on tracked
-  files/directories (no Git mode changes). Original photo-container passed.
-  Retried task photo-container after permissions repair: pass.
-- `npm run test:e2e`: initial 200-second tool timeout interrupted Chromium.
-  Full serial rerun completed Chromium, Firefox, WebKit successfully, each with
-  59 passed and one existing conditional skip; no skip edits were made.
-- `npm run test:storybook`: 17 passed.
-- Full `check` chain has not been rerun end-to-end since permissions repair.
-- Knip both modes: fail; exact original-install reproduction confirms same unused
-  files, unlisted playwright dependency and unused Member export. Migration adds
-  a tsrs configuration hint (preset discovery now recognizes backend usage).
-  No Knip findings hidden or ignored.
-- Type-aware/JSX/client/server/test rejection probes: **not yet performed**.
+- invalid/disabled transitions while a combobox is open and highlighted;
+- no stale popup reopening or highlighted selection after recovery;
+- Select closure across disable/re-enable and subsequent keyboard selection;
+- suggestion undo removal when leaving and re-entering management;
+- optimistic reorder retained during a pending save, including incoming rows;
+- server order authoritative when save/refetch finishes;
+- failed reorder rollback and visible error feedback.
 
-Evidence filenames: original-npm-ci.log, original-lint.log,
-migration-baseline-lint.log, final-npm-ci.log, typecheck.log, lint-final.log,
-build.log, tests.log, check.log, photo-container-retry-readable.log,
-original-photo-container.log, e2e.log, e2e-complete-attempt.log, storybook.log,
-knip.log, knip-production.log, original-knip.log,
-original-knip-production.log, versions.log.
+The original behavior passed before redesign. Removing the synchronization
+without replacing ownership went red; replacing it with guarded/derived state
+went green. Evidence: `controls-original.log`, `controls-red.log`,
+`controls-green.log`, `lists-original.log`, `lists-red.log`, `reorder-red.log`,
+`lists-green.log`. Keyboard tests wait for DnD activation/announcements rather
+than adding sleeps. An early fixture intercepted source module URLs as well as
+API requests; narrowing its route to `/api/lists/**` fixed the harness, not the
+application. Those harness failures are not behavioral red evidence.
 
-## Timing (checkpoint only; no speedup claim)
+Added tests also cover output formatting/stream ownership and arbitrary error
+metadata. Existing form, focus, cancellation, API conflict, cross-browser drag,
+suggestion undo, styling and accessibility regressions remain intact.
 
-Interleaved original/final Oxlint subprocesses, two threads each, same host:
-original 0.807 / 0.581 / 0.458 seconds; checkpoint
-2.274 / 1.754 / 1.949 seconds. Exit codes all zero.
-Commands use the original explicit scopes/root TS files versus checkpoint
-root discovery. Coverage differs and checkpoint still has temporary disables,
-so these numbers are **not a final full-preset benchmark**. Shared host load
-was uncontrolled. Raw order/results: `timings.json`.
-No baseline timing is inferred from the coordinator's failed /usr/bin/time run.
+## Rejection probes
 
-## Handoff requirements
+Temporary client TSX, server TS, test TS and script MJS probes were created,
+linted, and removed. `completed-rejection-probes.json` records rejection of:
 
-Finish every temporary rule disable with fixes and regression evidence;
-perform rejection probes; rerun fresh-install full check; repeat final interleaved
-benchmark; update this report. Coordinator must arrange two fresh local read-only
-reviews over the entire exact base-to-final diff afterward. No reviewers have
-been spawned and no remote operations have been performed.
+- floating promises in client, server and tests;
+- async JSX callbacks via no-misused-promises;
+- awaiting non-promises in all four scopes (including JS);
+- unsafe server returns and explicit any;
+- unbound test instance methods, despite the inherited test exemption;
+- script eval.
+
+The tracked node:test call was accepted, while the neighboring arbitrary
+floating promise was rejected. No probe files remain in the branch.
+
+## Validation and environment
+
+All checks serialized, browser workers limited to one, Oxlint to two threads.
+Data-changing commands use `node scripts/worktree.mjs run` with worktree-owned
+ports/databases: `phoget_dev_81235b55fce0` / `phoget_test_81235b55fce0`.
+
+- Fresh npm ci: pass.
+- Typecheck: client and server tsc pass.
+- Oxlint and Stylelint: pass without temporary disables.
+- Format check: pass.
+- Build: Vite and server compilation pass.
+- Unit/integration tests: 72 pass, zero skipped.
+- Production photo-container check: pass.
+- E2E: Chromium 60 pass; Firefox/WebKit each 59 pass and one existing
+  platform-conditional touch skip. No skips/timeouts changed.
+- Storybook: 17 pass.
+- Full `npm run check`: pass (`completed-check-retry.log`). First complete
+  attempt hit a transient occupied Chromium port; later browsers passed. The
+  port was unoccupied when inspected; no unrelated process was killed.
+- Knip and production Knip: fail with original findings, independently reproduced
+  in a **real detached original worktree**. Both have the unused Member type;
+  development has four unused branding scripts and the existing unlisted
+  playwright import; production has the unused Radio component. Migration adds
+  only a tsrs configuration hint. No findings suppressed or ignored.
+
+Knip evidence: `completed-knip.log`, `completed-knip-production.log`,
+`real-original-knip.log`, `real-original-knip-production.log`.
+
+### Correction to earlier checkpoint evidence
+
+The archived original at `.runtime/oxlint-audit/original` was traversed under an
+ignored ancestor. Its Oxlint run checked **only five root files**, not the full
+baseline. Earlier checkpoint lint/benchmark evidence from that archive is
+**invalid for full-baseline claims**. It is retained, not silently relabeled.
+
+Replacement baseline: detached worktree
+`/root/cb-coding/phoget/.worktrees/cloudflare-oxlint-original` at exact `c5b28c9`,
+fresh npm ci, no source edits. Original full lint passes with five warnings:
+require-array-sort-compare in the API test and four JS template-expression
+warnings. Replacement logs: `real-original-npm-ci.log`, `real-original-lint.log`,
+`real-original-diagnostics.json` (165 files), and the Knip logs above.
+
+## Fair interleaved timings
+
+`real-completed-timings.json`: identical Node/host, two Oxlint threads each,
+original installed backend versus final installed backend, original command's
+explicit scopes versus final root discovery. One warmup per configuration,
+then six interleaved rounds with alternating first runner. All exit codes zero.
+Oxlint only; installation, Stylelint and compiler time excluded.
+
+- Original seconds: 1.056 / 1.309 / 0.949 / 0.970 / 1.267 / 1.066;
+  median **1.061 s**.
+- Final seconds: 1.867 / 1.848 / 1.589 / 1.493 / 1.700 / 1.620;
+  median **1.660 s**.
+
+Final checks more files and rules (175/257 vs 165/112). This is a migration-cost
+measurement, **not a speedup claim** or isolated backend comparison. Shared-host
+load remains uncontrolled. Archived timings and `completed-timings.json` use the
+invalid five-file baseline and must not be used for performance conclusions.
+
+All raw evidence is retained locally under `.runtime/oxlint-audit/`. Small local
+implementation commits are preserved for coordinator review; final commit SHA
+and post-report checks are supplied in the handoff.

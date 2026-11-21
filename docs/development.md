@@ -16,9 +16,11 @@ The initial session/household requests show `LoadingScreen`, inspired by Shelf's
 `npm run lint` runs `oxlint . --threads=2` with the `tsrs` backend, followed by
 Stylelint. The root `oxlint.config.ts` adopts the Cloudflare preset and explicitly
 preserves the original correctness checks, promise handling, awaiting non-promises,
-and implied-eval checks. The migration is **not complete**: temporary rule disables
-remain. See [the migration audit](cloudflare-oxlint-audit.md) for their exact inventory
-and outstanding work. The only known-safe promise call is `test` from `node:test`:
+and implied-eval checks, including original checks relaxed by inherited TypeScript
+and test overrides. All preset defaults are enabled; no temporary migration
+disables remain. See [the migration audit](cloudflare-oxlint-audit.md) for the rule
+inventory, regression evidence and validation results. The only known-safe promise
+call is `test` from `node:test`:
 the Node test runner tracks test completion and reports failures itself. Other
 floating promises in tests are still checked.
 
