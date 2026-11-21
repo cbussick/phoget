@@ -1,4 +1,7 @@
 import { logger } from "../shared/logging.js";
+import { z } from "zod";
+
+const requestLogSchema = z.object({ requestId: z.string(), route: z.string(), status: z.number(), method: z.string(), durationMs: z.number() });
 import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
@@ -72,7 +75,7 @@ test("request logs use route templates without exposing query strings or list ID
     assert.equal(response.status, 200);
     assert.match(response.headers.get("x-request-id") ?? "", /^[0-9a-f-]{36}$/);
     const entry = messages
-      .map((message) => JSON.parse(message))
+      .map((message) => requestLogSchema.parse(JSON.parse(message)))
       .find((log) => log.requestId === response.headers.get("x-request-id"));
     assert.equal(entry?.route, "/api/state");
     assert.equal(entry?.status, 200);

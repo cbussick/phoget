@@ -5,6 +5,11 @@ import type { DeepKeys } from "@tanstack/react-form";
 import { ApiError } from "../api/request";
 import type { z } from "zod";
 
+type FieldErrors<T> = Partial<Record<DeepKeys<T>, string>>;
+function isFieldKey<T extends Record<string, string>>(values: T, key: string): key is DeepKeys<T> & string {
+  return Object.hasOwn(values, key);
+}
+
 export function useValidatedForm<T extends Record<string, string>>(
   defaultValues: T,
   schema: z.ZodType<unknown, T>,
@@ -22,10 +27,10 @@ export function useValidatedForm<T extends Record<string, string>>(
         if (
           error_ instanceof ApiError &&
           error_.field &&
-          Object.hasOwn(defaultValues, error_.field)
+          isFieldKey(defaultValues, error_.field)
         ) {
-          // The server field was validated above against this form's own keys.
-          const fields = { [error_.field]: error_.message } as Partial<Record<DeepKeys<T>, string>>;
+          const fields: FieldErrors<T> = {};
+          fields[error_.field] = error_.message;
           formApi.setErrorMap({ onSubmit: { fields } });
         } else {
           setError(error_ instanceof Error ? error_ : new Error("Bitte versuche es erneut."));

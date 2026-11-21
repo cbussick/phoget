@@ -47,6 +47,8 @@ import {
   NotFoundError,
 } from "./db/repository.js";
 
+import { errorDetails } from "./errorDetails.js";
+
 export const app = express();
 app.disable("x-powered-by");
 app.use(
@@ -67,7 +69,8 @@ app.use("/api", (request, response, next) => {
   response.setHeader("X-Request-Id", requestId);
   response.once("finish", () => {
     // Use Express route templates, never raw URLs (which may contain IDs or query strings).
-    const route = request.route?.path;
+    const matchedRoute: unknown = request.route;
+    const route = typeof matchedRoute === "object" && matchedRoute !== null && "path" in matchedRoute ? matchedRoute.path : undefined;
     logger.info(
       JSON.stringify({
         event: "api_request",
@@ -278,25 +281,26 @@ if (config.NODE_ENV === "production") {
       response.sendFile(resolve(clientPath, "index.html"), { dotfiles: "allow" }),
   );
 }
-const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
+  const details = errorDetails(error);
   const status =
     error instanceof HttpError
       ? error.status
       : error instanceof NotFoundError
         ? 404
-        : error.type === "entity.too.large"
+        : details.type === "entity.too.large"
           ? 413
           : error instanceof SyntaxError && "body" in error
             ? 400
             : 500;
-  if (error?.cause?.code === "23505" || error?.code === "23505") {
+  if (details.causeCode === "23505" || details.code === "23505") {
     response
       .status(409)
       .json({ error: "Dieser Benutzername ist bereits vergeben.", field: "username" });
     return;
   }
   if (status === 500) {
-    logger.error("Request failed", { name: error.name, code: error.code });
+    logger.error("Request failed", { name: details.name, code: details.code });
   }
   response.status(status).json(
     errorSchema.parse({
@@ -308,7 +312,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
             ? "Die Anfrage ist zu groß."
             : status === 400 && !(error instanceof HttpError)
               ? "Ungültiges JSON."
-              : error.message,
+              : details.message,
     }),
   );
 };

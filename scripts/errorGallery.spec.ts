@@ -3,6 +3,7 @@ import type { Page, Route } from "@playwright/test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { testCredentials } from "../tests/testCredentials";
+import { listSchema, addItemResultSchema } from "../shared/contracts";
 
 const output = resolve("error-gallery");
 const shots = resolve(output, "screenshots");
@@ -16,7 +17,7 @@ async function capture(page: Page, entry: Entry) {
   entries.push(entry);
   await page
     .getByRole("button", { name: "Meldung schließen" })
-    .evaluateAll((buttons) => buttons.forEach((button) => (button as HTMLButtonElement).click()));
+    .evaluateAll((buttons: Array<HTMLButtonElement>) => buttons.forEach((button) => button.click()));
   await page.waitForTimeout(250);
 }
 const failure =
@@ -89,7 +90,7 @@ test("capture the application's error states", async ({ page }) => {
   });
   await page.unrouteAll();
 
-  const list = await page.evaluate(async () =>
+  const listText = await page.evaluate(async () =>
     (
       await fetch("/api/lists", {
         method: "POST",
@@ -99,9 +100,10 @@ test("capture the application's error states", async ({ page }) => {
           description: "Temporary list for the gallery",
         }),
       })
-    ).json(),
+    ).text(),
   );
-  const item = await page.evaluate(
+  const list = listSchema.parse(JSON.parse(listText));
+  const itemText = await page.evaluate(
     async (listId) =>
       (
         await fetch(`/api/lists/${listId}/items`, {
@@ -109,9 +111,10 @@ test("capture the application's error states", async ({ page }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: "Milk" }),
         })
-      ).json(),
+      ).text(),
     list.id,
   );
+  const item = addItemResultSchema.parse(JSON.parse(itemText));
   try {
     await page.goto(`/lists/${list.id}`);
     await expect(page.getByRole("heading", { name: "Error state review" })).toBeVisible();

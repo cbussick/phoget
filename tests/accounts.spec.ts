@@ -208,7 +208,7 @@ test("login errors preserve username, password visibility is accessible, logout 
       page.getByRole("button", { name: "Anmeldung läuft…", exact: true }),
     ).toBeDisabled();
     await expect(page.locator(".spinner")).toBeVisible();
-    await page.locator("form").evaluate((form) => (form as HTMLFormElement).requestSubmit());
+    await page.locator("form").evaluate((form: HTMLFormElement) => form.requestSubmit());
     expect(submissions).toBe(1);
   } finally {
     release();
