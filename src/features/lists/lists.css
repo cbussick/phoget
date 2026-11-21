@@ -81,7 +81,7 @@
 }
 
 .list-items-card.list-card {
-  flex: 1;
+  flex: 0 1 auto;
   min-block-size: 0;
   overflow: auto;
   overscroll-behavior: contain;
@@ -444,6 +444,10 @@
 
   .list-card {
     padding-inline: var(--space-5);
+  }
+
+  .list-items-card.list-card {
+    flex: 1;
   }
 
   .lists-header {

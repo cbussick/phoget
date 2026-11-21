@@ -71,6 +71,59 @@ test("status tabs support keyboard selection, empty states, count-free labels, a
   await expect(page.getByRole("button", { name: "Milk", exact: true })).toBeVisible();
 });
 
+test("desktop list pane fits short content and scrolls long content below the controls", async ({
+  page,
+  request,
+}) => {
+  const height = 700;
+  await page.setViewportSize({ width: 1280, height });
+  const response = await request.post("/api/lists", { data: { name: "Desktop pane" } });
+  expect(response.status()).toBe(201);
+  const list = listSchema.parse(await response.json());
+  createdListIds.push(list.id);
+
+  for (let index = 1; index <= 16; index++) {
+    const response = await request.post(`/api/lists/${list.id}/items`, {
+      data: { name: `Item ${index}` },
+    });
+    expect(response.status()).toBe(201);
+    if (index === 1) {
+      const item = addItemResultSchema.parse(await response.json());
+      expect(
+        (await request.patch(`/api/items/${item.id}`, { data: { completed: true } })).status(),
+      ).toBe(200);
+    }
+  }
+
+  await page.goto(`/lists/${list.id}`);
+  const open = page.getByRole("tab", { name: "Offen", exact: true });
+  const completed = page.getByRole("tab", { name: "Erledigt", exact: true });
+  const pane = page.getByRole("tabpanel");
+  await completed.click();
+  const onlyRow = page.getByRole("button", { name: "Item 1", exact: true });
+  await expect(onlyRow).toBeInViewport();
+  const shortPane = (await pane.boundingBox())!;
+  const row = (await onlyRow.boundingBox())!;
+  expect(shortPane.y + shortPane.height - (row.y + row.height)).toBeLessThan(64);
+
+  await open.click();
+  const longPane = (await pane.boundingBox())!;
+  expect(longPane.y + longPane.height).toBeLessThanOrEqual(height);
+  const availableBottom = await page.locator("#main-content").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return element.getBoundingClientRect().bottom - Number.parseFloat(style.paddingBottom);
+  });
+  expect(longPane.y + longPane.height).toBeCloseTo(availableBottom, 0);
+  const lastRow = page.getByRole("button", { name: "Item 16", exact: true });
+  await expect(lastRow).not.toBeInViewport();
+  const tabsBeforeScroll = await open.boundingBox();
+  await lastRow.scrollIntoViewIfNeeded();
+  await expect(lastRow).toBeInViewport();
+  expect(await pane.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  expect(await open.boundingBox()).toEqual(tabsBeforeScroll);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test("reordering completed entries persists without changing the open section", async ({
   page,
   request,
