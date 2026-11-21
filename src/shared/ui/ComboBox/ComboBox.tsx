@@ -38,7 +38,9 @@ export function ComboBox({
   const input = useRef<HTMLInputElement>(null);
   useImperativeHandle(inputRef, () => {
     const element = input.current;
-    if (!element) { throw new Error("ComboBox input is not mounted"); }
+    if (!element) {
+      throw new Error("ComboBox input is not mounted");
+    }
     return element;
   });
   const popup = useRef<HTMLDivElement>(null);

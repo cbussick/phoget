@@ -44,7 +44,9 @@ export function ToggleButtonGroup({
             return;
           }
           event.preventDefault();
-          const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:enabled")];
+          const buttons = [
+            ...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:enabled"),
+          ];
           const index = buttons.findIndex((button) => button.matches(":focus"));
           const next =
             event.key === "Home"

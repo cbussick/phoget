@@ -14,7 +14,9 @@ import { UpdateNotice } from "./UpdateNotice";
 
 const queryClient = new QueryClient();
 const root = document.getElementById("root");
-if (!root) { throw new Error("Missing application root"); }
+if (!root) {
+  throw new Error("Missing application root");
+}
 createRoot(root).render(
   <React.StrictMode>
     <ErrorBoundary>

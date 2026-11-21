@@ -242,11 +242,7 @@ export async function createItem(
 type ItemChanges = { name?: string; note?: string; completed?: boolean };
 type PositionedItemChanges = ItemChanges & { position?: SQL };
 
-export async function changeItem(
-  id: string,
-  input: ItemChanges | null,
-  actor: Actor,
-) {
+export async function changeItem(id: string, input: ItemChanges | null, actor: Actor) {
   return database.transaction(async (transaction) => {
     const [located] = await transaction
       .select({ listId: items.listId })
@@ -268,11 +264,7 @@ export async function changeItem(
     const [row] =
       input === null
         ? await transaction.delete(items).where(eq(items.id, id)).returning()
-        : await transaction
-            .update(items)
-            .set(changes)
-            .where(eq(items.id, id))
-            .returning();
+        : await transaction.update(items).set(changes).where(eq(items.id, id)).returning();
     if (!row) {
       throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     }

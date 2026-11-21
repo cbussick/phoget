@@ -30,7 +30,9 @@ test(
   async () => {
     const occupied = await reservePort();
     const backend = await reservePort();
-    await new Promise<void>((resolve) => { backend.server.close(() => resolve()); });
+    await new Promise<void>((resolve) => {
+      backend.server.close(() => resolve());
+    });
     const cacheDir = await mkdtemp(resolve(tmpdir(), "phoget-vite-test-"));
     const child = spawn(
       process.execPath,

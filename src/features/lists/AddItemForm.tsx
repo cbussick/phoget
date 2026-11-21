@@ -51,18 +51,25 @@ export function AddItemForm({
     busy: formBusy,
     error,
     submit,
-  } = useValidatedForm({ name: "" }, itemInputSchema.pick({ name: true }), async ({ name }, { reset }) => {
-    await add.mutateAsync(name);
-    reset();
-    if (restoreInputFocus.current) {
-      requestAnimationFrame(() => {
-        // Do not steal focus if the user moved elsewhere while saving.
-        if (document.activeElement === document.body || document.activeElement === input.current) {
-          input.current?.focus();
-        }
-      });
-    }
-  });
+  } = useValidatedForm(
+    { name: "" },
+    itemInputSchema.pick({ name: true }),
+    async ({ name }, { reset }) => {
+      await add.mutateAsync(name);
+      reset();
+      if (restoreInputFocus.current) {
+        requestAnimationFrame(() => {
+          // Do not steal focus if the user moved elsewhere while saving.
+          if (
+            document.activeElement === document.body ||
+            document.activeElement === input.current
+          ) {
+            input.current?.focus();
+          }
+        });
+      }
+    },
+  );
   useErrorSnackbar(error ?? add.error);
   const busy = formBusy || add.isPending || suggestionState.busy;
   return (

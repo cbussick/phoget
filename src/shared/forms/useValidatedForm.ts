@@ -6,7 +6,10 @@ import { ApiError } from "../api/request";
 import type { z } from "zod";
 
 type FieldErrors<T> = Partial<Record<DeepKeys<T>, string>>;
-function isFieldKey<T extends Record<string, string>>(values: T, key: string): key is DeepKeys<T> & string {
+function isFieldKey<T extends Record<string, string>>(
+  values: T,
+  key: string,
+): key is DeepKeys<T> & string {
   return Object.hasOwn(values, key);
 }
 
@@ -24,11 +27,7 @@ export function useValidatedForm<T extends Record<string, string>>(
       try {
         await save(value, { reset: () => formApi.reset() });
       } catch (error_) {
-        if (
-          error_ instanceof ApiError &&
-          error_.field &&
-          isFieldKey(defaultValues, error_.field)
-        ) {
+        if (error_ instanceof ApiError && error_.field && isFieldKey(defaultValues, error_.field)) {
           const fields: FieldErrors<T> = {};
           fields[error_.field] = error_.message;
           formApi.setErrorMap({ onSubmit: { fields } });

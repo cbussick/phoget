@@ -24,9 +24,7 @@ test("new writing icons retain the supplied Lucide paths and are valid list icon
   for (const [name, path] of Object.entries(samples)) {
     assert.equal(iconSchema.parse(name), name);
     assert.ok(
-      renderToStaticMarkup(createElement(Icon, { name: iconSchema.parse(name) })).includes(
-        path,
-      ),
+      renderToStaticMarkup(createElement(Icon, { name: iconSchema.parse(name) })).includes(path),
     );
   }
 });

@@ -5,8 +5,14 @@ import { logger } from "../shared/logging.js";
 test("logging keeps formatted normal output and errors on their respective streams", (t) => {
   const output: Array<string> = [];
   const errors: Array<string> = [];
-  t.mock.method(process.stdout, "write", (text: string) => { output.push(text); return true; });
-  t.mock.method(process.stderr, "write", (text: string) => { errors.push(text); return true; });
+  t.mock.method(process.stdout, "write", (text: string) => {
+    output.push(text);
+    return true;
+  });
+  t.mock.method(process.stderr, "write", (text: string) => {
+    errors.push(text);
+    return true;
+  });
   logger.info("request %s: %d", "GET", 200);
   logger.log("ready");
   logger.error("failed", { code: "EIO" });

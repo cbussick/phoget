@@ -70,7 +70,10 @@ app.use("/api", (request, response, next) => {
   response.once("finish", () => {
     // Use Express route templates, never raw URLs (which may contain IDs or query strings).
     const matchedRoute: unknown = request.route;
-    const route = typeof matchedRoute === "object" && matchedRoute !== null && "path" in matchedRoute ? matchedRoute.path : undefined;
+    const route =
+      typeof matchedRoute === "object" && matchedRoute !== null && "path" in matchedRoute
+        ? matchedRoute.path
+        : undefined;
     logger.info(
       JSON.stringify({
         event: "api_request",

@@ -7,80 +7,118 @@ import { createServer } from "vite";
 import { chromium, firefox, webkit } from "playwright";
 import { expect } from "@playwright/test";
 
-test("controls discard open/highlight state across disabled and invalid transitions", { timeout: 120_000 }, async (t) => {
-  const cacheDir = await mkdtemp(join(tmpdir(), "phoget-control-lifecycle-"));
-  const server = await createServer({ cacheDir, server: {host: "127.0.0.1", port: 0, hmr: false}, plugins: [{ name: "control-lifecycle-fixture", configureServer(server) {
-  server.middlewares.use("/control-lifecycle", (_request, response) => {
-    void server.transformIndexHtml("/control-lifecycle", '<div id="root"></div><script type="module" src="/tests/fixtures/controlLifecycle.tsx"></script>').then((html) => {
-      response.setHeader("Content-Type", "text/html");
-      response.end(html);
+test(
+  "controls discard open/highlight state across disabled and invalid transitions",
+  { timeout: 120_000 },
+  async (t) => {
+    const cacheDir = await mkdtemp(join(tmpdir(), "phoget-control-lifecycle-"));
+    const server = await createServer({
+      cacheDir,
+      server: { host: "127.0.0.1", port: 0, hmr: false },
+      plugins: [
+        {
+          name: "control-lifecycle-fixture",
+          configureServer(server) {
+            server.middlewares.use("/control-lifecycle", (_request, response) => {
+              void server
+                .transformIndexHtml(
+                  "/control-lifecycle",
+                  '<div id="root"></div><script type="module" src="/tests/fixtures/controlLifecycle.tsx"></script>',
+                )
+                .then((html) => {
+                  response.setHeader("Content-Type", "text/html");
+                  response.end(html);
+                });
+            });
+          },
+        },
+      ],
     });
-  });
-  } }] });
-  await server.listen();
-  const address = server.httpServer?.address();
-  assert.ok(address && typeof address !== "string");
-  try {
-    for (const [name, engine] of Object.entries({chromium, firefox, webkit})) {
-      await t.test(name, async () => {
-        const browser = await engine.launch();
-        try {
-          const page = await browser.newPage();
-          await page.route("**/api/lists/**", (route) => route.fulfill({json: route.request().method() === "DELETE" ? { remembered: null, removedCompleted: false, undoToken: "22222222-2222-4222-8222-222222222222" } : {names: ["Coffee"], oftenBought: []}}));
-          await page.goto(`http://127.0.0.1:${address.port}/control-lifecycle`);
-          const combo = page.getByRole("combobox", {name: "Item", exact: true});
-          const select = page.getByRole("combobox", {name: "Role", exact: true});
-          await combo.focus();
-          await combo.press("ArrowDown");
-          await expect(combo).toHaveAttribute("aria-expanded", "true");
-          await expect(combo).toHaveAttribute("aria-activedescendant", /.+/);
-          // Programmatic prop transitions must not rely on blur to reset state.
-          await page.locator("#error").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(combo).toHaveAttribute("aria-expanded", "false");
-          await page.locator("#error").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(combo).toHaveAttribute("aria-expanded", "false");
-          await expect(combo).not.toHaveAttribute("aria-activedescendant");
-          await combo.press("ArrowDown");
-          await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(combo).toBeDisabled();
-          await expect(combo).toHaveAttribute("aria-expanded", "false");
-          await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(combo).toHaveAttribute("aria-expanded", "false");
-          await select.click();
-          await expect(select).toHaveAttribute("aria-expanded", "true");
-          await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(select).toHaveAttribute("aria-expanded", "false");
-          await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
-          await expect(select).toHaveAttribute("aria-expanded", "false");
-          await select.press("End");
-          await select.press("Enter");
-          await expect(select).toHaveText("Admin");
-          await page.getByRole("button", {name: "Forget coffee"}).click();
-          await expect(page.locator("#undo-state")).toHaveText("undo available");
-          await page.getByRole("button", {name: "Toggle managing"}).click();
-          await page.getByRole("button", {name: "Toggle managing"}).click();
-          await expect(page.locator("#undo-state")).toHaveText("no undo");
-          let releaseSave: (() => void) | undefined;
-          const saveHold = new Promise<void>((resolve) => { releaseSave = resolve; });
-          await page.route("**/lifecycle-save", async (route) => { await saveHold; await route.fulfill({status: 204}); });
-          await page.getByRole("button", {name: "A verschieben", exact: true}).focus();
-          await page.keyboard.press("Space");
-          await expect(page.locator(".lifecycle-rows .is-dragging")).toHaveCount(1);
-          await page.keyboard.press("ArrowDown");
-          await expect(page.locator('[id^="DndLiveRegion-"]')).toContainText("Über Position 2.");
-          await page.keyboard.press("Space");
-          const ordered = page.locator(".lifecycle-rows > li > span");
+    await server.listen();
+    const address = server.httpServer?.address();
+    assert.ok(address && typeof address !== "string");
+    try {
+      for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
+        await t.test(name, async () => {
+          const browser = await engine.launch();
           try {
-            await expect(ordered).toHaveText(["B", "A"]);
-            await page.getByRole("button", {name: "Server update"}).click();
-            await expect(ordered).toHaveText(["B", "A", "C"]);
-          } finally { releaseSave?.(); }
-          await expect(ordered).toHaveText(["C", "B", "A"]);
-        } finally { await browser.close(); }
-      });
+            const page = await browser.newPage();
+            await page.route("**/api/lists/**", (route) =>
+              route.fulfill({
+                json:
+                  route.request().method() === "DELETE"
+                    ? {
+                        remembered: null,
+                        removedCompleted: false,
+                        undoToken: "22222222-2222-4222-8222-222222222222",
+                      }
+                    : { names: ["Coffee"], oftenBought: [] },
+              }),
+            );
+            await page.goto(`http://127.0.0.1:${address.port}/control-lifecycle`);
+            const combo = page.getByRole("combobox", { name: "Item", exact: true });
+            const select = page.getByRole("combobox", { name: "Role", exact: true });
+            await combo.focus();
+            await combo.press("ArrowDown");
+            await expect(combo).toHaveAttribute("aria-expanded", "true");
+            await expect(combo).toHaveAttribute("aria-activedescendant", /.+/);
+            // Programmatic prop transitions must not rely on blur to reset state.
+            await page.locator("#error").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(combo).toHaveAttribute("aria-expanded", "false");
+            await page.locator("#error").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(combo).toHaveAttribute("aria-expanded", "false");
+            await expect(combo).not.toHaveAttribute("aria-activedescendant");
+            await combo.press("ArrowDown");
+            await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(combo).toBeDisabled();
+            await expect(combo).toHaveAttribute("aria-expanded", "false");
+            await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(combo).toHaveAttribute("aria-expanded", "false");
+            await select.click();
+            await expect(select).toHaveAttribute("aria-expanded", "true");
+            await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(select).toHaveAttribute("aria-expanded", "false");
+            await page.locator("#disabled").evaluate((button: HTMLButtonElement) => button.click());
+            await expect(select).toHaveAttribute("aria-expanded", "false");
+            await select.press("End");
+            await select.press("Enter");
+            await expect(select).toHaveText("Admin");
+            await page.getByRole("button", { name: "Forget coffee" }).click();
+            await expect(page.locator("#undo-state")).toHaveText("undo available");
+            await page.getByRole("button", { name: "Toggle managing" }).click();
+            await page.getByRole("button", { name: "Toggle managing" }).click();
+            await expect(page.locator("#undo-state")).toHaveText("no undo");
+            let releaseSave: (() => void) | undefined;
+            const saveHold = new Promise<void>((resolve) => {
+              releaseSave = resolve;
+            });
+            await page.route("**/lifecycle-save", async (route) => {
+              await saveHold;
+              await route.fulfill({ status: 204 });
+            });
+            await page.getByRole("button", { name: "A verschieben", exact: true }).focus();
+            await page.keyboard.press("Space");
+            await expect(page.locator(".lifecycle-rows .is-dragging")).toHaveCount(1);
+            await page.keyboard.press("ArrowDown");
+            await expect(page.locator('[id^="DndLiveRegion-"]')).toContainText("Über Position 2.");
+            await page.keyboard.press("Space");
+            const ordered = page.locator(".lifecycle-rows > li > span");
+            try {
+              await expect(ordered).toHaveText(["B", "A"]);
+              await page.getByRole("button", { name: "Server update" }).click();
+              await expect(ordered).toHaveText(["B", "A", "C"]);
+            } finally {
+              releaseSave?.();
+            }
+            await expect(ordered).toHaveText(["C", "B", "A"]);
+          } finally {
+            await browser.close();
+          }
+        });
+      }
+    } finally {
+      await server.close();
+      await rm(cacheDir, { recursive: true, force: true });
     }
-  } finally {
-    await server.close();
-    await rm(cacheDir, {recursive: true, force: true});
-  }
-});
+  },
+);

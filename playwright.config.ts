@@ -40,16 +40,21 @@ export default defineConfig({
       baseURL: origin,
     },
   })),
-  webServer: environments
-    .flatMap(({ name, databaseUrl, port: browserPort, origin }) => name === process.env.PHOGET_BROWSER_PROJECT ? [{ 
-      command: "node --env-file=.env.test dist/server/index.js",
-      env: {
-        DATABASE_URL: databaseUrl,
-        PORT: browserPort,
-        APP_ORIGIN: origin,
-        NODE_ENV: "production",
-      },
-      url: `${origin}/api/health`,
-      reuseExistingServer: false,
-    }] : []),
+  webServer: environments.flatMap(({ name, databaseUrl, port: browserPort, origin }) =>
+    name === process.env.PHOGET_BROWSER_PROJECT
+      ? [
+          {
+            command: "node --env-file=.env.test dist/server/index.js",
+            env: {
+              DATABASE_URL: databaseUrl,
+              PORT: browserPort,
+              APP_ORIGIN: origin,
+              NODE_ENV: "production",
+            },
+            url: `${origin}/api/health`,
+            reuseExistingServer: false,
+          },
+        ]
+      : [],
+  ),
 });

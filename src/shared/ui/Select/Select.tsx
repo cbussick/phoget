@@ -138,15 +138,15 @@ export function Select({
     }
   }
 
-
-
   useEffect(() => {
     if (!expanded) {
       return;
     }
     const dismiss = (event: PointerEvent) => {
       if (
-        !event.composedPath().some((target) => target === trigger.current || target === popup.current)
+        !event
+          .composedPath()
+          .some((target) => target === trigger.current || target === popup.current)
       ) {
         setOpen(false);
       }

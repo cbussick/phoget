@@ -28,10 +28,10 @@ for (const value of [port, apiPort]) {
 // using the actual URL, rather than probing a port and racing another process.
 // https://vite.dev/guide/api-javascript.html#createserver
 const serverOptions: ServerOptions = {
-    host: "127.0.0.1",
-    port,
-    strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
-    proxy: { "/api": `http://127.0.0.1:${apiPort}` },
+  host: "127.0.0.1",
+  port,
+  strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
+  proxy: { "/api": `http://127.0.0.1:${apiPort}` },
 };
 if (publicOrigin) {
   serverOptions.allowedHosts = [new URL(publicOrigin).hostname];

@@ -61,7 +61,12 @@ setTimeout(() => {
   });
   const events = async () => {
     const contents = await readFile(eventLog, "utf8").catch((error: unknown) => {
-      if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
         return "";
       }
       throw error;

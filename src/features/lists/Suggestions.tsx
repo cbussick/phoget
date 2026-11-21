@@ -26,7 +26,9 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
   const [previousManaging, setPreviousManaging] = useState(managing);
   if (previousManaging !== managing) {
     setPreviousManaging(managing);
-    if (!managing) { setForgotten(null); }
+    if (!managing) {
+      setForgotten(null);
+    }
   }
   useEffect(() => {
     if (!forgotten) {
@@ -79,7 +81,7 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
   useErrorSnackbar(remove.error ?? restore.error);
   const busy = remove.isPending || restore.isPending;
   const activeNames = new Set(
-    items.flatMap((item) => item.completed ? [] : [item.name.toLowerCase()]),
+    items.flatMap((item) => (item.completed ? [] : [item.name.toLowerCase()])),
   );
   // History refreshes on mount, focus and mutations; never offer removal of a known active item.
   const names = (history.data?.names ?? []).filter((name) => !activeNames.has(name.toLowerCase()));

@@ -364,7 +364,9 @@ test("long touch hold on the handle drags without selecting text or opening the 
           );
         };
         fire("touchstart", y);
-        await new Promise((resolve) => { setTimeout(resolve, 320); });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 320);
+        });
         fire("touchmove", ty);
         fire("touchend", ty);
       },
@@ -392,10 +394,14 @@ test("long touch hold on the handle drags without selecting text or opening the 
             }),
           );
         fire("touchstart", sx, sy);
-        await new Promise((resolve) => { setTimeout(resolve, 1100); });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1100);
+        });
         for (let i = 1; i <= 10; i++) {
           fire("touchmove", sx + ((tx - sx) * i) / 10, sy + ((ty - sy) * i) / 10);
-          await new Promise((resolve) => { setTimeout(resolve, 16); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 16);
+          });
         }
         fire("touchend", tx, ty);
       },

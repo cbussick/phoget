@@ -17,7 +17,9 @@ async function capture(page: Page, entry: Entry) {
   entries.push(entry);
   await page
     .getByRole("button", { name: "Meldung schließen" })
-    .evaluateAll((buttons: Array<HTMLButtonElement>) => buttons.forEach((button) => button.click()));
+    .evaluateAll((buttons: Array<HTMLButtonElement>) =>
+      buttons.forEach((button) => button.click()),
+    );
   await page.waitForTimeout(250);
 }
 const failure =

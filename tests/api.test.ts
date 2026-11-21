@@ -1,7 +1,13 @@
 import { logger } from "../shared/logging.js";
 import { z } from "zod";
 
-const requestLogSchema = z.object({ requestId: z.string(), route: z.string(), status: z.number(), method: z.string(), durationMs: z.number() });
+const requestLogSchema = z.object({
+  requestId: z.string(),
+  route: z.string(),
+  status: z.number(),
+  method: z.string(),
+  durationMs: z.number(),
+});
 import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
@@ -32,7 +38,9 @@ before(async () => {
   );
   assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
   server = app.listen(0, "127.0.0.1");
-  await new Promise<void>((resolve) => { server.on("listening", resolve); });
+  await new Promise<void>((resolve) => {
+    server.on("listening", resolve);
+  });
   const address = server.address();
   assert.ok(address && typeof address === "object");
   base = "http://127.0.0.1:" + address.port;
@@ -46,7 +54,9 @@ beforeEach(async () => {
 });
 after(async () => {
   await prepareAccounts();
-  await new Promise<void>((resolve) => { server.close(() => resolve()); });
+  await new Promise<void>((resolve) => {
+    server.close(() => resolve());
+  });
   await pool.end();
 });
 function send(path: string, method = "GET", body?: unknown, headers: Record<string, string> = {}) {
@@ -129,7 +139,10 @@ test("shared reorder persists, rejects stale orders, and keeps sections separate
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
   ]);
-  assert.deepEqual(concurrent.map((response) => response.status).sort((a, b) => a - b), [204, 409]);
+  assert.deepEqual(
+    concurrent.map((response) => response.status).sort((a, b) => a - b),
+    [204, 409],
+  );
   assert.equal(
     (await send(path, "PUT", { before: [a.id, b.id], after: [b.id, a.id] })).status,
     204,

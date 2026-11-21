@@ -26,7 +26,9 @@ export function Dialog({
   const titleId = useId();
   useEffect(() => {
     const dialog = ref.current;
-    if (!dialog) { return; }
+    if (!dialog) {
+      return;
+    }
     const previous = document.activeElement;
     dialog.showModal();
     dialog

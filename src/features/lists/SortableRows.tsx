@@ -59,15 +59,21 @@ export function SortableRow({
           zIndex: isDragging ? 2 : undefined,
         } as CSSProperties
       }
-      onMouseDown={(event) => { listeners?.onMouseDown?.(event); }}
+      onMouseDown={(event) => {
+        listeners?.onMouseDown?.(event);
+      }}
     >
       <button
         type="button"
         className="sort-handle"
         ref={setActivatorNodeRef}
         {...attributes}
-        onKeyDown={(event) => { listeners?.onKeyDown?.(event); }}
-        onTouchStart={(event) => { listeners?.onTouchStart?.(event); }}
+        onKeyDown={(event) => {
+          listeners?.onKeyDown?.(event);
+        }}
+        onTouchStart={(event) => {
+          listeners?.onTouchStart?.(event);
+        }}
         aria-label={`${label} verschieben`}
         onClick={(event) => event.preventDefault()}
       >
@@ -119,7 +125,10 @@ export function SortableRows<T extends { id: string }, Result>({
     // dnd-kit intercepts the post-drag click at document capture, before React
     // sees it. Prevent the browser's native link navigation at window capture.
     const preventDragClick = (event: MouseEvent) => {
-      if (!suppressClick.current || !event.composedPath().some((target) => target === listRef.current)) {
+      if (
+        !suppressClick.current ||
+        !event.composedPath().some((target) => target === listRef.current)
+      ) {
         return;
       }
       event.preventDefault();
