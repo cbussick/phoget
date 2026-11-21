@@ -30,8 +30,39 @@ No issue categories or files were ignored to obtain that result.
 A temporary unreferenced TypeScript file in `src/shared/ui` made production Knip
 fail with that exact unused-file finding; removing the probe restored green.
 This confirms production source remains checked rather than broadly excluded.
-Raw local evidence is retained in the task worktree's ignored
-`.runtime/knip-baseline/` directory. No probes remain.
+No probes remain. Disposable local evidence is removed after delivery; this audit
+and the delivery PR retain the diagnosis and verification summary.
+
+### Baseline follow-up verification
+
+Implementation `040370f` was reviewed by two fresh independent local read-only
+Pi processes (standards and spec), both with zero actionable findings. Neither
+reviewer reran the checks. The original CLI loops and `test:knip` failed before
+changes and passed afterwards; the production dead-source probe also failed with
+the expected unused-file finding before removal.
+
+All required check stages passed against the implementation tree: both compiler
+projects, Oxlint/Stylelint, formatting, Vite/server build, 76 Node/API tests (zero
+skips), production-container photo conversions (JPEG/PNG/WebP/HEIC and both large
+JPEG fixtures), Chromium (60 passed), Firefox and WebKit (59 passed and one
+existing platform-conditional skip each), and Storybook (17 passed). No skips,
+assertions, timeouts or tolerances were weakened. Both Knip modes pass with only
+the six documented normal-mode redundancy hints.
+
+These results were completed in stages, not one successful aggregate invocation:
+the first full check was interrupted during WebKit. Only missing WebKit and
+Storybook stages were then run, serially, against the existing E2E build and
+isolated runtime. The first WebKit resume hit a transient occupied task port;
+inspection found it unbound and a retry passed without killing any process.
+Firefox took 8.5 minutes and WebKit 8.3 minutes. Runtime performance investigation
+is tracked separately in PHO-21; no performance changes are bundled here.
+
+At delivery, the remote target still matched base `914e55e`; no reconciliation
+source changes were necessary. Existing full-stage results were reused rather
+than restarting the browser suites. Final bounded validation covers both Knip
+modes and formatting. Task-owned databases, dependencies, generated builds,
+screenshots/results and raw logs/reviewer scratch are disposable after merge;
+tracked fixtures, useful branding tools and unrelated worktrees remain intact.
 
 ## Scope and configuration
 
