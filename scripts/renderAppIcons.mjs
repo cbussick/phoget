@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { crc32, deflateSync } from "node:zlib";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 
 const chunk = (type, data) => {
   const tag = Buffer.from(type);

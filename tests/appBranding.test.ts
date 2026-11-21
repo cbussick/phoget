@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
 import { createServer } from "vite";
-import { chromium, firefox, webkit } from "playwright";
+import { chromium, firefox, webkit } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const user = {

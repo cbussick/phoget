@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes } from "react";
-import "../choiceControl.css";
+import "../../src/shared/ui/choiceControl.css";
 
 export function Radio({
   label,

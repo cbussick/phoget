@@ -1,5 +1,38 @@
 # Knip audit
 
+## Baseline follow-up (base 914e55e)
+
+This section supersedes the historical findings below. Both `npm run knip` and
+`npm run knip:production` now pass; `npm run test:knip` validates both with their
+original failure exit codes. It failed before the changes and passes afterwards.
+No issue categories or files were ignored to obtain that result.
+
+- Four manual branding CLIs are explicit development entries. They generate app
+  icons, regenerate Little Tangle review assets, check SVG contact geometry, and
+  compare artwork with its reference fixture. They are useful tooling, not dead
+  code; their implementations and assertions are retained.
+- Those CLIs and two browser test helpers now import browser launchers from the
+  already-declared `@playwright/test`, which re-exports the Playwright API. They
+  no longer rely on an undeclared transitive `playwright` dependency.
+- The unused `Member` type alias had no code references in this private app and
+  was removed. `memberSchema` and all account runtime contracts are unchanged.
+- Radio has no application consumers, but its three Storybook examples remain
+  useful. Its implementation now lives in `.storybook/components/Radio.tsx`,
+  outside the production source inventory, with the same props/rendering and
+  shared CSS. The existing story imports it there; no fake runtime entry or
+  blanket UI exclusion was added. This is a development-only boundary, not a
+  deletion of the component API.
+- The stale tsrs dependency ignore was removed: Knip now discovers the backend.
+  Six normal-mode redundant-entry hints remain intentional: script/plugin
+  discovery overlaps explicit roots needed for production analysis. They are
+  not unused-code findings, and no hints are suppressed.
+
+A temporary unreferenced TypeScript file in `src/shared/ui` made production Knip
+fail with that exact unused-file finding; removing the probe restored green.
+This confirms production source remains checked rather than broadly excluded.
+Raw local evidence is retained in the task worktree's ignored
+`.runtime/knip-baseline/` directory. No probes remain.
+
 ## Scope and configuration
 
 Knip is pinned locally to 6.42.1. Run `npm run knip` and

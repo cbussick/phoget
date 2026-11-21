@@ -1,8 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6.42.1/schema-jsonc.json",
   "ignoreExportsUsedInFile": true,
-  // Oxlint discovers this type-aware backend at runtime rather than through imports.
-  "ignoreDependencies": ["tsrs"],
   "entry": [
     "src/app/main.tsx!",
     "server/index.ts!",
@@ -11,6 +9,11 @@
     "server/db/seed.ts",
     "server/db/seedDevelopment.ts",
     "scripts/worktree.mjs",
+    // Manual asset generation and visual/reference verification, not runtime code.
+    "scripts/renderAppIcons.mjs",
+    "scripts/renderLittleTangleReview.mjs",
+    "scripts/verifyBrandingSvg.mjs",
+    "scripts/verifyLittleTangleReference.mjs",
     "tests/*.test.ts",
     "tests/*.spec.ts",
     "scripts/errorGallery.spec.ts",
