@@ -47,7 +47,7 @@ after(async () => {
   await pool.end();
 });
 function send(path: string, method = "GET", body?: unknown, headers: Record<string, string> = {}) {
-  return fetch(base + "/api" + path, {
+  const options: RequestInit = {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -55,8 +55,11 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
       Cookie: path === "/session" && method === "POST" ? "" : cookie,
       ...headers,
     },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  };
+  if (body !== undefined) {
+    options.body = JSON.stringify(body);
+  }
+  return fetch(base + "/api" + path, options);
 }
 test("request logs use route templates without exposing query strings or list IDs", async () => {
   const messages: Array<string> = [];

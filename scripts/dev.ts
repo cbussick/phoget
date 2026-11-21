@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { parseArgs } from "node:util";
 import { createServer } from "vite";
+import type { ServerOptions } from "vite";
 
 const { values } = parseArgs({
   options: { port: { type: "string", default: process.env.PHOGET_DEV_PORT ?? "5173" } },
@@ -26,15 +27,16 @@ for (const value of [port, apiPort]) {
 // Vite owns the port reservation/fallback. Start the API only after listen(),
 // using the actual URL, rather than probing a port and racing another process.
 // https://vite.dev/guide/api-javascript.html#createserver
-const vite = await createServer({
-  server: {
+const serverOptions: ServerOptions = {
     host: "127.0.0.1",
     port,
     strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
-    ...(publicOrigin ? { allowedHosts: [new URL(publicOrigin).hostname] } : {}),
     proxy: { "/api": `http://127.0.0.1:${apiPort}` },
-  },
-});
+};
+if (publicOrigin) {
+  serverOptions.allowedHosts = [new URL(publicOrigin).hostname];
+}
+const vite = await createServer({ server: serverOptions });
 let api: ChildProcess | undefined;
 let stopping = false;
 async function stop(code = 0) {

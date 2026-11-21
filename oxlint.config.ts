@@ -64,7 +64,6 @@ export default defineConfig({
       rules: {
         // Temporary migration baseline; remove each entry with its fixes.
         "react/immutability": "off",
-        "quality/no-conditional-empty-object-spread": "off",
         "react/set-state-in-effect": "off",
         "unicorn/consistent-function-scoping": "off",
         "react-hooks/exhaustive-deps": "off",

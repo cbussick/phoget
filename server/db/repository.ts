@@ -1,4 +1,5 @@
 import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
 import { createUndoStore } from "../undoStore.js";
 import { HttpError } from "../httpErrors.js";
 import { z } from "zod";
@@ -238,9 +239,12 @@ export async function createItem(
     return { ...parsed, outcome: "created" as const };
   });
 }
+type ItemChanges = { name?: string; note?: string; completed?: boolean };
+type PositionedItemChanges = ItemChanges & { position?: SQL };
+
 export async function changeItem(
   id: string,
-  input: { name?: string; note?: string; completed?: boolean } | null,
+  input: ItemChanges | null,
   actor: Actor,
 ) {
   return database.transaction(async (transaction) => {
@@ -257,19 +261,16 @@ export async function changeItem(
       throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     }
     const original = databaseItemSchema.parse(previous);
+    const changes: PositionedItemChanges = { ...input };
+    if (input?.completed !== undefined && input.completed !== previous.completed) {
+      changes.position = sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${previous.listId} AND completed = ${input.completed})`;
+    }
     const [row] =
       input === null
         ? await transaction.delete(items).where(eq(items.id, id)).returning()
         : await transaction
             .update(items)
-            .set({
-              ...input,
-              ...(input.completed !== undefined && input.completed !== previous.completed
-                ? {
-                    position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${previous.listId} AND completed = ${input.completed})`,
-                  }
-                : {}),
-            })
+            .set(changes)
             .where(eq(items.id, id))
             .returning();
     if (!row) {
