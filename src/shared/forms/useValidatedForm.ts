@@ -1,12 +1,22 @@
-import { useState, type FormEvent } from "react";
-import { useForm, useStore, type DeepKeys } from "@tanstack/react-form";
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import type { DeepKeys } from "@tanstack/react-form";
 import { ApiError } from "../api/request";
 import type { z } from "zod";
+
+type FieldErrors<T> = Partial<Record<DeepKeys<T>, string>>;
+function isFieldKey<T extends Record<string, string>>(
+  values: T,
+  key: string,
+): key is DeepKeys<T> & string {
+  return Object.hasOwn(values, key);
+}
 
 export function useValidatedForm<T extends Record<string, string>>(
   defaultValues: T,
   schema: z.ZodType<unknown, T>,
-  save: (value: T) => Promise<void>,
+  save: (value: T, controls: { reset: () => void }) => Promise<void>,
 ) {
   const [error, setError] = useState<Error | null>(null);
   const form = useForm({
@@ -15,20 +25,15 @@ export function useValidatedForm<T extends Record<string, string>>(
     onSubmit: async ({ value, formApi }) => {
       setError(null);
       try {
-        await save(value);
-      } catch (failure) {
-        if (
-          failure instanceof ApiError &&
-          failure.field &&
-          Object.hasOwn(defaultValues, failure.field)
-        ) {
-          // The server field was validated above against this form's own keys.
-          const fields = { [failure.field]: failure.message } as Partial<
-            Record<DeepKeys<T>, string>
-          >;
+        await save(value, { reset: () => formApi.reset() });
+      } catch (error_) {
+        if (error_ instanceof ApiError && error_.field && isFieldKey(defaultValues, error_.field)) {
+          const fields: FieldErrors<T> = {};
+          fields[error_.field] = error_.message;
           formApi.setErrorMap({ onSubmit: { fields } });
-        } else
-          setError(failure instanceof Error ? failure : new Error("Bitte versuche es erneut."));
+        } else {
+          setError(error_ instanceof Error ? error_ : new Error("Bitte versuche es erneut."));
+        }
       }
     },
   });
@@ -38,9 +43,13 @@ export function useValidatedForm<T extends Record<string, string>>(
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const element = event.currentTarget;
-    if (form.state.isSubmitting) return;
+    if (form.state.isSubmitting) {
+      return;
+    }
     void form.handleSubmit().then(() => {
-      if (!form.state.isValid) element.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      if (!form.state.isValid) {
+        element.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      }
     });
   }
   return { form, busy, error, submit };
@@ -48,13 +57,15 @@ export function useValidatedForm<T extends Record<string, string>>(
 
 type Field = {
   name: string;
-  state: { value: string; meta: { errors: unknown[] } };
+  state: { value: string; meta: { errors: Array<unknown> } };
   form: { state: { submissionAttempts: number } };
   handleChange: (value: string) => void;
   handleBlur: () => void;
 };
 export function fieldError(field: Pick<Field, "state" | "form">) {
-  if (!field.form.state.submissionAttempts) return undefined;
+  if (!field.form.state.submissionAttempts) {
+    return undefined;
+  }
   const error = field.state.meta.errors[0];
   return typeof error === "string"
     ? error

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -8,8 +9,8 @@ import {
   useSensor,
   useSensors,
   useDndContext,
-  type DragEndEvent,
 } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -58,15 +59,21 @@ export function SortableRow({
           zIndex: isDragging ? 2 : undefined,
         } as CSSProperties
       }
-      onMouseDown={(event) => listeners?.onMouseDown?.(event)}
+      onMouseDown={(event) => {
+        listeners?.onMouseDown?.(event);
+      }}
     >
       <button
         type="button"
         className="sort-handle"
         ref={setActivatorNodeRef}
         {...attributes}
-        onKeyDown={(event) => listeners?.onKeyDown?.(event)}
-        onTouchStart={(event) => listeners?.onTouchStart?.(event)}
+        onKeyDown={(event) => {
+          listeners?.onKeyDown?.(event);
+        }}
+        onTouchStart={(event) => {
+          listeners?.onTouchStart?.(event);
+        }}
         aria-label={`${label} verschieben`}
         onClick={(event) => event.preventDefault()}
       >
@@ -94,20 +101,20 @@ export function SortableRow({
   );
 }
 
-export function SortableRows<T extends { id: string }>({
+export function SortableRows<T extends { id: string }, Result>({
   rows,
   className,
   save,
   renderRow,
   getLabel,
 }: {
-  rows: T[];
+  rows: Array<T>;
   className: string;
-  save: (before: string[], after: string[]) => Promise<unknown>;
+  save: (before: Array<string>, after: Array<string>) => Promise<Result>;
   renderRow: (row: T) => ReactNode;
   getLabel: (row: T) => string;
 }) {
-  const [order, setOrder] = useState<string[]>(() => rows.map((row) => row.id));
+  const [order, setOrder] = useState<Array<string>>(() => rows.map((row) => row.id));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // A drag started on a link can still produce a click after mouseup.
@@ -118,7 +125,12 @@ export function SortableRows<T extends { id: string }>({
     // dnd-kit intercepts the post-drag click at document capture, before React
     // sees it. Prevent the browser's native link navigation at window capture.
     const preventDragClick = (event: MouseEvent) => {
-      if (!suppressClick.current || !listRef.current?.contains(event.target as Node)) return;
+      if (
+        !suppressClick.current ||
+        !event.composedPath().some((target) => target === listRef.current)
+      ) {
+        return;
+      }
       event.preventDefault();
       suppressClick.current = false;
     };
@@ -127,10 +139,7 @@ export function SortableRows<T extends { id: string }>({
   }, []);
   const client = useQueryClient();
   const ids = rows.map((row) => row.id);
-  const signature = ids.join("|");
-  useEffect(() => {
-    if (!busy) setOrder(ids);
-  }, [signature, busy]); // Server order is authoritative after sync.
+
   useErrorSnackbar(error);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -138,11 +147,23 @@ export function SortableRows<T extends { id: string }>({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const byId = new Map(rows.map((row) => [row.id, row]));
-  const visible = order.filter((id) => byId.has(id));
-  for (const id of ids) if (!visible.includes(id)) visible.push(id);
+  function labelFor(id: string) {
+    const row = byId.get(id);
+    return row ? getLabel(row) : "Eintrag";
+  }
+  // An optimistic order exists only while saving/refetching. Otherwise the
+  // server props are authoritative, including updates received during a save.
+  const visible = (busy ? order : ids).filter((id) => byId.has(id));
+  for (const id of ids) {
+    if (!visible.includes(id)) {
+      visible.push(id);
+    }
+  }
   async function finish(event: DragEndEvent) {
     const { active, over } = event;
-    if (!over || active.id === over.id || busy) return;
+    if (!over || active.id === over.id || busy) {
+      return;
+    }
     const before = visible;
     const after = arrayMove(
       before,
@@ -154,18 +175,18 @@ export function SortableRows<T extends { id: string }>({
     setError(null);
     try {
       await save(before, after);
-    } catch (failure) {
+    } catch (error_) {
       setOrder(before);
       setError(
-        failure instanceof Error
-          ? failure.message
+        error_ instanceof Error
+          ? error_.message
           : "Die Reihenfolge konnte nicht gespeichert werden.",
       );
     } finally {
-      await client.invalidateQueries({ queryKey: householdKey }).catch((failure: unknown) => {
+      await client.invalidateQueries({ queryKey: householdKey }).catch((error_: unknown) => {
         setError(
-          failure instanceof Error
-            ? failure.message
+          error_ instanceof Error
+            ? error_.message
             : "Die Reihenfolge konnte nicht aktualisiert werden.",
         );
       });
@@ -178,8 +199,9 @@ export function SortableRows<T extends { id: string }>({
       collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       onDragStart={({ activatorEvent }) => {
-        if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart")
+        if (activatorEvent.type === "mousedown" || activatorEvent.type === "touchstart") {
           suppressClick.current = true;
+        }
       }}
       onDragEnd={(event) => void finish(event)}
       accessibility={{
@@ -188,12 +210,12 @@ export function SortableRows<T extends { id: string }>({
             "Leertaste zum Aufnehmen, Pfeiltasten zum Verschieben, Leertaste zum Ablegen, Escape zum Abbrechen.",
         },
         announcements: {
-          onDragStart: ({ active }) => `${getLabel(byId.get(String(active.id))!)} aufgenommen.`,
+          onDragStart: ({ active }) => `${labelFor(String(active.id))} aufgenommen.`,
           onDragOver: ({ over }) =>
             over ? `Über Position ${visible.indexOf(String(over.id)) + 1}.` : "",
           onDragEnd: ({ active, over }) =>
             over
-              ? `${getLabel(byId.get(String(active.id))!)} an Position ${visible.indexOf(String(over.id)) + 1} abgelegt.`
+              ? `${labelFor(String(active.id))} an Position ${visible.indexOf(String(over.id)) + 1} abgelegt.`
               : "Verschieben abgebrochen.",
           onDragCancel: () => "Verschieben abgebrochen.",
         },
@@ -210,7 +232,10 @@ export function SortableRows<T extends { id: string }>({
             suppressClick.current = false;
           }}
         >
-          {visible.map((id) => renderRow(byId.get(id)!))}
+          {visible.map((id) => {
+            const row = byId.get(id);
+            return row ? renderRow(row) : null;
+          })}
         </ul>
       </SortableContext>
     </DndContext>

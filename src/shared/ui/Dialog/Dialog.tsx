@@ -1,5 +1,7 @@
 import "./Dialog.css";
-import { useEffect, useId, useRef, type ReactNode, type FormEventHandler } from "react";
+import { isHtmlElement } from "../dom";
+import { useEffect, useId, useRef } from "react";
+import type { ReactNode, FormEventHandler } from "react";
 import { Button } from "../Button/Button";
 export function Dialog({
   title,
@@ -23,7 +25,10 @@ export function Dialog({
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useEffect(() => {
-    const dialog = ref.current!;
+    const dialog = ref.current;
+    if (!dialog) {
+      return;
+    }
     const previous = document.activeElement;
     dialog.showModal();
     dialog
@@ -31,7 +36,9 @@ export function Dialog({
       ?.focus();
     return () => {
       dialog.close();
-      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      if (isHtmlElement(previous) && previous.isConnected) {
+        previous.focus();
+      }
     };
   }, [initialFocus]);
   return (
@@ -41,18 +48,23 @@ export function Dialog({
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        if (!busy) onClose();
+        if (!busy) {
+          onClose();
+        }
       }}
       onClick={(event) => {
-        if (event.target !== event.currentTarget || busy) return;
+        if (event.target !== event.currentTarget || busy) {
+          return;
+        }
         const box = event.currentTarget.getBoundingClientRect();
         if (
           event.clientX < box.left ||
           event.clientX > box.right ||
           event.clientY < box.top ||
           event.clientY > box.bottom
-        )
+        ) {
           onClose();
+        }
       }}
     >
       <form noValidate onSubmit={onSubmit}>

@@ -1,4 +1,5 @@
-import { useId, useRef, type ReactNode } from "react";
+import { useId } from "react";
+import type { ReactNode } from "react";
 import "./ToggleButtonGroup.css";
 
 type Option = { value: string; label: string; icon: ReactNode; disabled?: boolean };
@@ -13,14 +14,13 @@ export function ToggleButtonGroup({
 }: {
   label: string;
   value: string;
-  options: Option[];
+  options: Array<Option>;
   onValueChange: (value: string) => void;
   onBlur?: () => void;
   disabled?: boolean;
   error?: string;
 }) {
   const id = useId();
-  const root = useRef<HTMLDivElement>(null);
   const tabStop =
     options.find((option) => option.value === value && !option.disabled) ??
     options.find((option) => !option.disabled);
@@ -30,19 +30,24 @@ export function ToggleButtonGroup({
         {label}
       </span>
       <div
-        ref={root}
         className="toggle-group"
         role="group"
         aria-labelledby={id + "-label"}
         aria-describedby={error ? id + "-error" : undefined}
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) onBlur?.();
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            onBlur?.();
+          }
         }}
         onKeyDown={(event) => {
-          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+            return;
+          }
           event.preventDefault();
-          const buttons = [...root.current!.querySelectorAll<HTMLButtonElement>("button:enabled")];
-          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          const buttons = [
+            ...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:enabled"),
+          ];
+          const index = buttons.findIndex((button) => button.matches(":focus"));
           const next =
             event.key === "Home"
               ? 0

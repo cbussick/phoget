@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect } from "react";
+import type { ReactNode } from "react";
 import { Toaster, toast } from "sonner";
 import "sonner/dist/styles.css";
 import { Button } from "../Button/Button";
@@ -14,7 +15,9 @@ const SnackbarContext = createContext<
 
 export function useSnackbar() {
   const notify = useContext(SnackbarContext);
-  if (!notify) throw new Error("useSnackbar requires SnackbarProvider");
+  if (!notify) {
+    throw new Error("useSnackbar requires SnackbarProvider");
+  }
   return notify;
 }
 
@@ -32,9 +35,13 @@ const mobileOffset = {
 function promoteToaster() {
   requestAnimationFrame(() => {
     const toaster = document.querySelector<HTMLElement>(".snackbar-toaster");
-    if (!toaster?.showPopover) return;
+    if (!toaster?.showPopover) {
+      return;
+    }
     toaster.setAttribute("popover", "manual");
-    if (toaster.matches(":popover-open")) toaster.hidePopover();
+    if (toaster.matches(":popover-open")) {
+      toaster.hidePopover();
+    }
     toaster.showPopover();
   });
 }

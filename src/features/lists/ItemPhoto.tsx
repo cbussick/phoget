@@ -1,4 +1,5 @@
-import { useId, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Item } from "../../../shared/contracts";
 import { householdKey } from "../../shared/api/queryKeys";
@@ -33,7 +34,9 @@ export function ItemPhoto({
   useErrorSnackbar(error);
   useAnchoredPopup(choosing && !busy, trigger, popup, false);
   useLayoutEffect(() => {
-    if (confirmDelete) cancelDelete.current?.focus();
+    if (confirmDelete) {
+      cancelDelete.current?.focus();
+    }
   }, [confirmDelete]);
   useLayoutEffect(() => {
     if (!busy && !hasPhoto && restoreAfterRemoval.current) {
@@ -45,7 +48,9 @@ export function ItemPhoto({
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     setChoosing(false);
     setError(null);
     if (file.size > 12 * 1024 * 1024) {
@@ -60,10 +65,10 @@ export function ItemPhoto({
       setHasPhoto(true);
       setVersion((current) => current + 1);
       await client.invalidateQueries({ queryKey: householdKey });
-    } catch (cause) {
+    } catch (error_) {
       setError(
-        cause instanceof ApiError
-          ? cause.message
+        error_ instanceof ApiError
+          ? error_.message
           : "Das Foto konnte nicht hochgeladen werden. Bitte versuche es erneut.",
       );
     } finally {
@@ -84,14 +89,16 @@ export function ItemPhoto({
       setConfirmDelete(false);
       await client.invalidateQueries({ queryKey: householdKey });
       removed = true;
-    } catch (cause) {
+    } catch (error_) {
       setError(
-        cause instanceof ApiError ? cause.message : "Das Foto konnte nicht entfernt werden.",
+        error_ instanceof ApiError ? error_.message : "Das Foto konnte nicht entfernt werden.",
       );
     } finally {
       setBusy(false);
       onBusyChange(false);
-      if (removed) restoreAfterRemoval.current = true;
+      if (removed) {
+        restoreAfterRemoval.current = true;
+      }
     }
   }
   const url = `/api/items/${item.id}/photo?v=${version}`;
@@ -159,7 +166,9 @@ export function ItemPhoto({
           aria-label="Fotoquelle"
           popover="auto"
           onToggle={(event) => {
-            if (event.newState === "closed") setChoosing(false);
+            if (event.newState === "closed") {
+              setChoosing(false);
+            }
           }}
           onKeyDown={(event) => {
             if (event.key === "Escape") {

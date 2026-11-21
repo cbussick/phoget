@@ -30,7 +30,9 @@ test(
   async () => {
     const occupied = await reservePort();
     const backend = await reservePort();
-    await new Promise<void>((resolve) => backend.server.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      backend.server.close(() => resolve());
+    });
     const cacheDir = await mkdtemp(resolve(tmpdir(), "phoget-vite-test-"));
     const child = spawn(
       process.execPath,
@@ -61,8 +63,9 @@ test(
         origin = output.match(/Phoget dev origin: (http:\/\/127\.0\.0\.1:\d+)/)?.[1];
         if (origin) {
           try {
-            if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok)
+            if ((await fetch(origin + "/api/health", { signal: AbortSignal.timeout(1000) })).ok) {
               break;
+            }
           } catch {
             /* Wait for the API watcher to start. */
           }

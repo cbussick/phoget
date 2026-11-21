@@ -1,6 +1,9 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { logger } from "../shared/logging.js";
+import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { parseArgs } from "node:util";
 import { createServer } from "vite";
+import type { ServerOptions } from "vite";
 
 const { values } = parseArgs({
   options: { port: { type: "string", default: process.env.PHOGET_DEV_PORT ?? "5173" } },
@@ -16,7 +19,7 @@ if (
   throw new Error("PHOGET_DEV_PUBLIC_ORIGIN must be an HTTPS origin without a path.");
 }
 for (const value of [port, apiPort]) {
-  if (!Number.isInteger(value) || value < 1 || value > 65535) {
+  if (!Number.isInteger(value) || value < 1 || value > 65_535) {
     throw new Error("Ports must be integers between 1 and 65535.");
   }
 }
@@ -24,19 +27,22 @@ for (const value of [port, apiPort]) {
 // Vite owns the port reservation/fallback. Start the API only after listen(),
 // using the actual URL, rather than probing a port and racing another process.
 // https://vite.dev/guide/api-javascript.html#createserver
-const vite = await createServer({
-  server: {
-    host: "127.0.0.1",
-    port,
-    strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
-    ...(publicOrigin ? { allowedHosts: [new URL(publicOrigin).hostname] } : {}),
-    proxy: { "/api": `http://127.0.0.1:${apiPort}` },
-  },
-});
+const serverOptions: ServerOptions = {
+  host: "127.0.0.1",
+  port,
+  strictPort: Boolean(process.env.PHOGET_DEV_PORT && !process.argv.includes("--port")),
+  proxy: { "/api": `http://127.0.0.1:${apiPort}` },
+};
+if (publicOrigin) {
+  serverOptions.allowedHosts = [new URL(publicOrigin).hostname];
+}
+const vite = await createServer({ server: serverOptions });
 let api: ChildProcess | undefined;
 let stopping = false;
 async function stop(code = 0) {
-  if (stopping) return;
+  if (stopping) {
+    return;
+  }
   stopping = true;
   process.exitCode = code;
   api?.kill("SIGTERM");
@@ -47,7 +53,9 @@ process.once("SIGTERM", () => void stop());
 try {
   await vite.listen();
   const address = vite.httpServer?.address();
-  if (!address || typeof address === "string") throw new Error("Vite did not open a TCP port.");
+  if (!address || typeof address === "string") {
+    throw new Error("Vite did not open a TCP port.");
+  }
   const origin = `http://127.0.0.1:${address.port}`;
   api = spawn(process.execPath, ["node_modules/tsx/dist/cli.mjs", "watch", "server/index.ts"], {
     stdio: "inherit",
@@ -60,7 +68,7 @@ try {
   });
   api.once("error", () => void stop(1));
   api.once("exit", (code) => void stop(code ?? 1));
-  console.log(`Phoget dev origin: ${publicOrigin ?? origin}`);
+  logger.log(`Phoget dev origin: ${publicOrigin ?? origin}`);
   vite.printUrls();
 } catch (error) {
   await stop(1);

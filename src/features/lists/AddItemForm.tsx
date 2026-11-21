@@ -29,7 +29,9 @@ export function AddItemForm({
   useEffect(() => {
     if (!suggestionState.busy && focusAfterForget.current) {
       focusAfterForget.current = false;
-      if (document.activeElement === document.body) input.current?.focus();
+      if (document.activeElement === document.body) {
+        input.current?.focus();
+      }
     }
   }, [suggestionState.busy]);
   const add = useAction(async (name: string) => {
@@ -49,18 +51,25 @@ export function AddItemForm({
     busy: formBusy,
     error,
     submit,
-  } = useValidatedForm({ name: "" }, itemInputSchema.pick({ name: true }), async ({ name }) => {
-    await add.mutateAsync(name);
-    form.reset();
-    if (restoreInputFocus.current) {
-      requestAnimationFrame(() => {
-        // Do not steal focus if the user moved elsewhere while saving.
-        if (document.activeElement === document.body || document.activeElement === input.current) {
-          input.current?.focus();
-        }
-      });
-    }
-  });
+  } = useValidatedForm(
+    { name: "" },
+    itemInputSchema.pick({ name: true }),
+    async ({ name }, { reset }) => {
+      await add.mutateAsync(name);
+      reset();
+      if (restoreInputFocus.current) {
+        requestAnimationFrame(() => {
+          // Do not steal focus if the user moved elsewhere while saving.
+          if (
+            document.activeElement === document.body ||
+            document.activeElement === input.current
+          ) {
+            input.current?.focus();
+          }
+        });
+      }
+    },
+  );
   useErrorSnackbar(error ?? add.error);
   const busy = formBusy || add.isPending || suggestionState.busy;
   return (
@@ -130,7 +139,9 @@ export function AddItemForm({
               key={name}
               disabled={busy}
               onClick={() => {
-                if (busy) return;
+                if (busy) {
+                  return;
+                }
                 add.mutate(name);
               }}
             >

@@ -3,7 +3,8 @@ import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import test, { type TestContext } from "node:test";
+import test from "node:test";
+import type { TestContext } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
@@ -52,13 +53,22 @@ setTimeout(() => {
     child.once("close", (code) => resolve({ code, stderr }));
   });
   context.after(async () => {
-    if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill("SIGTERM");
+    }
     await finished.catch(() => {});
     await rm(directory, { recursive: true, force: true });
   });
   const events = async () => {
-    const contents = await readFile(eventLog, "utf8").catch((error) => {
-      if (error.code === "ENOENT") return "";
+    const contents = await readFile(eventLog, "utf8").catch((error: unknown) => {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        return "";
+      }
       throw error;
     });
     return contents.trim() ? contents.trim().split("\n") : [];
@@ -89,7 +99,9 @@ test("a failed browser fails the command without skipping later browsers", async
 test("interrupting the runner stops its child and does not start queued browsers", async (context) => {
   const { child, finished, events } = await runner(context, { holdBrowser: "chromium" });
   const deadline = Date.now() + 5000;
-  while (!(await events()).length && Date.now() < deadline) await delay(10);
+  while (!(await events()).length && Date.now() < deadline) {
+    await delay(10);
+  }
   assert.ok((await events()).length, "The first browser did not start");
   assert.ok(child.kill("SIGTERM"));
   const result = await finished;

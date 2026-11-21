@@ -9,7 +9,9 @@ export async function readItemPhoto(itemId: string) {
     .select({ data: itemPhotos.data })
     .from(itemPhotos)
     .where(eq(itemPhotos.itemId, itemId));
-  if (!photo) throw new NotFoundError("Dieses Foto existiert nicht mehr.");
+  if (!photo) {
+    throw new NotFoundError("Dieses Foto existiert nicht mehr.");
+  }
   return photo.data;
 }
 
@@ -19,7 +21,9 @@ export async function changeItemPhoto(itemId: string, data: Buffer | null, actor
       .select({ listId: items.listId })
       .from(items)
       .where(eq(items.id, itemId));
-    if (!located) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    if (!located) {
+      throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    }
     // Share the list lock order with item edits and list deletion before locking this row.
     await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${located.listId}))`);
     const [item] = await tx
@@ -27,7 +31,9 @@ export async function changeItemPhoto(itemId: string, data: Buffer | null, actor
       .from(items)
       .where(eq(items.id, itemId))
       .for("update");
-    if (!item) throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    if (!item) {
+      throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
+    }
     if (data) {
       await tx.insert(itemPhotos).values({ itemId, data }).onConflictDoUpdate({
         target: itemPhotos.itemId,
@@ -35,7 +41,9 @@ export async function changeItemPhoto(itemId: string, data: Buffer | null, actor
       });
     } else {
       const deleted = await tx.delete(itemPhotos).where(eq(itemPhotos.itemId, itemId)).returning();
-      if (!deleted.length) throw new NotFoundError("Dieses Foto existiert nicht mehr.");
+      if (!deleted.length) {
+        throw new NotFoundError("Dieses Foto existiert nicht mehr.");
+      }
     }
     await markListUpdated(tx, item.listId, actorId);
   });

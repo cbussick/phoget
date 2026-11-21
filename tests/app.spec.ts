@@ -1,10 +1,11 @@
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { addItemResultSchema, listSchema, stateSchema } from "../shared/contracts";
 
 import { testCredentials } from "./testCredentials";
-const createdListIds: string[] = [];
+const createdListIds: Array<string> = [];
 test.beforeEach(async ({ request, context }) => {
   const result = await request.post("/api/session", { data: testCredentials });
   expect(result.status()).toBe(200);
@@ -17,7 +18,9 @@ test.afterEach(async ({ playwright, request }) => {
     storageState: await request.storageState(),
   });
   try {
-    for (const id of createdListIds.splice(0)) await cleanup.delete("/api/lists/" + id);
+    for (const id of createdListIds.splice(0)) {
+      await cleanup.delete("/api/lists/" + id);
+    }
   } finally {
     await cleanup.dispose();
   }
@@ -103,9 +106,9 @@ for (const viewport of [
     const activeItems = page.getByRole("tabpanel", { name: "Offen", exact: true });
     const firstItem = activeItems.locator("li").first();
     const firstItemBounds = await firstItem.boundingBox();
-    for (const position of [1, 12, 700, 100000, 12, 1, 0]) {
+    for (const position of [1, 12, 700, 100_000, 12, 1, 0]) {
       await activeItems.evaluate((element, y) => element.scrollTo(0, y), position);
-      if (position === 100000) {
+      if (position === 100_000) {
         await expect
           .poll(() => activeItems.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(700);
@@ -269,7 +272,7 @@ test("completed tab uses the remaining viewport without moving the header or tab
     });
     for (const [index, position] of (await visiblePositions()).entries()) {
       // Transformed icon bounds may differ by floating-point rounding in WebKit.
-      expect(position.top).toBeCloseTo(before[index]!.top, 2);
+      expect(position.top).toBeCloseTo(before[index].top, 2);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
@@ -301,11 +304,13 @@ test("complete household workflow persists through reload and a second browser",
   browserName,
 }) => {
   test.setTimeout(browserName === "webkit" ? 240_000 : 180_000); // Cross-browser sync now takes up to 10 seconds per change.
-  const errors: string[] = [];
-  const sessionTraffic: string[] = [];
+  const errors: Array<string> = [];
+  const sessionTraffic: Array<string> = [];
   const record = (event: string) => {
     sessionTraffic.push(`${new Date().toISOString()} ${event}`);
-    if (sessionTraffic.length > 40) sessionTraffic.shift();
+    if (sessionTraffic.length > 40) {
+      sessionTraffic.shift();
+    }
   };
   page.on("pageerror", (error) => {
     errors.push(error.message);
@@ -313,21 +318,24 @@ test("complete household workflow persists through reload and a second browser",
   });
   const started = new WeakMap<object, number>();
   page.on("request", (request) => {
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
       started.set(request, Date.now());
+    }
   });
   page.on("requestfailed", (request) => {
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
       record(
         `${request.method()} ${new URL(request.url()).pathname} failed after ${Date.now() - (started.get(request) ?? Date.now())}ms: ${request.failure()?.errorText}`,
       );
+    }
   });
   page.on("response", (response) => {
     const request = response.request();
-    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session")
+    if (request.isNavigationRequest() || new URL(request.url()).pathname === "/api/session") {
       record(
         `${request.method()} ${new URL(request.url()).pathname} HTTP ${response.status()} after ${Date.now() - (started.get(request) ?? Date.now())}ms`,
       );
+    }
   });
   const name = "Weekend " + crypto.randomUUID();
   const id = await createList(page, name);

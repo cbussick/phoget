@@ -2,6 +2,16 @@ import { readFile, writeFile } from "node:fs/promises";
 import { crc32, deflateSync } from "node:zlib";
 import { chromium } from "playwright";
 
+const chunk = (type, data) => {
+  const tag = Buffer.from(type);
+  const result = Buffer.alloc(12 + data.length);
+  result.writeUInt32BE(data.length, 0);
+  tag.copy(result, 4);
+  data.copy(result, 8);
+  result.writeUInt32BE(crc32(Buffer.concat([tag, data])), 8 + data.length);
+  return result;
+};
+
 const publicDir = new URL("../public/", import.meta.url);
 const svg = await readFile(new URL("branding/little-tangle/favicon.svg", publicDir));
 await writeFile(new URL("icon.svg", publicDir), svg);
@@ -44,15 +54,6 @@ try {
     header.writeUInt32BE(size, 4);
     header[8] = 8;
     header[9] = 2;
-    const chunk = (type, data) => {
-      const tag = Buffer.from(type);
-      const result = Buffer.alloc(12 + data.length);
-      result.writeUInt32BE(data.length, 0);
-      tag.copy(result, 4);
-      data.copy(result, 8);
-      result.writeUInt32BE(crc32(Buffer.concat([tag, data])), 8 + data.length);
-      return result;
-    };
     await writeFile(
       new URL(`${name}.png`, publicDir),
       Buffer.concat([

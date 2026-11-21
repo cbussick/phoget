@@ -46,7 +46,7 @@ test("the t crown does not reverse curvature as it turns behind the stick", asyn
   for (const [, coordinates] of turn.matchAll(/C\s*([^C]+)/g)) {
     const values = coordinates.match(/-?\d+(?:\.\d+)?/g)?.map(Number);
     assert.equal(values?.length, 6);
-    const [x1, y1, x2, y2, x3, y3] = values!;
+    const [x1, y1, x2, y2, x3, y3] = values;
     for (const t of [0, 0.25, 0.5, 0.75, 1]) {
       const u = 1 - t;
       const dx = 3 * u * u * (x1 - start[0]) + 6 * u * t * (x2 - x1) + 3 * t * t * (x3 - x2);
@@ -54,7 +54,9 @@ test("the t crown does not reverse curvature as it turns behind the stick", asyn
       const ddx = 6 * u * (x2 - 2 * x1 + start[0]) + 6 * t * (x3 - 2 * x2 + x1);
       const ddy = 6 * u * (y2 - 2 * y1 + start[1]) + 6 * t * (y3 - 2 * y2 + y1);
       const cross = dx * ddy - dy * ddx;
-      if (Math.abs(cross) > 1e-7) signs.add(Math.sign(cross));
+      if (Math.abs(cross) > 1e-7) {
+        signs.add(Math.sign(cross));
+      }
     }
     start = [x3, y3];
   }
@@ -129,7 +131,7 @@ test("the Little Tangle full logo and compact applications share the tilted bowl
       /<(?:image|text|script|foreignObject|linearGradient|radialGradient)\b|data:/i,
     );
     // Luminance-mask white/black are technical coverage values, not painted colors.
-    const painted = svg.replace(/<mask\b[\s\S]*?<\/mask>/g, "");
+    const painted = svg.replaceAll(/<mask\b[\s\S]*?<\/mask>/g, "");
     for (const [, color] of painted.matchAll(/(?:fill|stroke)="([^"]+)"/g)) {
       assert.ok(["none", "#8bcdf1", "#176f9f", "#18302b", "#fffefa"].includes(color));
     }

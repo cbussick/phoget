@@ -13,11 +13,11 @@ export function PasswordForm({ required = false }: { required?: boolean }) {
   const { form, busy, error, submit } = useValidatedForm(
     { currentPassword: "", password: "" },
     changePasswordSchema,
-    async (value) => {
+    async (value, { reset }) => {
       const session = await accountApi.password(value);
       await client.cancelQueries({ queryKey: sessionKey });
       client.setQueryData(sessionKey, session);
-      form.reset();
+      reset();
       notify("Passwort geändert.");
     },
   );

@@ -1,4 +1,5 @@
-import { useState, type ComponentProps } from "react";
+import { useState } from "react";
+import type { ComponentProps } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
 import { Icon } from "../Icon/Icon";

@@ -13,11 +13,15 @@ export function UpdateNotice() {
     const currentVersion = document
       .querySelector('meta[name="phoget-build-id"]')
       ?.getAttribute("content");
-    if (!currentVersion) return;
+    if (!currentVersion) {
+      return;
+    }
     const controller = new AbortController();
     let checking = false;
     const check = async () => {
-      if (checking || !navigator.onLine || document.visibilityState !== "visible") return;
+      if (checking || !navigator.onLine || document.visibilityState !== "visible") {
+        return;
+      }
       checking = true;
       try {
         // HTML is fetched from the server, never from a service worker or HTTP cache.
@@ -26,7 +30,9 @@ export function UpdateNotice() {
           credentials: "include",
           signal: controller.signal,
         });
-        if (!response.ok || new URL(response.url).origin !== location.origin) return;
+        if (!response.ok || new URL(response.url).origin !== location.origin) {
+          return;
+        }
         const html = new DOMParser().parseFromString(await response.text(), "text/html");
         const version = html.querySelector('meta[name="phoget-build-id"]')?.getAttribute("content");
         if (
@@ -45,10 +51,14 @@ export function UpdateNotice() {
     };
     const onConnectionChange = () => {
       setOnline(navigator.onLine);
-      if (navigator.onLine) void check();
+      if (navigator.onLine) {
+        void check();
+      }
     };
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") void check();
+      if (document.visibilityState === "visible") {
+        void check();
+      }
     };
     void check();
     const interval = setInterval(() => void check(), checkIntervalMs);
@@ -64,7 +74,9 @@ export function UpdateNotice() {
     };
   }, []);
 
-  if (!availableVersion) return null;
+  if (!availableVersion) {
+    return null;
+  }
   return (
     <div className="update-notice" role="status">
       <span>

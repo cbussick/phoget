@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, Ref } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, Ref } from "react";
 import { Spinner } from "../Spinner/Spinner";
 import { accentColorStyle } from "../accentColor";
 import "./Button.css";
@@ -23,14 +23,16 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
+  const buttonStyle: CSSProperties = {};
+  if (accentColor && variant === "primary") {
+    Object.assign(buttonStyle, accentColorStyle(accentColor));
+  }
+  Object.assign(buttonStyle, style);
   return (
     <button
       {...props}
-      style={{
-        ...(accentColor && variant === "primary" ? accentColorStyle(accentColor) : {}),
-        ...style,
-      }}
-      type={type}
+      style={buttonStyle}
+      type={type === "submit" ? "submit" : type === "reset" ? "reset" : "button"}
       data-variant={variant}
       data-size={size}
       disabled={disabled || loading}

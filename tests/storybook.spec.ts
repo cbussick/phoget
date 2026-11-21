@@ -181,8 +181,9 @@ test("snackbars with and without Undo disappear automatically after five seconds
     await expect(snackbar).toBeVisible();
     await expect(snackbar).toBeHidden({ timeout: 8000 });
     expect(Date.now() - started).toBeGreaterThanOrEqual(4500);
-    if (story === "with-undo")
+    if (story === "with-undo") {
       await expect(page.getByRole("status")).toHaveText("0 Mal rückgängig gemacht");
+    }
   }
 });
 
@@ -200,12 +201,12 @@ test("password visibility and dialog focus work in Storybook", async ({ page }) 
 });
 
 test("Storybook controls update the real component preview", async ({ page }) => {
-  const errors: string[] = [];
+  const errors: Array<string> = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/?path=/story/components-button--primary");
   const preview = page.frameLocator("#storybook-preview-iframe");
   await expect(preview.getByRole("button", { name: "Save changes" })).toBeVisible({
-    timeout: 15000,
+    timeout: 15_000,
   });
   await page
     .getByRole("row")
@@ -232,8 +233,11 @@ test("each button variant has distinct hover and pressed feedback", async ({ pag
     await button.hover();
     const hovered = await style();
     expect(hovered[0], variant + " hover fill").not.toEqual(resting[0]);
-    if (variant === "secondary") expect(hovered[1]).not.toEqual(resting[1]);
-    else expect(hovered[1]).toEqual(resting[1]);
+    if (variant === "secondary") {
+      expect(hovered[1]).not.toEqual(resting[1]);
+    } else {
+      expect(hovered[1]).toEqual(resting[1]);
+    }
     expect(hovered[2]).toEqual(resting[2]);
     await page.mouse.down();
     const pressed = await style();
@@ -280,7 +284,9 @@ test("form controls share integrated hover and press states; disabled means disa
     const pressed = await style();
     const choice = component === "checkbox" || component === "radio";
     expect(pressed.outline).toBe(choice ? "0px" : "2px");
-    if (!choice) expect(pressed.offset).toBe("-2px");
+    if (!choice) {
+      expect(pressed.offset).toBe("-2px");
+    }
     expect(pressed.width).toBe("1px");
     expect(pressed.shadow).toBe("none");
     expect(pressed.geometry).toEqual(resting.geometry);

@@ -26,17 +26,22 @@ test("adding preserves input focus only for Enter in the combobox; new icons per
     for (const method of ["input", "mouse", "button"] as const) {
       const name = method + crypto.randomUUID();
       await input.fill(name);
-      if (method === "input") await input.press("Enter");
-      else if (method === "mouse") await add.click();
-      else {
+      if (method === "input") {
+        await input.press("Enter");
+      } else if (method === "mouse") {
+        await add.click();
+      } else {
         await add.focus();
         await add.press("Enter");
       }
       await expect(page.locator(".item-name").filter({ hasText: name })).toBeVisible();
       await expect(add).toBeEnabled();
       await expect(input).toHaveValue("");
-      if (method === "input") await expect(input).toBeFocused();
-      else await expect(input).not.toBeFocused();
+      if (method === "input") {
+        await expect(input).toBeFocused();
+      } else {
+        await expect(input).not.toBeFocused();
+      }
     }
     for (const [label, value] of [
       ["Einkaufswagen", "cart"],
@@ -85,8 +90,11 @@ test("opening an entry avoids text focus and retains keyboard editing and focus 
     const dialog = page.getByRole("dialog");
     const name = dialog.getByRole("textbox", { name: "Eintrag", exact: true });
     for (const method of ["pointer", "keyboard"] as const) {
-      if (method === "pointer") await item.click();
-      else await item.press("Enter");
+      if (method === "pointer") {
+        await item.click();
+      } else {
+        await item.press("Enter");
+      }
       await expect(dialog).toBeVisible();
       await expect(dialog.getByRole("button", { name: "Dialog schließen" })).toBeFocused();
       await expect(name).not.toBeFocused();

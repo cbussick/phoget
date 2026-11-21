@@ -1,16 +1,21 @@
-import { test as base, type BrowserContext } from "@playwright/test";
+import { test as base } from "@playwright/test";
+import type { BrowserContext } from "@playwright/test";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
 
 export async function installFirefoxNavigation(context: BrowserContext, browserName: string) {
-  if (browserName !== "firefox") return;
+  if (browserName !== "firefox") {
+    return;
+  }
   // Firefox may render COOP documents without reporting the navigation commit.
   // Preserve production headers and coverage in Chromium/WebKit; only intercept
   // Firefox test document responses, never API responses.
   await context.route("**/*", async (route) => {
-    if (route.request().resourceType() !== "document") return route.continue();
+    if (route.request().resourceType() !== "document") {
+      return route.continue();
+    }
     const response = await route.fetch();
     const headers = { ...response.headers() };
     delete headers["cross-origin-opener-policy"];
@@ -34,7 +39,9 @@ export const test = base.extend<{ firefoxNavigation: void; testDatabase: void }>
       const browser = workerInfo.project.name.toUpperCase();
       const databaseUrl = process.env[`PHOGET_${browser}_TEST_URL`];
       const port = process.env[`PHOGET_${browser}_TEST_PORT`];
-      if (!databaseUrl || !port) throw new Error(`Missing ${browser} test runtime`);
+      if (!databaseUrl || !port) {
+        throw new Error(`Missing ${browser} test runtime`);
+      }
       process.env.PHOGET_TEST_PORT = port;
       await run(
         process.execPath,

@@ -63,6 +63,6 @@ export const listApi = {
       method: "PUT",
       headers: { "Content-Type": file.type || "application/octet-stream" },
       body: file,
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(60_000),
     }),
 };

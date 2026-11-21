@@ -14,7 +14,7 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
   expect((await request.post("/api/session", { data: testCredentials })).status()).toBe(200);
   await context.addCookies((await request.storageState()).cookies);
   const name = "Farben " + crypto.randomUUID();
-  const ids: string[] = [];
+  const ids: Array<string> = [];
   const other = await context.newPage();
   try {
     const untouched = listSchema.parse(
@@ -83,8 +83,8 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
       await page.locator(".color-picker > legend").evaluate((element) => {
         const label = element.parentElement!.querySelector("label")!;
         return (
-          parseFloat(getComputedStyle(element).fontSize) >
-          parseFloat(getComputedStyle(label).fontSize)
+          Number.parseFloat(getComputedStyle(element).fontSize) >
+          Number.parseFloat(getComputedStyle(label).fontSize)
         );
       }),
     ).toBe(true);
@@ -179,6 +179,8 @@ test("list presets and custom colors stay in sync across icons, buttons, reloads
     await expect(add).toHaveCSS("background-color", "rgb(139, 205, 241)");
   } finally {
     await other.close();
-    for (const id of ids) await request.delete("/api/lists/" + id);
+    for (const id of ids) {
+      await request.delete("/api/lists/" + id);
+    }
   }
 });

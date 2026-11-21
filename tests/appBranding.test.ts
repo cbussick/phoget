@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { deferred } from "./deferred";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -15,13 +16,6 @@ const user = {
   mustChangePassword: false,
 };
 const state = { lists: [], items: [], settings: { id: 1, householdName: "Test" } };
-function deferred() {
-  let release = () => {};
-  const promise = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  return { promise, release };
-}
 
 test(
   "branding and startup loading work across browsers, motion preferences and failures",
@@ -53,11 +47,15 @@ test(
               const path = new URL(route.request().url()).pathname;
               if (path === "/api/session") {
                 await sessionHold?.promise;
-                if (sessionFail) return route.abort("failed");
+                if (sessionFail) {
+                  return route.abort("failed");
+                }
               }
               if (path === "/api/state") {
                 await stateHold?.promise;
-                if (stateFail) return route.fulfill({ status: 503, json: { error: "Offline" } });
+                if (stateFail) {
+                  return route.fulfill({ status: 503, json: { error: "Offline" } });
+                }
               }
               return route.fulfill({
                 json:
@@ -90,8 +88,9 @@ test(
             const navBox = await page.locator(".sidebar .nav-links").boundingBox();
             assert.ok(navBox);
             assert.equal(Math.round(navBox.y - markBox.y - markBox.height), 24);
-            if (name === "chromium")
+            if (name === "chromium") {
               await page.screenshot({ path: ".runtime/branding-review/header-desktop.png" });
+            }
             await page.setViewportSize({ width: 320, height: 844 });
             await page.reload();
             await page.getByRole("heading", { name: "Alle Listen", exact: true }).waitFor();
@@ -106,8 +105,9 @@ test(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,
             );
-            if (name === "chromium")
+            if (name === "chromium") {
               await page.screenshot({ path: ".runtime/branding-review/header-mobile.png" });
+            }
             signedIn = false;
             await page.reload();
             await page.getByRole("heading", { name: "Willkommen zu Hause", exact: true }).waitFor();
@@ -120,6 +120,22 @@ test(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               true,
             );
+
+            for (const width of [320, 390, 1280]) {
+              await page.setViewportSize({ width, height: 900 });
+              const logoBox = await page.locator(".login-page .brand-logo").boundingBox();
+              assert.ok(logoBox);
+              assert.ok(
+                Math.abs(logoBox.x + logoBox.width / 2 - width / 2) <= 1,
+                `Login logo must be horizontally centered at ${width}px`,
+              );
+            }
+            if (name === "chromium") {
+              await page.screenshot({ path: ".runtime/branding-review/login-desktop.png" });
+              await page.setViewportSize({ width: 390, height: 844 });
+              await page.screenshot({ path: ".runtime/branding-review/login-mobile.png" });
+            }
+            await page.setViewportSize({ width: 320, height: 844 });
 
             signedIn = true;
             sessionHold = deferred();

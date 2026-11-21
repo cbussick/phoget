@@ -1,4 +1,5 @@
-import { Router, type Request, type Response, type RequestHandler } from "express";
+import { Router } from "express";
+import type { Request, Response, RequestHandler } from "express";
 import { config } from "../config.js";
 import { idSchema } from "../../shared/contracts.js";
 import {
@@ -42,18 +43,22 @@ function setSession(response: Response, value: string) {
 }
 export const authenticate: RequestHandler = async (request, response, next) => {
   const user = await readSession(token(request));
-  if (!user) throw new HttpError(401, "Bitte melde dich an, um fortzufahren.");
+  if (!user) {
+    throw new HttpError(401, "Bitte melde dich an, um fortzufahren.");
+  }
   response.locals.user = user;
   next();
 };
 export const requireReady: RequestHandler = (_request, response, next) => {
-  if (userSchema.parse(response.locals.user).mustChangePassword)
+  if (userSchema.parse(response.locals.user).mustChangePassword) {
     throw new HttpError(403, "Ändere dein vorläufiges Passwort, um fortzufahren.");
+  }
   next();
 };
 export const adminOnly: RequestHandler = (_request, response, next) => {
-  if (userSchema.parse(response.locals.user).role !== "admin")
+  if (userSchema.parse(response.locals.user).role !== "admin") {
     throw new HttpError(403, "Administratorrechte sind erforderlich.");
+  }
   next();
 };
 export const authRouter = Router();

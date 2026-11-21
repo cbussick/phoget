@@ -10,7 +10,7 @@ for (const headers of [
   [
     ["Authorization", "test"],
     ["content-type", "text/plain"],
-  ] as [string, string][],
+  ] as Array<[string, string]>,
 ]) {
   test(`request preserves ${headers.constructor.name} headers and caller cancellation`, async (t) => {
     const controller = new AbortController();
@@ -36,7 +36,10 @@ for (const headers of [
 test("request supplies defaults and validates empty responses", async (t) => {
   t.mock.method(globalThis, "fetch", async (_url: string, options: RequestInit) => {
     assert.equal(new Headers(options.headers).get("Content-Type"), "application/json");
-    assert.ok(options.signal instanceof AbortSignal);
+    assert.ok(options.signal);
+    // Exercise the native brand check as well as the default non-aborted state.
+    assert.doesNotThrow(() => AbortSignal.prototype.throwIfAborted.call(options.signal));
+    assert.equal(options.signal.aborted, false);
     return new Response(null, { status: 204 });
   });
   assert.equal(await request("/example", z.undefined()), undefined);

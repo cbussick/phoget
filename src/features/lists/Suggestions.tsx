@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { itemHistorySchema, type Item } from "../../../shared/contracts";
+import { itemHistorySchema } from "../../../shared/contracts";
+import type { Item } from "../../../shared/contracts";
 import { householdKey } from "../../shared/api/queryKeys";
 import { request } from "../../shared/api/request";
 import { useAction } from "../../shared/api/useAction";
@@ -11,10 +12,10 @@ import { snackbarDurationMs, useSnackbar } from "../../shared/ui/Snackbar/Snackb
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
 
-export function useSuggestions(listId: string, items: Item[], managing: boolean) {
+export function useSuggestions(listId: string, items: Array<Item>, managing: boolean) {
   const notify = useSnackbar();
   const client = useQueryClient();
-  const [confirmation, setConfirmation] = useState<{ name: string; completed: Item[] } | null>(
+  const [confirmation, setConfirmation] = useState<{ name: string; completed: Array<Item> } | null>(
     null,
   );
   const [forgotten, setForgotten] = useState<{
@@ -22,11 +23,17 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
     token: string;
     removedCompleted: boolean;
   } | null>(null);
+  const [previousManaging, setPreviousManaging] = useState(managing);
+  if (previousManaging !== managing) {
+    setPreviousManaging(managing);
+    if (!managing) {
+      setForgotten(null);
+    }
+  }
   useEffect(() => {
-    if (!managing) setForgotten(null);
-  }, [managing]);
-  useEffect(() => {
-    if (!forgotten) return;
+    if (!forgotten) {
+      return;
+    }
     const timeout = window.setTimeout(() => setForgotten(null), snackbarDurationMs);
     return () => window.clearTimeout(timeout);
   }, [forgotten]);
@@ -46,7 +53,7 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
       );
     },
   );
-  const remove = useAction(async (input: { name: string; completedIds: string[] }) => {
+  const remove = useAction(async (input: { name: string; completedIds: Array<string> }) => {
     try {
       const result = await listApi.forgetItem(listId, input);
       setConfirmation(null);
@@ -74,17 +81,22 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
   useErrorSnackbar(remove.error ?? restore.error);
   const busy = remove.isPending || restore.isPending;
   const activeNames = new Set(
-    items.filter((item) => !item.completed).map((item) => item.name.toLowerCase()),
+    items.flatMap((item) => (item.completed ? [] : [item.name.toLowerCase()])),
   );
   // History refreshes on mount, focus and mutations; never offer removal of a known active item.
   const names = (history.data?.names ?? []).filter((name) => !activeNames.has(name.toLowerCase()));
   function forget(name: string) {
-    if (busy || activeNames.has(name.toLowerCase())) return;
+    if (busy || activeNames.has(name.toLowerCase())) {
+      return;
+    }
     const completed = items.filter(
       (item) => item.completed && item.name.toLowerCase() === name.toLowerCase(),
     );
-    if (completed.length) setConfirmation({ name, completed });
-    else remove.mutate({ name, completedIds: [] });
+    if (completed.length) {
+      setConfirmation({ name, completed });
+    } else {
+      remove.mutate({ name, completedIds: [] });
+    }
   }
   const confirmationDialog = confirmation ? (
     <Dialog
@@ -93,11 +105,12 @@ export function useSuggestions(listId: string, items: Item[], managing: boolean)
       onClose={() => setConfirmation(null)}
       onSubmit={(event) => {
         event.preventDefault();
-        if (!busy)
+        if (!busy) {
           remove.mutate({
             name: confirmation.name,
             completedIds: confirmation.completed.map((item) => item.id),
           });
+        }
       }}
     >
       <p>
@@ -132,7 +145,7 @@ export function SuggestionsDialog({
   onClose,
   undo,
 }: {
-  names: string[];
+  names: Array<string>;
   busy: boolean;
   loading: boolean;
   error: boolean;
@@ -143,7 +156,9 @@ export function SuggestionsDialog({
   const [search, setSearch] = useState("");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!busy && document.activeElement === document.body) input.current?.focus();
+    if (!busy && document.activeElement === document.body) {
+      input.current?.focus();
+    }
   }, [busy]);
   const query = search.trim().toLocaleLowerCase();
   const matches = names.filter((name) => name.toLocaleLowerCase().includes(query));

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { usersSchema, type User } from "../../../shared/accounts";
+import { usersSchema } from "../../../shared/accounts";
+import type { User } from "../../../shared/accounts";
 import { request } from "../../shared/api/request";
 import { Button } from "../../shared/ui/Button/Button";
 import { Badge } from "../../shared/ui/Badge/Badge";
 import { Table } from "../../shared/ui/Table/Table";
 import { Feedback } from "../../shared/ui/Feedback/Feedback";
 import { Icon } from "../../shared/ui/Icon/Icon";
-import { UserDialog, type UserAction } from "./UserDialog";
+import { UserDialog } from "./UserDialog";
+import type { UserAction } from "./UserDialog";
 export function UsersPage({ currentUser }: { currentUser: User }) {
   const [action, setAction] = useState<UserAction | null>(null);
   const users = useQuery({

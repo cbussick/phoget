@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -14,14 +15,14 @@ const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage();
   const scores = await page.evaluate(
-    async ({ reference, candidate }) => {
+    async ({ reference, candidate, width, height, alphaThreshold }) => {
       const raster = async (src, scale = 1) => {
         const image = new Image();
         image.src = src;
         await image.decode();
         const canvas = document.createElement("canvas");
-        canvas.width = 765 * scale;
-        canvas.height = 560 * scale;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
         const context = canvas.getContext("2d");
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         return context.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -41,7 +42,9 @@ try {
         [23, 111, 159],
       ];
       const classify = (pixels, index, colors) => {
-        if (pixels[index + 3] < 128) return 0;
+        if (pixels[index + 3] < alphaThreshold) {
+          return 0;
+        }
         let best = Infinity;
         let category = 0;
         for (let i = 0; i < colors.length; i++) {
@@ -71,16 +74,23 @@ try {
             const index = (y * 765 + x) * 4;
             let expected = classify(source, index, sourceColors);
             // The source is shaded; blue antialiasing below the rim belongs to the bowl.
-            if (expected === 1 && x > 100 && y > 329 + (x - 105) * 0.217) expected = 3;
+            if (expected === 1 && x > 100 && y > 329 + (x - 105) * 0.217) {
+              expected = 3;
+            }
             const actual = classify(output, index, outputColors);
             for (const category of categories) {
-              if (expected === category || actual === category) union[category]++;
-              if (expected === category && actual === category) intersection[category]++;
+              if (expected === category || actual === category) {
+                union[category]++;
+              }
+              if (expected === category && actual === category) {
+                intersection[category]++;
+              }
             }
           }
         }
-        for (const category of categories)
+        for (const category of categories) {
           result.push({ name, category, iou: intersection[category] / union[category] });
+        }
       }
       const contacts = [
         [110, 90],
@@ -98,8 +108,9 @@ try {
       const rearLeft = (y) => {
         for (let x = 90 * 4; x < 115 * 4; x++) {
           const i = (Math.round(y * 4) * 765 * 4 + x) * 4;
-          if (enlarged[i + 3] >= 200 && enlarged[i + 1] > 150 && enlarged[i + 2] > 200)
+          if (enlarged[i + 3] >= 200 && enlarged[i + 1] > 150 && enlarged[i + 2] > 200) {
             return x / 4;
+          }
         }
         throw new Error(`Missing p return at y=${y}`);
       };
@@ -108,17 +119,20 @@ try {
       return { outlines: result, contacts, pReturnSlant: rearLeft(97) - rearLeft(92), tFoldAlpha };
     },
     {
+      width: 765,
+      height: 560,
+      alphaThreshold: 128,
       reference: `data:image/png;base64,${reference.toString("base64")}`,
       candidate: `data:image/svg+xml;base64,${svg.toString("base64")}`,
     },
   );
   for (const score of scores.outlines) {
-    console.log(
-      `${score.name}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
+    logger.log(
+      `${String(score.name)}, color ${score.category}: ${(score.iou * 100).toFixed(2)}% silhouette overlap`,
     );
     assert.ok(
       score.iou >= 0.96,
-      `${score.name}: the vector contours drifted from the actual reference`,
+      `${String(score.name)}: the vector contours drifted from the actual reference`,
     );
   }
   for (const contact of scores.contacts) {
@@ -127,14 +141,14 @@ try {
       `White seam at ${contact.x}/${contact.y}: alpha ${contact.alpha}`,
     );
   }
-  console.log("Chopstick contacts: opaque shared occlusion boundaries passed");
+  logger.log("Chopstick contacts: opaque shared occlusion boundaries passed");
   assert.ok(
     scores.pReturnSlant >= 1.25,
     `p return is a vertical patch, not a slanted ribbon: ${scores.pReturnSlant}px`,
   );
-  console.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
+  logger.log(`p return: continuous slanted ribbon (${scores.pReturnSlant}px drift)`);
   assert.ok(scores.tFoldAlpha >= 250, `Triangular gap at the t fold: alpha ${scores.tFoldAlpha}`);
-  console.log("t fold: no triangular gap at the upper stick");
+  logger.log("t fold: no triangular gap at the upper stick");
 } finally {
   await browser.close();
 }

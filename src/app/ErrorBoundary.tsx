@@ -1,4 +1,5 @@
-import { Component, type ReactNode } from "react";
+import { Component } from "react";
+import type { ReactNode } from "react";
 import { Button } from "../shared/ui/Button/Button";
 import "./errorPage.css";
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -7,7 +8,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
     return { failed: true };
   }
   render() {
-    if (this.state.failed)
+    if (this.state.failed) {
       return (
         <main className="error-page">
           <h1>Etwas ist schiefgelaufen</h1>
@@ -19,6 +20,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
           </Button>
         </main>
       );
+    }
     return this.props.children;
   }
 }

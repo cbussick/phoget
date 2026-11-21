@@ -33,7 +33,9 @@ test("completed suggestions can be forgotten and fully restored with Undo", asyn
   await request.patch(`/api/items/${milk.id}`, { data: { completed: true, name: "Milk" } });
   try {
     const databaseUrl = process.env[`PHOGET_${browserName.toUpperCase()}_TEST_URL`];
-    if (!databaseUrl) throw new Error("Missing browser test database");
+    if (!databaseUrl) {
+      throw new Error("Missing browser test database");
+    }
     const pool = new Pool({ connectionString: databaseUrl });
     const photo = readFileSync("tests/fixtures/photo-synthetic.webp");
     try {

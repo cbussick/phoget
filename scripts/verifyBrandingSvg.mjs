@@ -1,3 +1,4 @@
+import { logger } from "../shared/logging.ts";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
@@ -156,11 +157,11 @@ try {
           samples[index]
             .slice(0, 3)
             .every((channel, position) => Math.abs(channel - checks[index].color[position]) <= 2),
-          `${name}: ${checks[index].name}; got ${samples[index]}, expected ${checks[index].color}`,
+          `${name}: ${checks[index].name}; got ${String(samples[index])}, expected ${String(checks[index].color)}`,
         );
       }
     }
-    console.log(`${name}: ${checks.length} lettering and check-placement checks passed`);
+    logger.log(`${name}: ${checks.length} lettering and check-placement checks passed`);
   }
 
   const tangle = await readFile(
@@ -183,7 +184,7 @@ try {
   assert.deepEqual(rimSamples[0], [...sky, 255], "The g approaches the rim");
   assert.equal(rimSamples[1][3], 0, "The g recedes at the rim, not as a floating rounded oval");
   assert.deepEqual(rimSamples[2], [23, 111, 159, 255], "The bowl sits directly below the g");
-  console.log("Little Tangle: original g/rim interaction checks passed");
+  logger.log("Little Tangle: original g/rim interaction checks passed");
 } finally {
   await browser.close();
 }

@@ -1,4 +1,5 @@
-import { expect, type Route } from "@playwright/test";
+import { expect } from "@playwright/test";
+import type { Route } from "@playwright/test";
 import { test } from "./browserTest";
 
 test("offers a manual refresh for a new build and remembers dismissal", async ({

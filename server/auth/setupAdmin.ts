@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { logger } from "../../shared/logging.js";
+import { ZodError } from "zod";
 import { HttpError } from "../httpErrors.js";
 import { createInterface } from "node:readline/promises";
 import { createAccount } from "./accounts.js";
@@ -11,7 +12,9 @@ async function readPassword() {
     let value = "";
     for await (const chunk of process.stdin) {
       value += chunk;
-      if (value.length > 1024) throw new Error("Password input is too long.");
+      if (value.length > 1024) {
+        throw new Error("Password input is too long.");
+      }
     }
     return value.replace(/\r?\n$/, "");
   }
@@ -33,8 +36,11 @@ async function readPassword() {
             resolve(value);
             return;
           }
-          if (char === "\u007f") value = value.slice(0, -1);
-          else if (value.length < 128) value += char;
+          if (char === "\u007f") {
+            value = value.slice(0, -1);
+          } else if (value.length < 128) {
+            value += char;
+          }
         }
       };
       process.stdin.on("data", onData);
@@ -48,10 +54,11 @@ async function readPassword() {
 try {
   let [username, name] = process.argv.slice(2);
   if (!username || !name) {
-    if (!process.stdin.isTTY)
+    if (!process.stdin.isTTY) {
       throw new Error(
         'Usage: npm run account:setup -- username "Display name" (password on stdin)',
       );
+    }
     const prompt = createInterface({ input: process.stdin, output: process.stdout });
     username = await prompt.question("Username: ");
     name = await prompt.question("Display name: ");
@@ -64,10 +71,10 @@ try {
     password: await readPassword(),
   });
   const user = await createAccount(input);
-  console.log(`Administrator ${user.username} created.`);
+  logger.log(`Administrator ${user.username} created.`);
 } catch (error) {
-  console.error(
-    error instanceof z.ZodError
+  logger.error(
+    error instanceof ZodError
       ? error.issues[0]?.message
       : error instanceof HttpError
         ? error.message

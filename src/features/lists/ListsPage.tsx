@@ -8,7 +8,7 @@ import { ListRow } from "../../shared/ui/ListRow/ListRow";
 import { ListDialog } from "./ListDialog";
 import { SortableRow, SortableRows } from "./SortableRows";
 import { listApi } from "./listApi";
-export function ListsPage({ lists }: { lists: List[] }) {
+export function ListsPage({ lists }: { lists: Array<List> }) {
   const [creating, setCreating] = useState(false);
   return (
     <>

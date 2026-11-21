@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { deferred } from "./deferred";
 import { installFirefoxNavigation, test } from "./browserTest";
 import AxeBuilder from "@axe-core/playwright";
 import { testCredentials } from "./testCredentials";
@@ -154,7 +155,9 @@ test("administrator creates a user; user changes password and sees personal and 
     });
   } finally {
     await other.close();
-    if (userId) await request.delete("/api/users/" + userId);
+    if (userId) {
+      await request.delete("/api/users/" + userId);
+    }
   }
 });
 
@@ -186,10 +189,7 @@ test("login errors preserve username, password visibility is accessible, logout 
     testCredentials.username,
   );
   await page.getByLabel("Passwort", { exact: true }).fill(testCredentials.password);
-  let release = () => {};
-  const hold = new Promise<void>((resolve) => {
-    release = resolve;
-  });
+  const { promise: hold, release } = deferred();
   let submissions = 0;
   await page.route("**/api/session", async (route) => {
     if (route.request().method() === "POST") {
@@ -206,7 +206,7 @@ test("login errors preserve username, password visibility is accessible, logout 
       page.getByRole("button", { name: "Anmeldung läuft…", exact: true }),
     ).toBeDisabled();
     await expect(page.locator(".spinner")).toBeVisible();
-    await page.locator("form").evaluate((form) => (form as HTMLFormElement).requestSubmit());
+    await page.locator("form").evaluate((form: HTMLFormElement) => form.requestSubmit());
     expect(submissions).toBe(1);
   } finally {
     release();

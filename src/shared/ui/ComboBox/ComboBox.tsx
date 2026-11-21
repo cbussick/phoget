@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type Ref } from "react";
+import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
+import type { Ref } from "react";
 import { TextField } from "../TextField/TextField";
 import type { FieldPresentation } from "../FieldLayout/FieldLayout";
 import { Button } from "../Button/Button";
@@ -21,7 +22,7 @@ export function ComboBox({
   ...field
 }: FieldPresentation & {
   value: string;
-  options: readonly string[];
+  options: ReadonlyArray<string>;
   onValueChange: (value: string) => void;
   onBlur?: () => void;
   onRemove?: (value: string) => void;
@@ -35,26 +36,34 @@ export function ComboBox({
   const id = field.id ?? generatedId;
   const popupId = id + "-options";
   const input = useRef<HTMLInputElement>(null);
+  useImperativeHandle(inputRef, () => {
+    const element = input.current;
+    if (!element) {
+      throw new Error("ComboBox input is not mounted");
+    }
+    return element;
+  });
   const popup = useRef<HTMLDivElement>(null);
   const anchor = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>();
+  // Discard transient interaction state before committing a blocked control.
+  if ((disabled || field.error) && (open || active !== undefined)) {
+    setOpen(false);
+    setActive(undefined);
+  }
   const search = value.trim().toLocaleLowerCase();
   const matches = options.filter((option) => option.toLocaleLowerCase().includes(search));
   const expanded = open && !disabled && !field.error && matches.length > 0;
   const highlighted = active && matches.includes(active) ? active : undefined;
   useAnchoredPopup(expanded, anchor, popup);
+
   useEffect(() => {
-    if (disabled || field.error) {
-      setOpen(false);
-      setActive(undefined);
-    }
-  }, [disabled, field.error]);
-  useEffect(() => {
-    if (highlighted && expanded)
+    if (highlighted && expanded) {
       document
         .getElementById(popupId + "-" + encodeURIComponent(highlighted))
         ?.scrollIntoView({ block: "nearest" });
+    }
   }, [highlighted, expanded, popupId]);
   function choose(next: string) {
     onValueChange(next);
@@ -76,8 +85,6 @@ export function ComboBox({
         inputRef={(element) => {
           input.current = element;
           anchor.current = element?.parentElement ?? null;
-          if (typeof inputRef === "function") inputRef(element);
-          else if (inputRef) inputRef.current = element;
         }}
         role="combobox"
         aria-autocomplete="list"
@@ -94,12 +101,16 @@ export function ComboBox({
         }}
         onFocus={() => setOpen(true)}
         onBlur={(event) => {
-          if (!popup.current?.contains(event.relatedTarget)) setOpen(false);
+          if (!popup.current?.contains(event.relatedTarget)) {
+            setOpen(false);
+          }
           onBlur?.();
         }}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing) {
-            if (event.key === "Enter") event.preventDefault();
+            if (event.key === "Enter") {
+              event.preventDefault();
+            }
             return;
           }
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -178,8 +189,9 @@ export function ComboBox({
             if (
               !popup.current?.contains(event.relatedTarget) &&
               event.relatedTarget !== input.current
-            )
+            ) {
               setOpen(false);
+            }
           }}
         />
       ) : null}

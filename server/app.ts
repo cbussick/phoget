@@ -1,4 +1,6 @@
-import express, { type ErrorRequestHandler } from "express";
+import { logger } from "../shared/logging.js";
+import express from "express";
+import type { ErrorRequestHandler } from "express";
 import helmet from "helmet";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -45,6 +47,8 @@ import {
   NotFoundError,
 } from "./db/repository.js";
 
+import { errorDetails } from "./errorDetails.js";
+
 export const app = express();
 app.disable("x-powered-by");
 app.use(
@@ -65,8 +69,12 @@ app.use("/api", (request, response, next) => {
   response.setHeader("X-Request-Id", requestId);
   response.once("finish", () => {
     // Use Express route templates, never raw URLs (which may contain IDs or query strings).
-    const route = request.route?.path;
-    console.info(
+    const matchedRoute: unknown = request.route;
+    const route =
+      typeof matchedRoute === "object" && matchedRoute !== null && "path" in matchedRoute
+        ? matchedRoute.path
+        : undefined;
+    logger.info(
       JSON.stringify({
         event: "api_request",
         requestId,
@@ -140,7 +148,9 @@ app.put(
   }),
   async (request, response) => {
     const id = parseInput(idSchema, request.params.id);
-    if (!Buffer.isBuffer(request.body)) throw new HttpError(415, "Ungültiger Bildtyp.");
+    if (!Buffer.isBuffer(request.body)) {
+      throw new HttpError(415, "Ungültiger Bildtyp.");
+    }
     const data = await processPhoto(request.body);
     await changeItemPhoto(id, data, userSchema.parse(response.locals.user).id);
     response.status(204).end();
@@ -180,8 +190,9 @@ app.put("/api/lists/:id", async (request, response) => {
 });
 app.put("/api/lists/:id/items/order/:completed", async (request, response) => {
   const completed = request.params.completed;
-  if (completed !== "open" && completed !== "completed")
+  if (completed !== "open" && completed !== "completed") {
     throw new HttpError(400, "Ungültiger Abschnitt.");
+  }
   await reorderItems(
     parseInput(idSchema, request.params.id),
     completed === "completed",
@@ -273,24 +284,27 @@ if (config.NODE_ENV === "production") {
       response.sendFile(resolve(clientPath, "index.html"), { dotfiles: "allow" }),
   );
 }
-const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
+  const details = errorDetails(error);
   const status =
     error instanceof HttpError
       ? error.status
       : error instanceof NotFoundError
         ? 404
-        : error.type === "entity.too.large"
+        : details.type === "entity.too.large"
           ? 413
           : error instanceof SyntaxError && "body" in error
             ? 400
             : 500;
-  if (error?.cause?.code === "23505" || error?.code === "23505") {
+  if (details.causeCode === "23505" || details.code === "23505") {
     response
       .status(409)
       .json({ error: "Dieser Benutzername ist bereits vergeben.", field: "username" });
     return;
   }
-  if (status === 500) console.error("Request failed", { name: error.name, code: error.code });
+  if (status === 500) {
+    logger.error("Request failed", { name: details.name, code: details.code });
+  }
   response.status(status).json(
     errorSchema.parse({
       field: error instanceof HttpError ? error.field : undefined,
@@ -301,7 +315,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
             ? "Die Anfrage ist zu groß."
             : status === 400 && !(error instanceof HttpError)
               ? "Ungültiges JSON."
-              : error.message,
+              : details.message,
     }),
   );
 };

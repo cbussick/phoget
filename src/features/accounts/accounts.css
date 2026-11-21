@@ -13,7 +13,7 @@
 
 .login-page > .brand {
   width: 8.5rem;
-  margin-inline: var(--space-none);
+  margin-inline: auto;
 }
 
 .auth-page header p {

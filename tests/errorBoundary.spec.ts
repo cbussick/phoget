@@ -23,7 +23,9 @@ test("error boundary centers its fallback on desktop and mobile", async ({ page 
       };
     });
     expect(Math.abs((content.top + content.bottom) / 2 - 500)).toBeLessThan(2);
-    for (const center of content.centers) expect(Math.abs(center - width / 2)).toBeLessThan(2);
+    for (const center of content.centers) {
+      expect(Math.abs(center - width / 2)).toBeLessThan(2);
+    }
   }
   expect(
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())

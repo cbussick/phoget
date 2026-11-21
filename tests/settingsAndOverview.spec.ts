@@ -20,7 +20,9 @@ for (const width of [320, 390, 1280]) {
     await expect(tabs.getByRole("tab", { name: "Benutzer", exact: true })).toHaveCount(0);
     await expect(account).toHaveAttribute("aria-selected", "true");
     await expect(account).toHaveCSS("background-color", "rgb(139, 205, 241)");
-    for (const tab of [account, household]) await expect(tab).toBeInViewport({ ratio: 1 });
+    for (const tab of [account, household]) {
+      await expect(tab).toBeInViewport({ ratio: 1 });
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
     await account.focus();
     await account.press("ArrowRight");

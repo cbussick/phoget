@@ -3,7 +3,7 @@ import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 // OWASP's scrypt profile: N=2^15, r=8, p=3. Async work stays off the event loop.
 function derive(password: string, salt: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    scrypt(password, salt, 64, { N: 32768, r: 8, p: 3, maxmem: 64 * 1024 * 1024 }, (error, key) =>
+    scrypt(password, salt, 64, { N: 32_768, r: 8, p: 3, maxmem: 64 * 1024 * 1024 }, (error, key) =>
       error ? reject(error) : resolve(key),
     );
   });
@@ -18,7 +18,8 @@ export async function verifyPassword(password: string, hash: string) {
     version !== "scrypt-v1" ||
     !/^[a-f0-9]{32}$/.test(salt ?? "") ||
     !/^[a-f0-9]{128}$/.test(key ?? "")
-  )
+  ) {
     return false;
+  }
   return timingSafeEqual(await derive(password, salt), Buffer.from(key, "hex"));
 }

@@ -75,7 +75,9 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       await expect(row).toHaveCSS("opacity", "0.9");
       await expect(row).not.toHaveCSS("box-shadow", "none");
       await expect(link).toHaveCSS("cursor", "grabbing");
-      if (reducedMotion === "reduce") await expect(row).toHaveCSS("transition-duration", "0s");
+      if (reducedMotion === "reduce") {
+        await expect(row).toHaveCSS("transition-duration", "0s");
+      }
       await page.keyboard.press("Escape");
       await page.mouse.up();
       await expect(row).not.toHaveClass(/is-dragging/);
@@ -362,7 +364,9 @@ test("long touch hold on the handle drags without selecting text or opening the 
           );
         };
         fire("touchstart", y);
-        await new Promise((resolve) => setTimeout(resolve, 320));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 320);
+        });
         fire("touchmove", ty);
         fire("touchend", ty);
       },
@@ -390,10 +394,14 @@ test("long touch hold on the handle drags without selecting text or opening the 
             }),
           );
         fire("touchstart", sx, sy);
-        await new Promise((resolve) => setTimeout(resolve, 1100));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1100);
+        });
         for (let i = 1; i <= 10; i++) {
           fire("touchmove", sx + ((tx - sx) * i) / 10, sy + ((ty - sy) * i) / 10);
-          await new Promise((resolve) => setTimeout(resolve, 16));
+          await new Promise((resolve) => {
+            setTimeout(resolve, 16);
+          });
         }
         fire("touchend", tx, ty);
       },
@@ -434,7 +442,9 @@ test("keyboard handle reorders lists and items without changing row actions", as
       "transition-duration",
       "0s",
     );
-    for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowUp");
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press("ArrowUp");
+    }
     await page.keyboard.press("Space");
     await expect
       .poll(async () => {
@@ -454,7 +464,9 @@ test("keyboard handle reorders lists and items without changing row actions", as
     await page.goto(`/lists/${one.id}`);
     await page.getByRole("button", { name: "Sort B verschieben" }).focus();
     await page.keyboard.press("Space");
-    for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowUp");
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press("ArrowUp");
+    }
     await page.keyboard.press("Space");
     await expect
       .poll(async () =>

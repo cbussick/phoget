@@ -12,10 +12,14 @@ test("anchored suggestions stay clear of the field in a keyboard-sized viewport"
       {
         name: "popup-viewport-fixture",
         resolveId(id) {
-          if (id === "/popup-fixture.js") return id;
+          if (id === "/popup-fixture.js") {
+            return id;
+          }
         },
         load(id) {
-          if (id !== "/popup-fixture.js") return;
+          if (id !== "/popup-fixture.js") {
+            return;
+          }
           return `import React, {useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {useAnchoredPopup} from '/src/shared/ui/OptionList/useAnchoredPopup.ts';
@@ -31,7 +35,9 @@ createRoot(document.getElementById('root')).render(React.createElement(Fixture))
         },
         configureServer(vite) {
           vite.middlewares.use((req, res, next) => {
-            if (req.url !== "/popup-fixture") return next();
+            if (req.url !== "/popup-fixture") {
+              return next();
+            }
             res.setHeader("Content-Type", "text/html");
             res.end(
               '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/popup-fixture.js"></script></body></html>',
@@ -51,7 +57,7 @@ createRoot(document.getElementById('root')).render(React.createElement(Fixture))
         try {
           const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
           await page.goto(`http://127.0.0.1:${address.port}/popup-fixture`);
-          await page.locator("#popup").waitFor({ timeout: 10000 });
+          await page.locator("#popup").waitFor({ timeout: 10_000 });
           await page.evaluate(() => {
             const viewport = window.visualViewport!;
             Object.defineProperties(viewport, {
@@ -74,9 +80,11 @@ createRoot(document.getElementById('root')).render(React.createElement(Fixture))
           // Wait for resize/ResizeObserver work to settle, not a screenshot delay.
           await page.evaluate(
             () =>
-              new Promise<void>((resolve) =>
-                requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-              ),
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => resolve());
+                });
+              }),
           );
           assert.equal(
             await check(),
@@ -91,7 +99,10 @@ createRoot(document.getElementById('root')).render(React.createElement(Fixture))
             window.visualViewport!.dispatchEvent(new Event("scroll"));
           });
           await page.evaluate(
-            () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+            () =>
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() => resolve());
+              }),
           );
           assert.equal(await check(), true, "viewport panning must reposition suggestions");
           await page.evaluate(() => {
@@ -103,9 +114,11 @@ createRoot(document.getElementById('root')).render(React.createElement(Fixture))
           });
           await page.evaluate(
             () =>
-              new Promise<void>((resolve) =>
-                requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-              ),
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => resolve());
+                });
+              }),
           );
           assert.equal(await check(), true, "closing the keyboard must restore popup placement");
           assert.equal(Math.round((await page.locator("#popup").boundingBox())!.height), 280);

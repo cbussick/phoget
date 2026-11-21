@@ -1,3 +1,4 @@
+import { logger } from "../../shared/logging.js";
 import { settings } from "./schema.js";
 import { sql } from "drizzle-orm";
 import { database, pool } from "./database.js";
@@ -18,7 +19,7 @@ try {
       householdName: "Unser Haushalt",
     })
     .onConflictDoNothing();
-  console.log("Household initialized. Create the first administrator with npm run account:setup.");
+  logger.log("Household initialized. Create the first administrator with npm run account:setup.");
 } finally {
   await pool.end();
 }

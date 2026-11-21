@@ -21,13 +21,19 @@ export function createUndoStore<T>({
   let usedBytes = 0;
   function discard(token: string) {
     const entry = entries.get(token);
-    if (!entry) return;
+    if (!entry) {
+      return;
+    }
     clearTimeout(entry.timer);
     usedBytes -= entry.bytes;
     entries.delete(token);
   }
   function purgeExpired() {
-    for (const [token, entry] of entries) if (entry.expiresAt <= now()) discard(token);
+    for (const [token, entry] of entries) {
+      if (entry.expiresAt <= now()) {
+        discard(token);
+      }
+    }
   }
   return {
     remember(scope: string, value: T, bytes: number): string | null {
@@ -37,8 +43,9 @@ export function createUndoStore<T>({
         !Number.isFinite(bytes) ||
         usedBytes + bytes > maxBytes ||
         entries.size >= maxEntries
-      )
+      ) {
         return null;
+      }
       const token = randomUUID();
       const timer = setTimeout(() => discard(token), ttlMs);
       timer.unref();

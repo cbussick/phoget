@@ -40,18 +40,19 @@ test("overflowing placeholder looks identical before focus, during suggestions a
       const after = await capture();
       const difference = await page.evaluate(
         async ([a, b]) => {
-          const pixels = async (base64: string) => {
-            const img = new Image();
-            img.src = "data:image/png;base64," + base64;
-            await img.decode();
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d")!;
-            ctx.drawImage(img, 0, 0);
-            return ctx.getImageData(0, 0, img.width, img.height);
-          };
-          const [first, second] = await Promise.all([pixels(a), pixels(b)]);
+          const [first, second] = await Promise.all(
+            [a, b].map(async (base64) => {
+              const img = new Image();
+              img.src = "data:image/png;base64," + base64;
+              await img.decode();
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(img, 0, 0);
+              return ctx.getImageData(0, 0, img.width, img.height);
+            }),
+          );
           // Allow a one-pixel rasterization shift when the popup creates a layer.
           let smallest = 1;
           for (const dx of [-1, 0, 1]) {
@@ -61,10 +62,13 @@ test("overflowing placeholder looks identical before focus, during suggestions a
                 for (let x = 1; x < first.width - 1; x++) {
                   const i = (y * first.width + x) * 4;
                   const j = ((y + dy) * second.width + x + dx) * 4;
-                  const luminance = (data: Uint8ClampedArray, offset: number) =>
-                    (data[offset]! + data[offset + 1]! + data[offset + 2]!) / 3;
-                  if (Math.abs(luminance(first.data, i) - luminance(second.data, j)) > 55)
+                  const firstLuminance =
+                    (first.data[i] + first.data[i + 1] + first.data[i + 2]) / 3;
+                  const secondLuminance =
+                    (second.data[j] + second.data[j + 1] + second.data[j + 2]) / 3;
+                  if (Math.abs(firstLuminance - secondLuminance) > 55) {
                     changed++;
+                  }
                 }
               }
               smallest = Math.min(smallest, changed / ((first.width - 2) * (first.height - 2)));

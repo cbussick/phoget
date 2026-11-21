@@ -1,3 +1,13 @@
+import { logger } from "../shared/logging.js";
+import { z } from "zod";
+
+const requestLogSchema = z.object({
+  requestId: z.string(),
+  route: z.string(),
+  status: z.number(),
+  method: z.string(),
+  durationMs: z.number(),
+});
 import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
@@ -28,7 +38,9 @@ before(async () => {
   );
   assert.match(process.env.PHOGET_TEST_DATABASE ?? "", /^phoget_test_[a-f0-9]{12}$/);
   server = app.listen(0, "127.0.0.1");
-  await new Promise<void>((resolve) => server.on("listening", resolve));
+  await new Promise<void>((resolve) => {
+    server.on("listening", resolve);
+  });
   const address = server.address();
   assert.ok(address && typeof address === "object");
   base = "http://127.0.0.1:" + address.port;
@@ -42,11 +54,13 @@ beforeEach(async () => {
 });
 after(async () => {
   await prepareAccounts();
-  await new Promise<void>((resolve) => server.close(() => resolve()));
+  await new Promise<void>((resolve) => {
+    server.close(() => resolve());
+  });
   await pool.end();
 });
 function send(path: string, method = "GET", body?: unknown, headers: Record<string, string> = {}) {
-  return fetch(base + "/api" + path, {
+  const options: RequestInit = {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -54,13 +68,16 @@ function send(path: string, method = "GET", body?: unknown, headers: Record<stri
       Cookie: path === "/session" && method === "POST" ? "" : cookie,
       ...headers,
     },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  };
+  if (body !== undefined) {
+    options.body = JSON.stringify(body);
+  }
+  return fetch(base + "/api" + path, options);
 }
 test("request logs use route templates without exposing query strings or list IDs", async () => {
-  const messages: string[] = [];
-  const original = console.info;
-  console.info = (message: string) => {
+  const messages: Array<string> = [];
+  const original = logger.info;
+  logger.info = (message: string) => {
     messages.push(message);
   };
   try {
@@ -68,7 +85,7 @@ test("request logs use route templates without exposing query strings or list ID
     assert.equal(response.status, 200);
     assert.match(response.headers.get("x-request-id") ?? "", /^[0-9a-f-]{36}$/);
     const entry = messages
-      .map((message) => JSON.parse(message))
+      .map((message) => requestLogSchema.parse(JSON.parse(message)))
       .find((log) => log.requestId === response.headers.get("x-request-id"));
     assert.equal(entry?.route, "/api/state");
     assert.equal(entry?.status, 200);
@@ -76,7 +93,7 @@ test("request logs use route templates without exposing query strings or list ID
     assert.equal(typeof entry?.durationMs, "number");
     assert.ok(!messages.join(" ").includes("do-not-log"));
   } finally {
-    console.info = original;
+    logger.info = original;
   }
 });
 async function create(name = "API test") {
@@ -122,7 +139,10 @@ test("shared reorder persists, rejects stale orders, and keeps sections separate
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
     send(path, "PUT", { before: [b.id, a.id], after: [a.id, b.id] }),
   ]);
-  assert.deepEqual(concurrent.map((response) => response.status).sort(), [204, 409]);
+  assert.deepEqual(
+    concurrent.map((response) => response.status).sort((a, b) => a - b),
+    [204, 409],
+  );
   assert.equal(
     (await send(path, "PUT", { before: [a.id, b.id], after: [b.id, a.id] })).status,
     204,
@@ -411,7 +431,7 @@ test("rejects malformed, unknown, oversized and hostile input without leaking de
     (await send("/lists/00000000-0000-4000-8000-000000000001/items", "POST", { name: "x" })).status,
     404,
   );
-  assert.equal((await send("/lists", "POST", { name: "x".repeat(20000) })).status, 413);
+  assert.equal((await send("/lists", "POST", { name: "x".repeat(20_000) })).status, 413);
   assert.equal(
     (await send("/lists", "POST", { name: "x" }, { Origin: "https://attacker.invalid" })).status,
     403,
@@ -479,8 +499,9 @@ test("settings persist and validate, with security headers on responses", async 
 });
 
 test("authentication protects data and mutations require the same-origin header", async () => {
-  for (const path of ["/state", "/users", "/members"])
+  for (const path of ["/state", "/users", "/members"]) {
     assert.equal((await send(path, "GET", undefined, { Cookie: "" })).status, 401);
+  }
   assert.equal(
     (await send("/session", "POST", { ...testCredentials, password: "wrong" }, { Cookie: "" }))
       .status,
@@ -647,7 +668,7 @@ test("expired sessions are rejected and login attempts are rate limited", async 
   const username = "rate-limit-test";
   await database
     .insert(loginAttempts)
-    .values({ key: tokenDigest(username), count: 30, expiresAt: new Date(Date.now() + 60000) });
+    .values({ key: tokenDigest(username), count: 30, expiresAt: new Date(Date.now() + 60_000) });
   try {
     assert.equal(
       (await send("/session", "POST", { username, password: "incorrect password" })).status,
@@ -777,7 +798,7 @@ test("forget deletes history outright, confirms completed IDs, protects active i
     );
   const history = async () =>
     itemHistorySchema.parse(await (await send(`/lists/${list.id}/history`)).json());
-  const forget = (name: string, completedIds: string[] = []) =>
+  const forget = (name: string, completedIds: Array<string> = []) =>
     send(`/lists/${list.id}/history`, "DELETE", { name, completedIds });
   const item = await add(list.id, "Milk");
   const independent = await add(other.id, "Milk");
@@ -970,11 +991,12 @@ test("Often Bought ranks completed names per list, excludes unfinished names and
         [200, 200],
       );
     }
-    if (name === "Coffee")
+    if (name === "Coffee") {
       assert.ok(
         (await history()).oftenBought.some((entry) => entry.name === name),
         "done items remain eligible",
       );
+    }
     await send("/items/" + item.id, "DELETE");
   }
   assert.deepEqual((await history()).oftenBought, [

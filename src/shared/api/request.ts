@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { errorSchema } from "../../../shared/contracts";
 
 export class ApiError extends Error {
@@ -17,12 +17,14 @@ export async function request<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   headers.set("X-Phoget-Request", "1");
   const response = await fetch("/api" + path, {
     ...options,
     headers,
-    signal: options.signal ?? AbortSignal.timeout(15000),
+    signal: options.signal ?? AbortSignal.timeout(15_000),
   });
   if (!response.ok) {
     const parsed = errorSchema.safeParse(await response.json().catch(() => null));
@@ -32,6 +34,8 @@ export async function request<T>(
       parsed.success ? parsed.data.field : undefined,
     );
   }
-  if (response.status === 204) return schema.parse(undefined);
+  if (response.status === 204) {
+    return schema.parse(undefined);
+  }
   return schema.parse(await response.json());
 }

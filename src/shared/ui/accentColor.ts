@@ -5,7 +5,7 @@ const white = "#ffffff";
 const black = "#000000";
 
 function channels(hex: string) {
-  return [1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16));
+  return [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
 }
 
 // WCAG sRGB relative luminance and contrast:
@@ -25,7 +25,9 @@ function contrast(a: string, b: string) {
 }
 
 function foreground(background: string) {
-  if (contrast(ink, background) >= 4.5) return ink;
+  if (contrast(ink, background) >= 4.5) {
+    return ink;
+  }
   return contrast(white, background) >= contrast(black, background) ? white : black;
 }
 
