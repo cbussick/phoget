@@ -130,12 +130,7 @@ export function SortableRows<T extends { id: string }, Result>({
   }, []);
   const client = useQueryClient();
   const ids = rows.map((row) => row.id);
-  const signature = ids.join("|");
-  useEffect(() => {
-    if (!busy) {
-      setOrder(ids);
-    }
-  }, [signature, busy]); // Server order is authoritative after sync.
+
   useErrorSnackbar(error);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -147,7 +142,9 @@ export function SortableRows<T extends { id: string }, Result>({
     const row = byId.get(id);
     return row ? getLabel(row) : "Eintrag";
   }
-  const visible = order.filter((id) => byId.has(id));
+  // An optimistic order exists only while saving/refetching. Otherwise the
+  // server props are authoritative, including updates received during a save.
+  const visible = (busy ? order : ids).filter((id) => byId.has(id));
   for (const id of ids) {
     if (!visible.includes(id)) {
       visible.push(id);

@@ -63,9 +63,7 @@ export default defineConfig({
       files: ["**/*"],
       rules: {
         // Temporary migration baseline; remove each entry with its fixes.
-        "react/set-state-in-effect": "off",
         "unicorn/consistent-function-scoping": "off",
-        "react-hooks/exhaustive-deps": "off",
       },
     },
   ],

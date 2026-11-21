@@ -23,11 +23,11 @@ export function useSuggestions(listId: string, items: Array<Item>, managing: boo
     token: string;
     removedCompleted: boolean;
   } | null>(null);
-  useEffect(() => {
-    if (!managing) {
-      setForgotten(null);
-    }
-  }, [managing]);
+  const [previousManaging, setPreviousManaging] = useState(managing);
+  if (previousManaging !== managing) {
+    setPreviousManaging(managing);
+    if (!managing) { setForgotten(null); }
+  }
   useEffect(() => {
     if (!forgotten) {
       return;

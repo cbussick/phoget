@@ -26,6 +26,7 @@ test("controls discard open/highlight state across disabled and invalid transiti
         const browser = await engine.launch();
         try {
           const page = await browser.newPage();
+          await page.route("**/api/lists/**", (route) => route.fulfill({json: route.request().method() === "DELETE" ? { remembered: null, removedCompleted: false, undoToken: "22222222-2222-4222-8222-222222222222" } : {names: ["Coffee"], oftenBought: []}}));
           await page.goto(`http://127.0.0.1:${address.port}/control-lifecycle`);
           const combo = page.getByRole("combobox", {name: "Item", exact: true});
           const select = page.getByRole("combobox", {name: "Role", exact: true});
@@ -54,6 +55,27 @@ test("controls discard open/highlight state across disabled and invalid transiti
           await select.press("End");
           await select.press("Enter");
           await expect(select).toHaveText("Admin");
+          await page.getByRole("button", {name: "Forget coffee"}).click();
+          await expect(page.locator("#undo-state")).toHaveText("undo available");
+          await page.getByRole("button", {name: "Toggle managing"}).click();
+          await page.getByRole("button", {name: "Toggle managing"}).click();
+          await expect(page.locator("#undo-state")).toHaveText("no undo");
+          let releaseSave: (() => void) | undefined;
+          const saveHold = new Promise<void>((resolve) => { releaseSave = resolve; });
+          await page.route("**/lifecycle-save", async (route) => { await saveHold; await route.fulfill({status: 204}); });
+          await page.getByRole("button", {name: "A verschieben", exact: true}).focus();
+          await page.keyboard.press("Space");
+          await expect(page.locator(".lifecycle-rows .is-dragging")).toHaveCount(1);
+          await page.keyboard.press("ArrowDown");
+          await expect(page.locator('[id^="DndLiveRegion-"]')).toContainText("Über Position 2.");
+          await page.keyboard.press("Space");
+          const ordered = page.locator(".lifecycle-rows > li > span");
+          try {
+            await expect(ordered).toHaveText(["B", "A"]);
+            await page.getByRole("button", {name: "Server update"}).click();
+            await expect(ordered).toHaveText(["B", "A", "C"]);
+          } finally { releaseSave?.(); }
+          await expect(ordered).toHaveText(["C", "B", "A"]);
         } finally { await browser.close(); }
       });
     }
