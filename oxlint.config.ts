@@ -51,6 +51,23 @@ export default defineConfig({
     {
       files: ["**/*.{ts,tsx,mts,cts}"],
       rules: {
+        // Preserve original checks even where inherited overrides relax them.
+        "constructor-super": "error",
+        "getter-return": "error",
+        "no-class-assign": "error",
+        "no-const-assign": "error",
+        "no-dupe-class-members": "error",
+        "no-dupe-keys": "error",
+        "no-func-assign": "error",
+        "no-import-assign": "error",
+        "no-new-native-nonconstructor": "error",
+        "no-obj-calls": "error",
+        "no-setter-return": "error",
+        "no-this-before-super": "error",
+        "no-unreachable": "error",
+        "no-unsafe-negation": "error",
+        "no-with": "error",
+        "typescript/unbound-method": "error",
         "typescript/await-thenable": "error",
         "typescript/no-misused-promises": "error",
         "typescript/no-floating-promises": [
