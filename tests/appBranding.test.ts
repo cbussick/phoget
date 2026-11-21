@@ -121,6 +121,22 @@ test(
               true,
             );
 
+            for (const width of [320, 390, 1280]) {
+              await page.setViewportSize({ width, height: 900 });
+              const logoBox = await page.locator(".login-page .brand-logo").boundingBox();
+              assert.ok(logoBox);
+              assert.ok(
+                Math.abs(logoBox.x + logoBox.width / 2 - width / 2) <= 1,
+                `Login logo must be horizontally centered at ${width}px`,
+              );
+            }
+            if (name === "chromium") {
+              await page.screenshot({ path: ".runtime/branding-review/login-desktop.png" });
+              await page.setViewportSize({ width: 390, height: 844 });
+              await page.screenshot({ path: ".runtime/branding-review/login-mobile.png" });
+            }
+            await page.setViewportSize({ width: 320, height: 844 });
+
             signedIn = true;
             sessionHold = deferred();
             stateHold = deferred();
