@@ -16,16 +16,17 @@ export function AppShell({
   user: User;
 }) {
   const allLists = path === "/" || path === "/all-lists.html";
+  const listDetail = path.startsWith("/lists/") || path === "/index.html";
   const isSettings = path === "/settings";
   const links = (mobile: boolean) => (
     <>
       <Link
         href="/"
-        className={allLists ? "active" : undefined}
-        aria-current={allLists ? "page" : undefined}
+        className={allLists || listDetail ? "active" : undefined}
+        aria-current={allLists ? "page" : listDetail ? "location" : undefined}
       >
-        <Icon name="lists" />
-        {mobile ? <span>Listen</span> : "Alle Listen"}
+        <Icon name="listTodo" />
+        {mobile ? <span>Listen</span> : "Listen"}
       </Link>
       <Link
         href="/settings"

@@ -69,6 +69,12 @@ for (const viewport of [
       expect(item.status()).toBe(201);
     }
     await page.goto(`/lists/${list.id}`);
+    const navigation = page.getByRole("navigation", {
+      name: viewport.width === 390 ? "Mobile Navigation" : "Hauptnavigation",
+    });
+    const listsLink = navigation.getByRole("link", { name: "Listen", exact: true });
+    await expect(listsLink).toHaveClass("active");
+    await expect(listsLink).toHaveAttribute("aria-current", "location");
     await expect(page.locator(".active-items > li")).toHaveCount(30);
     const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toHaveCSS("text-overflow", "ellipsis");
