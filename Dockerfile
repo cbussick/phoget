@@ -15,11 +15,13 @@ ENV NODE_ENV=production
 ENV MAGICK_CONFIGURE_PATH=/app/magick
 RUN apk add --no-cache imagemagick imagemagick-jpeg imagemagick-webp imagemagick-heic libheif-libde265
 
-COPY package.json package-lock.json ./
+# Git checkouts may use a restrictive host umask; runtime files must be readable by node.
+COPY --chmod=644 package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build /app/dist ./dist
 COPY server/photos/policy.xml ./magick/policy.xml
+RUN chmod 755 ./magick && chmod 644 ./magick/policy.xml
 
 USER node
 EXPOSE 3001

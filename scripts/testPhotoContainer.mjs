@@ -1,25 +1,41 @@
 import { execFileSync } from "node:child_process";
-import { resolve } from "node:path";
+import { chmodSync, copyFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 // Integration gate: use the actual production image, not the host's ImageMagick installation.
 execFileSync("docker", ["build", "-q", "-t", "phoget-item-photos:test", "."], { stdio: "inherit" });
-execFileSync(
-  "docker",
-  [
-    "run",
-    "--rm",
-    "--volume",
-    `${resolve("tests/fixtures")}:/fixtures:ro`,
-    "--entrypoint",
-    "node",
-    "phoget-item-photos:test",
-    "--input-type=module",
-    "-e",
-    `import { readFileSync, mkdtempSync, rmSync } from "node:fs";
+// Bind mounts retain host permissions. Stage only synthetic fixtures so the
+// non-root production user can read them even from a checkout created with umask 077.
+const fixtures = mkdtempSync(join(tmpdir(), "phoget-photo-fixtures-"));
+try {
+  chmodSync(fixtures, 0o755);
+  for (const suffix of ["jpg", "png", "webp", "heic"]) {
+    const name = "photo-synthetic." + suffix;
+    const destination = join(fixtures, name);
+    copyFileSync(resolve("tests/fixtures", name), destination);
+    chmodSync(destination, 0o644);
+  }
+  execFileSync(
+    "docker",
+    [
+      "run",
+      "--rm",
+      "--volume",
+      `${fixtures}:/fixtures:ro`,
+      "--entrypoint",
+      "node",
+      "phoget-item-photos:test",
+      "--input-type=module",
+      "-e",
+      `import { accessSync, constants, readFileSync, mkdtempSync, rmSync } from "node:fs";
    import { execFileSync } from "node:child_process";
    import { tmpdir } from "node:os";
    import { join } from "node:path";
    import { processPhoto } from "./dist/server/photos/processPhoto.js";
+   if (process.getuid() === 0) throw new Error("Photo gate must use the non-root production user");
+   accessSync("/app/package.json", constants.R_OK);
+   accessSync(process.env.MAGICK_CONFIGURE_PATH + "/policy.xml", constants.R_OK);
    for (const suffix of ["jpg", "png", "webp", "heic"]) {
      const output = await processPhoto(readFileSync("/fixtures/photo-synthetic." + suffix));
      if (output.toString("ascii", 8, 12) !== "WEBP") throw new Error(suffix + " did not become WebP");
@@ -40,6 +56,9 @@ execFileSync(
    } finally {
      rmSync(directory, { recursive: true, force: true });
    }`,
-  ],
-  { stdio: "inherit" },
-);
+    ],
+    { stdio: "inherit" },
+  );
+} finally {
+  rmSync(fixtures, { recursive: true, force: true });
+}
