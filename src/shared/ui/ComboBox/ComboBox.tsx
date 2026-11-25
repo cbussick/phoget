@@ -1,11 +1,11 @@
 import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
-import { TextField } from "../../src/shared/ui/TextField/TextField";
-import type { FieldPresentation } from "../../src/shared/ui/FieldLayout/FieldLayout";
-import { Button } from "../../src/shared/ui/Button/Button";
-import { Icon } from "../../src/shared/ui/Icon/Icon";
-import { OptionList } from "../../src/shared/ui/OptionList/OptionList";
-import { useAnchoredPopup } from "../../src/shared/ui/OptionList/useAnchoredPopup";
+import { TextField } from "../TextField/TextField";
+import type { FieldPresentation } from "../FieldLayout/FieldLayout";
+import { Button } from "../Button/Button";
+import { Icon } from "../Icon/Icon";
+import { OptionList } from "../OptionList/OptionList";
+import { useAnchoredPopup } from "../OptionList/useAnchoredPopup";
 import "./ComboBox.css";
 
 export function ComboBox({
@@ -14,6 +14,7 @@ export function ComboBox({
   onValueChange,
   onBlur,
   onRemove,
+  onlyWhileTyping = false,
   inputRef,
   disabled,
   required,
@@ -26,6 +27,7 @@ export function ComboBox({
   onValueChange: (value: string) => void;
   onBlur?: () => void;
   onRemove?: (value: string) => void;
+  onlyWhileTyping?: boolean;
   inputRef?: Ref<HTMLInputElement>;
   disabled?: boolean;
   required?: boolean;
@@ -53,7 +55,10 @@ export function ComboBox({
     setActive(undefined);
   }
   const search = value.trim().toLocaleLowerCase();
-  const matches = options.filter((option) => option.toLocaleLowerCase().includes(search));
+  const matches =
+    onlyWhileTyping && !search
+      ? []
+      : options.filter((option) => option.toLocaleLowerCase().includes(search));
   const expanded = open && !disabled && !field.error && matches.length > 0;
   const highlighted = active && matches.includes(active) ? active : undefined;
   useAnchoredPopup(expanded, anchor, popup);
@@ -113,7 +118,7 @@ export function ComboBox({
             }
             return;
           }
-          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          if (matches.length && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
             event.preventDefault();
             const index = matches.indexOf(highlighted ?? "");
             const next =
@@ -135,25 +140,27 @@ export function ComboBox({
           }
         }}
         endAdornment={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="combo-toggle"
-            aria-label={"Vorschläge anzeigen: " + field.label}
-            disabled={disabled}
-            tabIndex={-1}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => {
-              input.current?.focus();
-              setOpen(!expanded);
-              setActive(undefined);
-            }}
-          >
-            <Icon
-              name="chevronDown"
-              className={expanded ? "combo-chevron expanded" : "combo-chevron"}
-            />
-          </Button>
+          onlyWhileTyping ? undefined : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="combo-toggle"
+              aria-label={"Vorschläge anzeigen: " + field.label}
+              disabled={disabled}
+              tabIndex={-1}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                input.current?.focus();
+                setOpen(!expanded);
+                setActive(undefined);
+              }}
+            >
+              <Icon
+                name="chevronDown"
+                className={expanded ? "combo-chevron expanded" : "combo-chevron"}
+              />
+            </Button>
+          )
         }
       />
       {expanded ? (
@@ -170,7 +177,6 @@ export function ComboBox({
             onRemove
               ? (option) => {
                   input.current?.focus();
-                  setOpen(false);
                   setActive(undefined);
                   onRemove(option);
                 }

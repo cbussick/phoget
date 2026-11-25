@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ComboBox } from "../../.storybook/components/ComboBox";
+import { ComboBox } from "../../src/shared/ui/ComboBox/ComboBox";
 import { Select } from "../../src/shared/ui/Select/Select";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SnackbarProvider } from "../../src/shared/ui/Snackbar/Snackbar";

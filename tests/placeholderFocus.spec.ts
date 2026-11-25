@@ -16,7 +16,7 @@ test("overflowing placeholder looks identical before focus, during focus and aft
   );
   try {
     await page.goto(`/lists/${list.id}`);
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     const placeholder = page.locator(".text-field-placeholder");

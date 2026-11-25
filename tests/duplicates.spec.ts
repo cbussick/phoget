@@ -26,7 +26,7 @@ test("duplicate toast does not shift layout or focus; completed items restore si
   );
   try {
     await page.goto(`/lists/${list.id}`);
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await input.fill("MILK");
     const before = await page.locator(".add-item-form").boundingBox();
     await input.press("Enter");

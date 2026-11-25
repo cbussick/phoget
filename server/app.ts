@@ -22,6 +22,8 @@ import {
   stateSchema,
   itemSchema,
   addItemResultSchema,
+  suggestionInputSchema,
+  suggestionsSchema,
   listSchema,
   settingsSchema,
 } from "../shared/contracts.js";
@@ -32,6 +34,8 @@ import {
   deleteList,
   createItem,
   changeItem,
+  readSuggestions,
+  removeSuggestion,
   reorderLists,
   reorderItems,
   updateSettings,
@@ -193,6 +197,15 @@ app.put("/api/lists/:id/items/order/:completed", async (request, response) => {
 });
 app.delete("/api/lists/:id", async (request, response) => {
   await deleteList(parseInput(idSchema, request.params.id));
+  response.status(204).end();
+});
+app.get("/api/lists/:id/suggestions", async (request, response) => {
+  const names = await readSuggestions(parseInput(idSchema, request.params.id));
+  response.json(suggestionsSchema.parse(names));
+});
+app.delete("/api/lists/:id/suggestions", async (request, response) => {
+  const { name } = parseInput(suggestionInputSchema, request.body);
+  await removeSuggestion(parseInput(idSchema, request.params.id), name);
   response.status(204).end();
 });
 app.post("/api/lists/:id/items", async (request, response) => {

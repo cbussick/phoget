@@ -137,7 +137,7 @@ test("capture the application's error states", async ({ page }) => {
 
     await page.route(`**/api/lists/${list.id}/items`, failure());
     await page
-      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Keep this draft");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("region", { name: "Benachrichtigung" })).toBeVisible();

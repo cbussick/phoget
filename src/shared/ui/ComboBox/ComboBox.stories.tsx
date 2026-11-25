@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ComponentProps } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ComboBox } from "../../../../.storybook/components/ComboBox";
+import { ComboBox } from "./ComboBox";
 import { controlPreview } from "../../../../.storybook/controlPreview";
 function Example(args: ComponentProps<typeof ComboBox>) {
   const [value, setValue] = useState(args.value);

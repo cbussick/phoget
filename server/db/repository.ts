@@ -6,7 +6,7 @@ import { database } from "./database.js";
 import type { Transaction } from "./database.js";
 import { markListUpdated } from "./listActivity.js";
 import type { User } from "../../shared/accounts.js";
-import { items, itemPhotos, lists, settings, users } from "./schema.js";
+import { items, itemPhotos, itemSuggestions, lists, settings, users } from "./schema.js";
 import type { listInputSchema, listUpdateSchema } from "../../shared/contracts.js";
 import { itemSchema, listSchema, settingsSchema, stateSchema } from "../../shared/contracts.js";
 
@@ -21,6 +21,7 @@ const databaseListSchema = listSchema
   })
   .strip(); // Internal foreign keys are not part of the public list response.
 const databaseItemSchema = itemSchema.extend({ createdAt: databaseTimeSchema }).strip();
+const publicSettings = { id: settings.id, householdName: settings.householdName };
 export class NotFoundError extends Error {}
 
 async function requireList(transaction: Transaction, listId: string) {
@@ -51,7 +52,10 @@ export async function readState() {
           asc(items.createdAt),
           asc(items.id),
         );
-      const [storedSettings] = await transaction.select().from(settings).where(eq(settings.id, 1));
+      const [storedSettings] = await transaction
+        .select(publicSettings)
+        .from(settings)
+        .where(eq(settings.id, 1));
       const photoIds = new Set(
         (await transaction.select({ itemId: itemPhotos.itemId }).from(itemPhotos)).map(
           (row) => row.itemId,
@@ -169,6 +173,40 @@ export async function deleteList(id: string) {
     }
   });
 }
+export async function readSuggestions(listId: string) {
+  return database.transaction(
+    async (tx) => {
+      await requireList(tx, listId);
+      const rows = await tx
+        .select({ name: itemSuggestions.name })
+        .from(itemSuggestions)
+        .where(eq(itemSuggestions.listId, listId))
+        .orderBy(asc(itemSuggestions.nameKey));
+      return rows.map((row) => row.name);
+    },
+    { isolationLevel: "repeatable read", accessMode: "read only" },
+  );
+}
+
+export async function removeSuggestion(listId: string, name: string) {
+  await database.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(1011, hashtext(${listId}))`);
+    await requireList(tx, listId);
+    await tx
+      .delete(itemSuggestions)
+      .where(
+        and(eq(itemSuggestions.listId, listId), eq(itemSuggestions.nameKey, name.toLowerCase())),
+      );
+  });
+}
+
+async function rememberSuggestion(tx: Transaction, listId: string, name: string) {
+  await tx
+    .insert(itemSuggestions)
+    .values({ listId, name, nameKey: name.toLowerCase() })
+    .onConflictDoNothing();
+}
+
 export async function createItem(
   listId: string,
   input: { name: string; note: string },
@@ -190,6 +228,7 @@ export async function createItem(
     if (existing) {
       let row = existing;
       if (existing.completed) {
+        await rememberSuggestion(transaction, listId, existing.name);
         await markListUpdated(transaction, listId, actor.id);
         [row] = await transaction
           .update(items)
@@ -219,6 +258,7 @@ export async function createItem(
         position: sql`(SELECT coalesce(max(position), 0) + 1 FROM items WHERE "listId" = ${listId} AND completed = false)`,
       })
       .returning();
+    await rememberSuggestion(transaction, listId, row.name);
     return { ...databaseItemSchema.parse(row), outcome: "created" as const };
   });
 }
@@ -250,6 +290,9 @@ export async function changeItem(id: string, input: ItemChanges | null, actor: A
     if (!row) {
       throw new NotFoundError("Dieser Eintrag existiert nicht mehr.");
     }
+    if (input?.name !== undefined && input.name.toLowerCase() !== previous.name.toLowerCase()) {
+      await rememberSuggestion(transaction, row.listId, row.name);
+    }
     const parsed = databaseItemSchema.parse(row);
     await markListUpdated(transaction, parsed.listId, actor.id);
     return parsed;
@@ -260,6 +303,6 @@ export async function updateSettings(input: z.input<typeof settingsSchema>) {
     .insert(settings)
     .values(input)
     .onConflictDoUpdate({ target: settings.id, set: input })
-    .returning();
+    .returning(publicSettings);
   return settingsSchema.parse(row);
 }

@@ -21,7 +21,7 @@ test("adding preserves input focus only for Enter in the item field; new icons p
   try {
     await page.goto(`/lists/${list.id}`);
     await expect(page.locator(".list-meta")).toContainText("aktualisiert von Test Admin");
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     const add = page.getByRole("button", { name: "Hinzufügen", exact: true });
     for (const method of ["input", "mouse", "button"] as const) {
       const name = method + crypto.randomUUID();

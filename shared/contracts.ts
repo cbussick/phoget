@@ -38,6 +38,8 @@ export const itemInputSchema = z
     note: z.string().trim().max(2000).default(""),
   })
   .strict();
+export const suggestionInputSchema = z.object({ name: nameSchema }).strict();
+export const suggestionsSchema = z.array(nameSchema);
 export const itemPatchSchema = z
   .object({
     name: nameSchema.optional(),

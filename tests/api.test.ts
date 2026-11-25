@@ -10,6 +10,7 @@ const requestLogSchema = z.object({
 });
 import { before, beforeEach, after, test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import type { Server } from "node:http";
 import { app } from "../server/app.js";
 import { pool } from "../server/db/database.js";
@@ -19,6 +20,7 @@ import {
   itemSchema,
   addItemResultSchema,
   settingsSchema,
+  suggestionsSchema,
 } from "../shared/contracts.js";
 
 import { prepareAccounts } from "./prepareAccounts.js";
@@ -757,19 +759,81 @@ test("administrators cannot delete or reset themselves even with another adminis
   }
 });
 
-test("suggestion history endpoints and storage are gone", async () => {
-  const response = await send("/lists", "POST", { name: "No suggestions" });
-  assert.equal(response.status, 201);
-  const list = listSchema.parse(await response.json());
+test("database setup backfills existing items once without reviving forgotten names", async () => {
+  const list = await create();
+  const path = `/lists/${list.id}/suggestions`;
+  async function names() {
+    const response = await send(path);
+    assert.equal(response.status, 200);
+    return suggestionsSchema.parse(await response.json());
+  }
   try {
-    const path = `/lists/${list.id}/history`;
-    assert.equal((await send(path)).status, 404);
-    assert.equal((await send(path, "DELETE", { name: "Milk" })).status, 404);
-    assert.equal((await send(path, "POST", { name: "Milk", completionCount: 1 })).status, 404);
-    assert.equal((await send(path + "/undo", "POST", { token: crypto.randomUUID() })).status, 404);
-    const { rows } = await pool.query("SELECT to_regclass('public.item_names') IS NULL AS absent");
-    assert.equal(rows[0].absent, true);
+    // Simulate a database that has items but has not yet received the backfill.
+    await pool.query('UPDATE settings SET "suggestionsBackfilled" = false WHERE id = 1');
+    await pool.query(
+      "INSERT INTO items (\"listId\", name, completed) VALUES ($1, 'Bread', false), ($1, 'Eggs', true)",
+      [list.id],
+    );
+    assert.deepEqual(await names(), []);
+    execFileSync(process.execPath, ["--import", "tsx", "server/db/setup.ts"]);
+    assert.deepEqual(await names(), ["Bread", "Eggs"]);
+    assert.equal((await send(path, "DELETE", { name: "Eggs" })).status, 204);
+    execFileSync(process.execPath, ["--import", "tsx", "server/db/setup.ts"]);
+    assert.deepEqual(await names(), ["Bread"]);
   } finally {
     await send(`/lists/${list.id}`, "DELETE");
   }
+});
+
+test("autocomplete history is list-scoped and independent of items and their status", async () => {
+  const list = await create();
+  const other = await create();
+  const path = `/lists/${list.id}/suggestions`;
+  async function names(endpoint = path) {
+    const response = await send(endpoint);
+    assert.equal(response.status, 200);
+    return suggestionsSchema.parse(await response.json());
+  }
+  try {
+    assert.deepEqual(await names(), []);
+    const created = await send(`/lists/${list.id}/items`, "POST", {
+      name: "Milk",
+      note: "Keep me",
+    });
+    assert.equal(created.status, 201);
+    const item = addItemResultSchema.parse(await created.json());
+    const itemPath = `/items/${item.id}`;
+    assert.equal((await send(`/lists/${other.id}/items`, "POST", { name: "Milk" })).status, 201);
+    assert.equal((await send(`/lists/${list.id}/items`, "POST", { name: "milk" })).status, 200);
+    assert.deepEqual(await names(), ["Milk"]);
+
+    assert.equal((await send(itemPath, "PATCH", { completed: true })).status, 200);
+    assert.deepEqual(await names(), ["Milk"]);
+    assert.equal((await send(path, "DELETE", { name: "MILK" })).status, 204);
+    assert.deepEqual(await names(), []);
+    assert.deepEqual(await names(`/lists/${other.id}/suggestions`), ["Milk"]);
+
+    const state = stateSchema.parse(await (await send("/state")).json());
+    assert.deepEqual(
+      state.items.find(({ id }) => id === item.id),
+      {
+        ...itemSchema.strip().parse(item),
+        completed: true,
+      },
+    );
+
+    assert.equal((await send(itemPath, "PATCH", { completed: false })).status, 200);
+    assert.deepEqual(await names(), [], "checking or unchecking does not remember forgotten names");
+    assert.equal((await send(itemPath, "DELETE")).status, 204);
+    assert.deepEqual(await names(), []);
+    const reentered = await send(`/lists/${list.id}/items`, "POST", { name: "milk" });
+    assert.equal(reentered.status, 201);
+    const next = addItemResultSchema.parse(await reentered.json());
+    assert.equal((await send(`/items/${next.id}`, "DELETE")).status, 204);
+    assert.deepEqual(await names(), ["milk"], "manually re-entered names survive item deletion");
+  } finally {
+    await send(`/lists/${list.id}`, "DELETE");
+    await send(`/lists/${other.id}`, "DELETE");
+  }
+  assert.equal((await send(path)).status, 404);
 });

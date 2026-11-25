@@ -23,10 +23,11 @@ npm run account:setup:production
 npm start
 ```
 
-When upgrading from a version with “Häufig gekauft”, stop the old app before running
-`npm run db:setup`. Back up the database, then review and approve Drizzle's removal
-of `item_names`. This permanently deletes suggestion history only; lists, open and
-completed items, and photos are kept. Start the updated app after setup.
+When upgrading to list autocomplete, stop the old app and back up the database
+before running `npm run db:setup`. Setup seeds the new suggestion history once
+from each list’s existing open and completed items. If the old “Häufig gekauft”
+table (`item_names`) still exists, review Drizzle’s removal of it; names absent
+from the current lists are not imported. Start the updated app after setup.
 
 Run commands from the repository root. Skip account setup on existing installations. Keep development dependencies until build and database setup finish.
 

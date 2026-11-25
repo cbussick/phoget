@@ -39,7 +39,7 @@ test("status tabs support keyboard selection, empty states, count-free labels, a
   await expect(completed).toBeFocused();
   await expect(completed).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("heading", { name: "Noch nichts erledigt" })).toBeVisible();
-  const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+  const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
   await input.fill("Keep my draft");
   await completed.focus();
   await completed.press("Home");

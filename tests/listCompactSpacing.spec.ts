@@ -31,7 +31,7 @@ test("compact composer keeps its accessible label and reduces the bottom navigat
       );
     }
     await page.goto(`/lists/${list.id}`);
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await testInfo.attach("short-screen-layout", {

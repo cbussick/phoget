@@ -1,9 +1,11 @@
 import { useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { householdKey } from "../../shared/api/queryKeys";
 import { itemInputSchema } from "../../../shared/contracts";
-import { useValidatedForm, textFieldProps } from "../../shared/forms/useValidatedForm";
+import { useValidatedForm, fieldError } from "../../shared/forms/useValidatedForm";
 import { Button } from "../../shared/ui/Button/Button";
 import { Icon } from "../../shared/ui/Icon/Icon";
-import { TextField } from "../../shared/ui/TextField/TextField";
+import { ComboBox } from "../../shared/ui/ComboBox/ComboBox";
 import { useSnackbar } from "../../shared/ui/Snackbar/Snackbar";
 import { useErrorSnackbar } from "../../shared/ui/Snackbar/useErrorSnackbar";
 import { listApi } from "./listApi";
@@ -21,6 +23,22 @@ export function AddItemForm({
   const notify = useSnackbar();
   const input = useRef<HTMLInputElement>(null);
   const restoreInputFocus = useRef(false);
+  const client = useQueryClient();
+  const suggestionKey = [...householdKey, "suggestions", listId];
+  const suggestions = useQuery({
+    queryKey: suggestionKey,
+    queryFn: ({ signal }) => listApi.suggestions(listId, signal),
+    retry: false,
+  });
+  const remove = useAction(async (name: string) => {
+    await listApi.removeSuggestion(listId, name);
+    await client.cancelQueries({ queryKey: suggestionKey });
+    client.setQueryData<Array<string>>(suggestionKey, (names) =>
+      names?.filter((option) => option !== name),
+    );
+    onAnnounce("Vorschlag entfernt: " + name);
+  });
+  useErrorSnackbar(remove.error);
   const add = useAction(async (name: string) => {
     const result = await listApi.addItem(listId, { name });
     if (result.outcome === "duplicate") {
@@ -75,13 +93,23 @@ export function AddItemForm({
     >
       <form.Field name="name">
         {(field) => (
-          <TextField
-            {...textFieldProps(field)}
+          <ComboBox
+            name={field.name}
+            value={field.state.value}
+            onValueChange={field.handleChange}
+            onBlur={field.handleBlur}
+            error={fieldError(field)}
+            options={suggestions.data ?? []}
+            onlyWhileTyping
+            onRemove={(name) => {
+              if (!remove.isPending) {
+                remove.mutate(name);
+              }
+            }}
             label="Eintrag hinzufügen"
             hideLabel
             required
             inputRef={input}
-            autoComplete="off"
             disabled={busy}
             placeholder="Eintrag hinzufügen…"
           />

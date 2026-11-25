@@ -76,7 +76,7 @@ for (const viewport of [
     await expect(listsLink).toHaveClass("active");
     await expect(listsLink).toHaveAttribute("aria-current", "location");
     await expect(page.locator(".active-items > li")).toHaveCount(30);
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await expect(input).toHaveCSS("text-overflow", "ellipsis");
     await expect(page.locator("body")).toHaveCSS("background-image", "none");
     await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 246, 244)");
@@ -96,7 +96,7 @@ for (const viewport of [
     const controls = [
       page.getByRole("heading", { name: list.name, exact: true }),
       page.locator(".back-link"),
-      page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }),
+      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
       page.getByRole("button", { name: "Hinzufügen", exact: true }),
     ];
     const initialBounds = await Promise.all(controls.map((control) => control.boundingBox()));
@@ -127,12 +127,12 @@ for (const viewport of [
     }
     await activeItems.evaluate((element) => element.scrollTo(0, 700));
     await page
-      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Added while scrolled");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.locator(".active-items > li")).toHaveCount(31);
     await expect(
-      page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }),
+      page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }),
     ).toHaveValue("");
     await page.locator(".back-link").click();
     await expect(page.getByRole("heading", { name: "Alle Listen", exact: true })).toBeVisible();
@@ -347,7 +347,7 @@ test("complete household workflow persists through reload and a second browser",
     });
     await expect(second.getByRole("heading", { name, level: 1 })).toBeVisible();
     await page
-      .getByRole("textbox", { name: "Eintrag hinzufügen", exact: true })
+      .getByRole("combobox", { name: "Eintrag hinzufügen", exact: true })
       .fill("Pack towels");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(second.getByRole("button", { name: "Pack towels", exact: true })).toBeVisible({
@@ -394,7 +394,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(page.locator(".active-items")).toContainText("Pack two towels", {
       timeout: 15_000,
     });
-    await page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
+    await page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
     const divider = page.locator(".active-items .item-divider:visible");
@@ -411,7 +411,7 @@ test("complete household workflow persists through reload and a second browser",
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toHaveCount(0);
     await page.getByRole("tab", { name: "Offen", exact: true }).click();
-    await page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
+    await page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true }).fill("Bananas");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
     await expect(page.getByRole("button", { name: "Bananas", exact: true })).toBeVisible();
     const more = page.getByRole("button", { name: "Weitere Optionen", exact: true });
@@ -435,13 +435,53 @@ test("complete household workflow persists through reload and a second browser",
     await request.delete("/api/lists/" + id);
   }
 });
+test("typing suggests previously entered names and can forget them without changing the list", async ({
+  page,
+  request,
+}) => {
+  const id = await createList(page, "Autocomplete " + crypto.randomUUID());
+  async function add(name: string) {
+    const response = await request.post(`/api/lists/${id}/items`, { data: { name } });
+    expect(response.status()).toBe(201);
+    return addItemResultSchema.parse(await response.json());
+  }
+  const removed = await add("Hafermilch");
+  expect((await request.delete(`/api/items/${removed.id}`)).status()).toBe(204);
+  await add("Vollmilch");
+  await page.reload();
+
+  const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
+  const popup = page.getByRole("grid", { name: "Eintrag hinzufügen", exact: true });
+  await input.focus();
+  await expect(popup).toBeHidden();
+  await input.fill("MILCH");
+  await expect(popup.getByRole("button", { name: "Hafermilch", exact: true })).toBeVisible();
+  await expect(popup.getByRole("button", { name: "Vollmilch", exact: true })).toBeVisible();
+  await popup.getByRole("button", { name: "Vorschlag vergessen: Vollmilch" }).click();
+  await expect(popup.getByRole("button", { name: "Vollmilch", exact: true })).toHaveCount(0);
+  await expect(page.locator(".active-items")).toContainText("Vollmilch");
+  await expect(input).toBeFocused();
+
+  await page.reload();
+  await input.fill("milch");
+  await expect(popup.getByRole("button", { name: "Hafermilch", exact: true })).toBeVisible();
+  await expect(popup.getByRole("button", { name: "Vollmilch", exact: true })).toHaveCount(0);
+  await input.press("ArrowDown");
+  await input.press("Enter");
+  await expect(input).toHaveValue("Hafermilch");
+  await expect(popup).toBeHidden();
+  await input.press("Enter");
+  await expect(page.locator(".active-items")).toContainText("Hafermilch");
+  await expect(input).toHaveValue("");
+});
+
 test("failed saves retain input, whitespace is rejected, and keyboard dialog focus returns", async ({
   page,
   request,
 }) => {
   const id = await createList(page, "Failure " + crypto.randomUUID());
   try {
-    const input = page.getByRole("textbox", { name: "Eintrag hinzufügen", exact: true });
+    const input = page.getByRole("combobox", { name: "Eintrag hinzufügen", exact: true });
     await input.fill("   ");
     await page.getByRole("button", { name: "Hinzufügen", exact: true }).focus();
     await expect(page.locator(".field-error")).toHaveCount(0);

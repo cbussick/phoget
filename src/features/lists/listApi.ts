@@ -9,9 +9,18 @@ import {
   itemSchema,
   addItemResultSchema,
   reorderSchema,
+  suggestionsSchema,
+  suggestionInputSchema,
 } from "../../../shared/contracts";
 
 export const listApi = {
+  suggestions: (id: string, signal: AbortSignal) =>
+    request(`/lists/${id}/suggestions`, suggestionsSchema, { signal }),
+  removeSuggestion: (id: string, name: string) =>
+    request(`/lists/${id}/suggestions`, z.undefined(), {
+      method: "DELETE",
+      body: JSON.stringify(suggestionInputSchema.parse({ name })),
+    }),
   reorderLists: (input: z.input<typeof reorderSchema>) =>
     request("/lists/order", z.undefined(), {
       method: "PUT",
